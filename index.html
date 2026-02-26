@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Serendeep - Outil de développement narratif</title>
+    <style>
+:root {
+    --primary: #2c3e50;
+    --secondary: #3498db;
+    --accent: #e74c3c;
+    --bg: #ecf0f1;
+    --card-bg: #ffffff;
+    --text: #2c3e50;
+    --border: #bdc3c7;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+}
+
+.welcome-screen {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.welcome-screen h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: var(--primary);
+}
+
+.primary-btn {
+    background: var(--secondary);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.3s;
+}
+
+.primary-btn:hover {
+    background: #2980b9;
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: var(--card-bg);
+    padding: 2rem;
+    border-radius: 8px;
+    max-width: 500px;
+    width: 90%;
+}
+
+.modal-content h2 {
+    margin-bottom: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.form-group input[type="text"] {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.radio-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: normal;
+    cursor: pointer;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 2rem;
+}
+
+.modal-actions button {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.modal-actions button:first-child {
+    background: var(--border);
+}
+
+.modal-actions button:last-child {
+    background: var(--secondary);
+    color: white;
+}
+
+.workspace {
+    min-height: 100vh;
+    padding: 2rem;
+}
+
+.workspace-header {
+    background: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.project-display {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.project-name {
+    font-size: 1.5rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.project-name:hover {
+    color: var(--secondary);
+}
+
+.project-type {
+    background: var(--secondary);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+}
+
+.rename-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: all 0.3s;
+}
+
+.rename-btn:hover {
+    background: var(--bg);
+}
+
+.phase {
+    background: var(--card-bg);
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.phase h2 {
+    margin-bottom: 1.5rem;
+    color: var(--primary);
+}
+
+.cloud-input-zone {
+    margin-bottom: 2rem;
+}
+
+.cloud-input-zone textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 1rem;
+    resize: vertical;
+}
+
+.cloud-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.upload-btn {
+    background: var(--bg);
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    transition: background 0.3s;
+}
+
+.upload-btn:hover {
+    background: #d5dbdb;
+}
+
+.clouds-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.cloud {
+    background: var(--bg);
+    padding: 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.3s;
+}
+
+.cloud:hover {
+    border-color: var(--secondary);
+}
+
+.cloud.selected {
+    border-color: var(--accent);
+    background: #ffe6e6;
+}
+
+.cloud img {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+}
+
+.dialogue-zone {
+    margin-top: 2rem;
+}
+
+.mode-selector {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.mode-btn {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.mode-btn:hover {
+    background: #d5dbdb;
+}
+
+.mode-btn.active {
+    background: var(--secondary);
+    color: white;
+    border-color: var(--secondary);
+}
+
+.chat-container {
+    background: var(--bg);
+    min-height: 300px;
+    max-height: 500px;
+    overflow-y: auto;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+
+.message {
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    border-radius: 4px;
+}
+
+.message.user {
+    background: var(--secondary);
+    color: white;
+    margin-left: 20%;
+}
+
+.message.assistant {
+    background: white;
+    margin-right: 20%;
+    border: 1px solid var(--border);
+}
+
+.chat-input-zone {
+    display: flex;
+    gap: 1rem;
+}
+
+.chat-input-zone textarea {
+    flex: 1;
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    resize: vertical;
+    min-height: 60px;
+}
+
+.chat-input-zone button {
+    background: var(--secondary);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.test-panel {
+    margin-top: 2rem;
+}
+
+.test-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.test-card {
+    background: var(--bg);
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+.test-card h4 {
+    margin-bottom: 1rem;
+    color: var(--primary);
+}
+
+.test-card button {
+    background: var(--secondary);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.test-result {
+    margin-top: 1rem;
+}
+
+.test-result-content {
+    background: white;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+    border: 1px solid var(--border);
+}
+
+.test-result label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+#combinationPanel {
+    background: var(--bg);
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-top: 2rem;
+}
+
+#combinationPanel h3 {
+    margin-bottom: 1rem;
+}
+
+#combinationControls {
+    margin-bottom: 1rem;
+}
+
+#combinationControls button {
+    background: var(--secondary);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.combination-editor {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+.combination-editor textarea {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 1rem;
+    font-family: inherit;
+    margin-bottom: 1rem;
+}
+
+.combination-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.combination-actions button {
+    background: var(--secondary);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+
+.combination-actions button:first-child {
+    background: var(--accent);
+}
+
+.combination-actions button:nth-child(2) {
+    background: #9b59b6;
+}
+
+.combination-actions button:last-child {
+    background: #27ae60;
+}
+
+.warning {
+    color: var(--accent);
+    font-size: 0.875rem;
+    font-style: italic;
+}
+
+@media (max-width: 768px) {
+    .test-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .clouds-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .combination-actions {
+        flex-direction: column;
+    }
+    
+    .combination-actions button {
+        width: 100%;
+    }
+}
+    </style>
+</head>
+<body>
+    <div id="welcomeScreen" class="welcome-screen">
+        <h1>Serendeep</h1>
+        <p>Outil de développement narratif rhizomatique</p>
+        <button id="createProjectBtn" class="primary-btn">Créer un nouveau projet</button>
+        <div id="projectsList"></div>
+    </div>
+
+    <div id="workspace" class="workspace" style="display:none;">
+        <header class="workspace-header">
+            <div id="currentProjectDisplay" class="project-display"></div>
+        </header>
+
+        <section class="phase" id="phase1">
+            <h2>Phase 1 : Nuages d'intuition</h2>
+            
+            <div class="cloud-input-zone">
+                <textarea id="cloudInput" placeholder="Déposez une intuition, une idée, un fragment..."></textarea>
+                <div class="cloud-actions">
+                    <label for="cloudUpload" class="upload-btn">📎 Ajouter une image</label>
+                    <input type="file" id="cloudUpload" accept="image/*" style="display:none;">
+                    <button id="addCloudBtn" class="primary-btn">Créer le nuage</button>
+                </div>
+            </div>
+
+            <div id="cloudsContainer" class="clouds-container"></div>
+
+            <div class="dialogue-zone">
+                <h3>Dialogue focalisé</h3>
+                
+                <div class="mode-selector">
+                    <button class="mode-btn active" data-mode="conversational">💬 Conversationnel</button>
+                    <button class="mode-btn" data-mode="explorer">🌀 Explorer</button>
+                    <button class="mode-btn" data-mode="psychoanalytic">🧠 Psychanalytique</button>
+                    <button class="mode-btn" data-mode="strategic">🎯 Stratégique</button>
+                </div>
+
+                <div id="chatContainer" class="chat-container"></div>
+
+                <div class="chat-input-zone">
+                    <textarea id="userInput" placeholder="Votre message..."></textarea>
+                    <button id="sendMessageBtn">Envoyer</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="phase" id="phase2">
+            <h2>Phase 2 : Tests et combinaisons</h2>
+            <button class="mode-btn" data-mode="tests" onclick="switchMode('tests')">Activer le mode Tests</button>
+            <div id="testPanel" class="test-panel"></div>
+        </section>
+
+        <section class="phase" id="phase3">
+            <h2>Phase 3 : Synthèse et teaser</h2>
+            <div id="synthesisPanel" class="synthesis-panel">
+                <button id="generateSynthesisBtn">Générer une synthèse du projet</button>
+                <div id="synthesisResult"></div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+let currentProject = '';
+let projectType = '';
+let clouds = {};
+let clusters = {};
+let conversations = {};
+let testResults = {};
+let testCombination = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadProjects();
+    setupEventListeners();
+});
+
+function setupEventListeners() {
+    document.getElementById('createProjectBtn')?.addEventListener('click', showProjectCreationModal);
+    document.getElementById('addCloudBtn')?.addEventListener('click', addCloud);
+    document.getElementById('cloudUpload')?.addEventListener('change', handleImageUpload);
+    
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            if (e.target.dataset.mode === 'tests') {
+                switchMode('tests');
+            } else {
+                switchMode(e.target.dataset.mode);
+            }
+        });
+    });
+    
+    document.getElementById('sendMessageBtn')?.addEventListener('click', sendMessage);
+    document.getElementById('userInput')?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+}
+
+function showProjectCreationModal() {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <h2>Nouveau Projet</h2>
+            <div class="form-group">
+                <label>Nom du projet :</label>
+                <input type="text" id="newProjectName" placeholder="Mon projet">
+            </div>
+            <div class="form-group">
+                <label>Type de projet :</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="projectType" value="série" checked> Série de fiction</label>
+                    <label><input type="radio" name="projectType" value="film"> Long-métrage</label>
+                    <label><input type="radio" name="projectType" value="podcast"> Podcast narratif</label>
+                    <label><input type="radio" name="projectType" value="documentaire"> Documentaire</label>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button onclick="this.closest('.modal').remove()">Annuler</button>
+                <button onclick="createProject()">Créer le projet</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    document.getElementById('newProjectName').focus();
+}
+
+function createProject() {
+    const nameInput = document.getElementById('newProjectName');
+    const name = nameInput.value.trim();
+    const selectedType = document.querySelector('input[name="projectType"]:checked').value;
+    
+    if (!name) {
+        alert('Veuillez entrer un nom de projet');
+        return;
+    }
+    
+    currentProject = name;
+    projectType = selectedType;
+    clouds[currentProject] = [];
+    clusters[currentProject] = [];
+    conversations[currentProject] = [];
+    
+    saveProjects();
+    document.querySelector('.modal')?.remove();
+    updateProjectDisplay();
+    showWorkspace();
+}
+
+function updateProjectDisplay() {
+    const display = document.getElementById('currentProjectDisplay');
+    if (display && currentProject) {
+        display.innerHTML = `
+            <span class="project-name" onclick="showRenameModal()">${currentProject}</span>
+            <span class="project-type">${projectType}</span>
+            <button class="rename-btn" onclick="showRenameModal()">✏️ Renommer</button>
+        `;
+    }
+}
+
+function showRenameModal() {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <h2>Renommer le projet</h2>
+            <div class="form-group">
+                <label>Nouveau nom :</label>
+                <input type="text" id="renameProjectInput" value="${currentProject}">
+            </div>
+            <div class="modal-actions">
+                <button onclick="this.closest('.modal').remove()">Annuler</button>
+                <button onclick="renameProject()">Renommer</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    document.getElementById('renameProjectInput').focus();
+    document.getElementById('renameProjectInput').select();
+}
+
+function renameProject() {
+    const newName = document.getElementById('renameProjectInput').value.trim();
+    
+    if (!newName || newName === currentProject) {
+        document.querySelector('.modal')?.remove();
+        return;
+    }
+    
+    clouds[newName] = clouds[currentProject];
+    clusters[newName] = clusters[currentProject];
+    conversations[newName] = conversations[currentProject];
+    
+    delete clouds[currentProject];
+    delete clusters[currentProject];
+    delete conversations[currentProject];
+    
+    currentProject = newName;
+    saveProjects();
+    updateProjectDisplay();
+    document.querySelector('.modal')?.remove();
+}
+
+async function handleExplorerMode(userMessage) {
+    const selectedClouds = getSelectedClouds();
+    const cloudsContext = selectedClouds.map(c => c.content).join('\n\n');
+    
+    const prompt = `Tu es en mode EXPLORATION RHIZOMATIQUE.
+Contexte du projet (${projectType}) : ${currentProject}
+
+Nuages d'intuition :
+${cloudsContext}
+
+Message utilisateur : ${userMessage}
+
+CONSIGNE : Ne cherche pas à analyser le "pourquoi". Ouvre le champ des possibles :
+- Propose des tangentes inattendues
+- Fais des connections surprenantes entre les éléments
+- Suggère des ramifications narratives
+- Imagine des angles non évidents
+- Crée des ponts avec d'autres univers/références
+- Libère les associations d'idées
+
+Réponds de manière ouverte et générative, pas analytique.`;
+
+    return await callClaude(prompt);
+}
+
+function initTestMode() {
+    const testPanel = document.getElementById('testPanel');
+    const selectedClouds = getSelectedClouds();
+    
+    if (selectedClouds.length === 0) {
+        testPanel.innerHTML = '<p>Sélectionnez des nuages pour les tester</p>';
+        return;
+    }
+    
+    testResults = {};
+    testCombination = [];
+    
+    testPanel.innerHTML = `
+        <h3>Tests individuels</h3>
+        <div class="test-grid">
+            ${selectedClouds.map((cloud, i) => `
+                <div class="test-card" data-index="${i}">
+                    <h4>Nuage ${i + 1}: ${cloud.content.substring(0, 30)}...</h4>
+                    <button onclick="testIndividualCloud(${i})">Tester</button>
+                    <div class="test-result" id="result-${i}"></div>
+                </div>
+            `).join('')}
+        </div>
+        <div id="combinationPanel" style="display:none;">
+            <h3>Combinaison</h3>
+            <div id="combinationControls"></div>
+            <div id="combinationResult"></div>
+        </div>
+    `;
+}
+
+async function testIndividualCloud(index) {
+    const selectedClouds = getSelectedClouds();
+    const cloud = selectedClouds[index];
+    
+    const resultDiv = document.getElementById(`result-${index}`);
+    resultDiv.innerHTML = '<p>Test en cours...</p>';
+    
+    let formatContext = '';
+    if (projectType === 'série') {
+        formatContext = 'Structure sérielle, arcs narratifs multiples, personnages récurrents.';
+    } else if (projectType === 'film') {
+        formatContext = 'Structure trois actes, condensation dramatique, film de 90-120 minutes.';
+    } else if (projectType === 'podcast') {
+        formatContext = 'Format audio narratif, importance du son, rythme et narration orale.';
+    } else if (projectType === 'documentaire') {
+        formatContext = 'Ancrage dans le réel, enquête, point de vue documentaire.';
+    }
+    
+    const prompt = `Projet : ${currentProject} (${projectType})
+Format : ${formatContext}
+
+Teste ce nuage d'intuition isolément :
+"${cloud.content}"
+
+Propose UNE piste de développement pour ce nuage en tenant compte du format ${projectType}.
+Sois concis et concret (max 150 mots).`;
+
+    const result = await callClaude(prompt);
+    testResults[index] = result;
+    
+    resultDiv.innerHTML = `
+        <div class="test-result-content">${result}</div>
+        <label>
+            <input type="checkbox" onchange="toggleCombination(${index}, event)">
+            Combiner
+        </label>
+    `;
+    
+    updateCombinationPanel();
+}
+
+function toggleCombination(index, event) {
+    const checkbox = event.target;
+    if (checkbox.checked) {
+        testCombination.push(index);
+    } else {
+        testCombination = testCombination.filter(i => i !== index);
+    }
+    updateCombinationPanel();
+}
+
+function updateCombinationPanel() {
+    const panel = document.getElementById('combinationPanel');
+    const controls = document.getElementById('combinationControls');
+    
+    if (testCombination.length >= 2) {
+        panel.style.display = 'block';
+        controls.innerHTML = `
+            <p>Éléments sélectionnés : ${testCombination.map(i => `Nuage ${i+1}`).join(' + ')}</p>
+            <button onclick="generateCombination()">Générer la combinaison</button>
+        `;
+    } else {
+        panel.style.display = 'none';
+    }
+}
+
+async function generateCombination() {
+    const resultDiv = document.getElementById('combinationResult');
+    resultDiv.innerHTML = '<p>Génération en cours...</p>';
+    
+    const combinedResults = testCombination.map(i => testResults[i]).join('\n\n---\n\n');
+    
+    let formatContext = '';
+    if (projectType === 'série') {
+        formatContext = 'série de fiction avec structure sérielle';
+    } else if (projectType === 'film') {
+        formatContext = 'long-métrage avec structure trois actes';
+    } else if (projectType === 'podcast') {
+        formatContext = 'podcast narratif avec attention au son';
+    } else if (projectType === 'documentaire') {
+        formatContext = 'documentaire ancré dans le réel';
+    }
+    
+    const prompt = `Projet : ${currentProject} (${projectType})
+
+Voici plusieurs pistes développées séparément :
+
+${combinedResults}
+
+CONSIGNE : Synthétise ces pistes en UNE proposition cohérente pour un projet de ${formatContext}.
+Crée une synergie entre les éléments. Max 250 mots.`;
+
+    const combination = await callClaude(prompt);
+    
+    resultDiv.innerHTML = `
+        <div class="combination-editor">
+            <textarea id="combinationText" rows="10">${combination}</textarea>
+            <div class="combination-actions">
+                <button onclick="regenerateCombination()">Régénérer la combinaison</button>
+                <button onclick="improveCombination()">Améliorer ma version</button>
+                <button onclick="validateCombination()">Valider et sauvegarder comme grappe</button>
+            </div>
+            <p class="warning">⚠️ Ajouter/retirer des éléments écrasera cette version (sauf si validée)</p>
+        </div>
+    `;
+}
+
+async function regenerateCombination() {
+    await generateCombination();
+}
+
+async function improveCombination() {
+    const textarea = document.getElementById('combinationText');
+    const userVersion = textarea.value;
+    
+    textarea.value = 'Amélioration en cours...';
+    
+    const prompt = `Voici une combinaison narrative que l'utilisateur a modifiée :
+
+"${userVersion}"
+
+CONSIGNE : Améliore cette version en :
+- Renforçant la cohérence
+- Affinant la langue
+- Précisant les éléments flous
+- Gardant l'intention et le sens de l'utilisateur
+
+Max 250 mots.`;
+
+    const improved = await callClaude(prompt);
+    textarea.value = improved;
+}
+
+function validateCombination() {
+    const textarea = document.getElementById('combinationText');
+    const content = textarea.value;
+    
+    if (!clusters[currentProject]) {
+        clusters[currentProject] = [];
+    }
+    
+    clusters[currentProject].push({
+        date: new Date().toISOString(),
+        clouds: testCombination.map(i => getSelectedClouds()[i]),
+        content: content
+    });
+    
+    saveProjects();
+    alert('Grappe sauvegardée !');
+    
+    testCombination = [];
+    initTestMode();
+}
+
+async function handleStrategicMode(userMessage) {
+    const selectedClouds = getSelectedClouds();
+    const cloudsContext = selectedClouds.map(c => c.content).join('\n\n');
+    
+    let formatContext = '';
+    if (projectType === 'série') {
+        formatContext = 'Pense structure sérielle, arcs de saison, bible de personnages, potentiel de développement multi-saisons.';
+    } else if (projectType === 'film') {
+        formatContext = 'Pense structure trois actes, condensation narrative, arc unique et complet.';
+    } else if (projectType === 'podcast') {
+        formatContext = 'Pense format audio, épisodes, narration sonore, identité vocale.';
+    } else if (projectType === 'documentaire') {
+        formatContext = 'Pense enquête, angle éditorial, accès au réel, dispositif filmique.';
+    }
+    
+    const prompt = `Tu es en mode STRATÉGIQUE pour un projet de ${projectType}.
+${formatContext}
+
+Projet : ${currentProject}
+
+Nuages d'intuition :
+${cloudsContext}
+
+Message utilisateur : ${userMessage}
+
+CONSIGNE : Réponds de manière stratégique et professionnelle en tenant compte des contraintes et opportunités du format ${projectType}.`;
+
+    return await callClaude(prompt);
+}
+
+async function handleImageUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        const base64 = e.target.result.split(',')[1];
+        const cloudContent = document.getElementById('cloudInput').value;
+        
+        if (!cloudContent.trim()) {
+            alert('Ajoutez du texte au nuage avant d\'ajouter une image');
+            event.target.value = '';
+            return;
+        }
+        
+        addCloud({ content: cloudContent, image: base64 });
+        
+        document.getElementById('cloudInput').value = '';
+        event.target.value = '';
+    };
+    reader.readAsDataURL(file);
+}
+
+async function sendMessage() {
+    const input = document.getElementById('userInput');
+    const message = input.value.trim();
+    if (!message) return;
+    
+    input.value = '';
+    addMessageToChat('user', message);
+    
+    const currentMode = document.querySelector('.mode-btn.active')?.dataset.mode || 'conversational';
+    
+    let response;
+    switch(currentMode) {
+        case 'explorer':
+            response = await handleExplorerMode(message);
+            break;
+        case 'strategic':
+            response = await handleStrategicMode(message);
+            break;
+        case 'psychoanalytic':
+            response = await handlePsychoanalyticMode(message);
+            break;
+        default:
+            response = await handleConversationalMode(message);
+    }
+    
+    addMessageToChat('assistant', response);
+    saveConversation(currentMode, message, response);
+}
+
+async function callClaude(prompt) {
+    const selectedClouds = getSelectedClouds();
+    const images = selectedClouds
+        .filter(c => c.image)
+        .map(c => ({
+            type: "image",
+            source: {
+                type: "base64",
+                media_type: "image/jpeg",
+                data: c.image
+            }
+        }));
+    
+    const messages = [
+        {
+            role: "user",
+            content: [
+                ...images,
+                { type: "text", text: prompt }
+            ]
+        }
+    ];
+    
+    try {
+        const response = await fetch("https://api.anthropic.com/v1/messages", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                model: "claude-sonnet-4-20250514",
+                max_tokens: 1000,
+                messages: messages
+            })
+        });
+        
+        const data = await response.json();
+        return data.content.find(c => c.type === "text")?.text || "Erreur de réponse";
+    } catch (error) {
+        console.error("Erreur API:", error);
+        return "Erreur de connexion à l'API";
+    }
+}
+
+function getSelectedClouds() {
+    if (!clouds[currentProject]) return [];
+    return clouds[currentProject].filter(c => c.selected);
+}
+
+function addCloud(cloudData) {
+    if (!clouds[currentProject]) {
+        clouds[currentProject] = [];
+    }
+    
+    let content, image;
+    
+    if (!cloudData) {
+        const cloudInput = document.getElementById('cloudInput');
+        content = cloudInput.value.trim();
+        image = null;
+        
+        if (!content) {
+            alert('Le nuage doit contenir du texte');
+            return;
+        }
+        
+        cloudInput.value = '';
+    } else {
+        content = cloudData.content;
+        image = cloudData.image || null;
+    }
+    
+    clouds[currentProject].push({
+        id: Date.now(),
+        date: new Date().toISOString(),
+        content: content,
+        image: image,
+        selected: false
+    });
+    
+    saveProjects();
+    renderClouds();
+}
+
+function renderClouds() {
+    const container = document.getElementById('cloudsContainer');
+    if (!container || !clouds[currentProject]) return;
+    
+    container.innerHTML = clouds[currentProject].map((cloud, i) => `
+        <div class="cloud ${cloud.selected ? 'selected' : ''}" onclick="toggleCloudSelection(${i})">
+            ${cloud.image ? '<img src="data:image/jpeg;base64,' + cloud.image + '" alt="Image nuage">' : ''}
+            <p>${cloud.content}</p>
+        </div>
+    `).join('');
+}
+
+function toggleCloudSelection(index) {
+    clouds[currentProject][index].selected = !clouds[currentProject][index].selected;
+    renderClouds();
+}
+
+function saveProjects() {
+    localStorage.setItem('serendeep_clouds', JSON.stringify(clouds));
+    localStorage.setItem('serendeep_clusters', JSON.stringify(clusters));
+    localStorage.setItem('serendeep_conversations', JSON.stringify(conversations));
+    localStorage.setItem('serendeep_currentProject', currentProject);
+    localStorage.setItem('serendeep_projectType', projectType);
+}
+
+function loadProjects() {
+    clouds = JSON.parse(localStorage.getItem('serendeep_clouds')) || {};
+    clusters = JSON.parse(localStorage.getItem('serendeep_clusters')) || {};
+    conversations = JSON.parse(localStorage.getItem('serendeep_conversations')) || {};
+    currentProject = localStorage.getItem('serendeep_currentProject') || '';
+    projectType = localStorage.getItem('serendeep_projectType') || '';
+    
+    if (currentProject) {
+        updateProjectDisplay();
+        showWorkspace();
+    }
+}
+
+function addMessageToChat(role, content) {
+    const chatContainer = document.getElementById('chatContainer');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${role}`;
+    messageDiv.textContent = content;
+    chatContainer.appendChild(messageDiv);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+
+function saveConversation(mode, userMessage, assistantResponse) {
+    if (!conversations[currentProject]) {
+        conversations[currentProject] = [];
+    }
+    
+    conversations[currentProject].push({
+        mode,
+        date: new Date().toISOString(),
+        user: userMessage,
+        assistant: assistantResponse
+    });
+    
+    saveProjects();
+}
+
+function showWorkspace() {
+    document.getElementById('welcomeScreen').style.display = 'none';
+    document.getElementById('workspace').style.display = 'block';
+    renderClouds();
+}
+
+function switchMode(mode) {
+    document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    if (mode === 'tests') {
+        initTestMode();
+    }
+}
+
+async function handleConversationalMode(userMessage) {
+    const selectedClouds = getSelectedClouds();
+    const cloudsContext = selectedClouds.map(c => c.content).join('\n\n');
+    
+    const prompt = `Projet : ${currentProject}
+
+Nuages d'intuition :
+${cloudsContext}
+
+Message utilisateur : ${userMessage}
+
+Réponds de manière conversationnelle et naturelle.`;
+
+    return await callClaude(prompt);
+}
+
+async function handlePsychoanalyticMode(userMessage) {
+    const selectedClouds = getSelectedClouds();
+    const cloudsContext = selectedClouds.map(c => c.content).join('\n\n');
+    
+    const prompt = `Tu es en mode PSYCHANALYTIQUE.
+
+Projet : ${currentProject}
+
+Nuages d'intuition :
+${cloudsContext}
+
+Message utilisateur : ${userMessage}
+
+CONSIGNE : Interroge les désirs latents, les contradictions, les non-dits. Creuse les tensions sous-jacentes.`;
+
+    return await callClaude(prompt);
+}
+    </script>
+</body>
+</html>
