@@ -1,0 +1,4881 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Serendeep — Outil de développement narratif</title>
+<meta name="description" content="Serendeep - Outil de développement narratif par saturation/émergence pour la fiction audiovisuelle">
+<style>
+/* ══════════════════════════════════════════
+   SERENDEEP - Phase 1
+   Looker Films - Outil de développement narratif
+   ══════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@300;400&family=Crimson+Pro:wght@300;400;500;600&display=swap');
+
+/* === RESET & BASE === */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  /* Palette papier/encre */
+  --ink:#111009;
+  --paper:#f6f3ee;
+  --paper2:#edeae4;
+  --paper3:#e2ddd6;
+  --white:#fff;
+  
+  /* Accents */
+  --accent:#bf3c18;
+  --muted:#8c8880;
+  --border:#cdc8c0;
+  --green:#3a6b49;
+  --orange:#c47a1a;
+  --blue:#2a5a8a;
+  --purple:#6b3a8a;
+  
+  /* Ombres */
+  --shadow:0 1px 8px rgba(17,16,9,.07),0 2px 20px rgba(17,16,9,.04);
+  --shadow-lg:0 4px 32px rgba(17,16,9,.12);
+}
+
+html,body{
+  height:100%;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'Crimson Pro',serif;
+  font-size:16px;
+  line-height:1.55;
+}
+
+/* Texture papier */
+body::after{
+  content:'';
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:9999;
+  opacity:.4;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='.07'/%3E%3C/svg%3E");
+}
+
+#app{
+  display:flex;
+  flex-direction:column;
+  height:100vh;
+  overflow:hidden;
+}
+
+/* === HEADER === */
+#hdr{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:11px 24px;
+  border-bottom:1px solid var(--border);
+  background:rgba(246,243,238,.94);
+  backdrop-filter:blur(10px);
+  flex-shrink:0;
+  z-index:50;
+}
+
+.hdr-l{
+  display:flex;
+  align-items:baseline;
+  gap:14px;
+}
+
+.logo{
+  font-family:'Playfair Display',serif;
+  font-size:1.1rem;
+  font-weight:600;
+}
+
+.logo em{
+  color:var(--accent);
+  font-style:italic;
+}
+
+#proj-lbl{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.67rem;
+  color:var(--muted);
+  cursor:pointer;
+  border-bottom:1px dashed var(--border);
+  padding-bottom:1px;
+  transition:color .15s;
+  max-width:220px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+#proj-lbl:hover{color:var(--ink)}
+
+#ctr{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.62rem;
+  background:var(--paper3);
+  padding:2px 8px;
+  border-radius:20px;
+  color:var(--muted);
+}
+
+.hdr-r{
+  display:flex;
+  gap:7px;
+  align-items:center;
+}
+
+/* === PHASE SWITCHER === */
+#phase-switcher{
+  display:flex;
+  gap:0;
+  padding:8px 24px;
+  border-bottom:1px solid var(--border);
+  background:var(--paper2);
+}
+
+.phase-btn{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.72rem;
+  padding:6px 16px;
+  border:none;
+  background:transparent;
+  color:var(--muted);
+  cursor:pointer;
+  transition:all .2s;
+  border-radius:3px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.phase-btn:hover{
+  background:var(--paper);
+  color:var(--ink);
+}
+
+.phase-btn.active{
+  background:var(--paper);
+  color:var(--ink);
+  font-weight:500;
+}
+
+.phase-dot{
+  font-size:.9rem;
+  line-height:1;
+}
+
+.phase-btn.active .phase-dot{
+  color:var(--accent);
+}
+
+/* === BUTTONS === */
+.btn{
+  font-family:'Crimson Pro',serif;
+  font-size:.85rem;
+  padding:5px 13px;
+  border-radius:3px;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--ink);
+  cursor:pointer;
+  transition:all .15s;
+}
+
+.btn:hover{
+  background:var(--paper2);
+  border-color:var(--muted);
+}
+
+.btn-ink{
+  background:var(--ink);
+  color:var(--paper);
+  border-color:var(--ink);
+}
+
+.btn-ink:hover{
+  background:#2c2a26;
+}
+
+.btn-sm{
+  font-size:.77rem;
+  padding:4px 10px;
+}
+
+.btn-danger{
+  color:var(--accent);
+}
+
+.btn-danger:hover{
+  background:#fdf0ec;
+  border-color:#e8a898;
+}
+
+.btn-green{
+  color:var(--green);
+  border-color:var(--green);
+}
+
+.btn-green:hover{
+  background:#eef6f1;
+}
+
+.btn-ghost{
+  border-color:transparent;
+}
+
+.btn-ghost:hover{
+  background:var(--paper2);
+  border-color:var(--border);
+}
+
+/* === TABS === */
+#tabs{
+  display:flex;
+  padding:0 24px;
+  border-bottom:1px solid var(--border);
+  background:var(--paper);
+  flex-shrink:0;
+}
+
+.tab{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.68rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  padding:10px 16px;
+  border:none;
+  background:none;
+  color:var(--muted);
+  cursor:pointer;
+  border-bottom:2px solid transparent;
+  margin-bottom:-1px;
+  transition:all .15s;
+}
+
+.tab:hover{color:var(--ink)}
+
+.tab.on{
+  color:var(--ink);
+  border-bottom-color:var(--accent);
+}
+
+/* === MAIN === */
+#main{
+  flex:1;
+  overflow:hidden;
+  display:flex;
+  position:relative;
+}
+
+.sec{
+  display:none;
+  flex:1;
+  overflow-y:auto;
+  padding:22px 24px;
+  flex-direction:column;
+}
+
+.sec.on{display:flex}
+
+/* === TOOLBAR === */
+.toolbar{
+  display:flex;
+  gap:6px;
+  align-items:center;
+  flex-wrap:wrap;
+  margin-bottom:16px;
+}
+
+.fbtn{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.63rem;
+  letter-spacing:.07em;
+  text-transform:uppercase;
+  padding:4px 11px;
+  border-radius:2px;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--muted);
+  cursor:pointer;
+  transition:all .15s;
+}
+
+.fbtn:hover,.fbtn.on{
+  background:var(--ink);
+  color:var(--paper);
+  border-color:var(--ink);
+}
+
+.tsep{
+  width:1px;
+  height:20px;
+  background:var(--border);
+  margin:0 2px;
+}
+
+.srch-w{
+  position:relative;
+  display:flex;
+  align-items:center;
+}
+
+.srch-w svg{
+  position:absolute;
+  left:8px;
+  color:var(--muted);
+  pointer-events:none;
+}
+
+#srch{
+  font-family:'Crimson Pro',serif;
+  font-size:.87rem;
+  padding:5px 10px 5px 28px;
+  border:1px solid var(--border);
+  border-radius:3px;
+  background:var(--white);
+  color:var(--ink);
+  outline:none;
+  width:190px;
+  transition:border-color .15s;
+}
+
+#srch:focus{border-color:var(--muted)}
+#srch::placeholder{color:var(--muted);font-style:italic}
+
+/* === ADD FORM === */
+#add-form{
+  background:var(--white);
+  border:1px dashed var(--border);
+  border-radius:4px;
+  padding:13px;
+  margin-bottom:16px;
+  display:none;
+  flex-direction:column;
+  gap:9px;
+}
+
+#add-form.on{display:flex}
+
+#add-txt{
+  font-family:'Crimson Pro',serif;
+  font-size:.92rem;
+  line-height:1.6;
+  padding:9px;
+  border:1px solid var(--border);
+  border-radius:3px;
+  resize:vertical;
+  min-height:80px;
+  background:var(--paper);
+  color:var(--ink);
+  outline:none;
+  transition:border-color .15s;
+}
+
+#add-txt:focus{border-color:var(--muted)}
+
+.form-row{
+  display:flex;
+  gap:7px;
+  align-items:center;
+}
+
+.img-drop{
+  flex:1;
+  border:1px dashed var(--border);
+  border-radius:3px;
+  padding:7px 10px;
+  text-align:center;
+  cursor:pointer;
+  font-size:.78rem;
+  color:var(--muted);
+  font-style:italic;
+  transition:all .15s;
+}
+
+.img-drop:hover,.img-drop.drag{
+  background:var(--paper2);
+  border-color:var(--muted);
+}
+
+#img-in{display:none}
+
+/* === CLOUD GRID === */
+#cgrid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(225px,1fr));
+  gap:11px;
+  align-content:start;
+}
+
+.ccard{
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:12px;
+  cursor:pointer;
+  transition:all .17s;
+  position:relative;
+  box-shadow:var(--shadow);
+  display:flex;
+  flex-direction:column;
+  min-height:105px;
+  user-select:none;
+}
+
+.ccard:hover{
+  box-shadow:var(--shadow-lg);
+  transform:translateY(-1px);
+}
+
+.ccard.sel{
+  border:2px solid var(--green);
+  box-shadow:0 0 0 3px rgba(58,107,73,.13),var(--shadow);
+}
+
+.ccard.si{border-left:3px solid var(--orange)}
+.ccard.se{opacity:.56;background:var(--paper2)}
+.ccard.sc{border-left:3px solid var(--green)}
+.ccard.sv{border-top:2px solid var(--green)}
+
+.chk{
+  position:absolute;
+  top:8px;
+  right:8px;
+  width:16px;
+  height:16px;
+  border:1.5px solid var(--border);
+  border-radius:3px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:9px;
+  background:var(--white);
+  transition:all .13s;
+  pointer-events:none;
+}
+
+.ccard.sel .chk{
+  background:var(--green);
+  border-color:var(--green);
+  color:var(--paper);
+}
+
+.cimg-w{
+  position:relative;
+  margin-bottom:7px;
+}
+
+.cimg-w img{
+  width:100%;
+  height:76px;
+  object-fit:cover;
+  border-radius:2px;
+  display:block;
+}
+
+.rm-img{
+  position:absolute;
+  top:3px;
+  right:3px;
+  width:17px;
+  height:17px;
+  background:rgba(17,16,9,.6);
+  color:white;
+  border:none;
+  border-radius:2px;
+  cursor:pointer;
+  font-size:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  opacity:0;
+  transition:opacity .13s;
+}
+
+.cimg-w:hover .rm-img{opacity:1}
+
+.ctxt{
+  font-size:.85rem;
+  line-height:1.5;
+  flex:1;
+  overflow:hidden;
+  display:-webkit-box;
+  -webkit-line-clamp:5;
+  -webkit-box-orient:vertical;
+}
+
+.cmeaning{
+  font-size:.77rem;
+  color:var(--green);
+  font-style:italic;
+  line-height:1.45;
+  margin-top:6px;
+  padding-top:5px;
+  border-top:1px solid #d4e8db;
+}
+
+.cfooter{
+  display:flex;
+  gap:4px;
+  margin-top:8px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+.tag{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.58rem;
+  letter-spacing:.04em;
+  padding:2px 5px;
+  border-radius:2px;
+  border:1px solid var(--border);
+  color:var(--muted);
+  cursor:pointer;
+  transition:all .13s;
+}
+
+.tag:hover{background:var(--paper2)}
+
+.t-imp{
+  color:var(--orange);
+  border-color:var(--orange);
+  background:#fdf6ee;
+}
+
+.t-exp{background:var(--paper3)}
+
+.t-cmb{
+  color:var(--green);
+  border-color:var(--green);
+  background:#eef6f1;
+}
+
+.cacts{
+  display:flex;
+  gap:2px;
+  margin-left:auto;
+}
+
+.icbtn{
+  background:none;
+  border:none;
+  cursor:pointer;
+  color:var(--muted);
+  font-size:.78rem;
+  padding:2px 4px;
+  border-radius:2px;
+  transition:all .13s;
+}
+
+.icbtn:hover{
+  background:var(--paper2);
+  color:var(--ink);
+}
+
+.icbtn.del:hover{color:var(--accent)}
+
+.legend{
+  display:flex;
+  gap:14px;
+  margin-top:14px;
+  padding-top:11px;
+  border-top:1px solid var(--border);
+}
+
+.li{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  font-size:.76rem;
+  color:var(--muted);
+}
+
+.ls{
+  width:13px;
+  height:13px;
+  border-radius:2px;
+  border:2px solid currentColor;
+  flex-shrink:0;
+}
+
+.ls.lx{
+  border-color:var(--border);
+  background:var(--paper3);
+}
+
+.ls.li_{border-color:var(--orange)}
+.ls.lc{border-color:var(--green)}
+
+.empty{
+  grid-column:1/-1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:9px;
+  padding:46px 20px;
+  color:var(--muted);
+  text-align:center;
+  font-style:italic;
+}
+
+.empty .ei{
+  font-size:1.7rem;
+  opacity:.3;
+}
+
+/* === TESTS === */
+#sec-tests{gap:14px}
+
+.tgrid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+  flex:1;
+  min-height:0;
+}
+
+.panel{
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+
+.ptitle{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.63rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin-bottom:12px;
+  padding-bottom:9px;
+  border-bottom:1px solid var(--paper3);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.chips{
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px;
+  margin-bottom:10px;
+  min-height:30px;
+}
+
+.chip{
+  font-family:'Crimson Pro',serif;
+  font-size:.8rem;
+  padding:3px 9px;
+  background:var(--paper2);
+  border:1px solid var(--border);
+  border-radius:20px;
+  display:flex;
+  align-items:center;
+  gap:5px;
+}
+
+.chip-x{
+  cursor:pointer;
+  color:var(--muted);
+  line-height:1;
+  font-size:.88rem;
+  transition:color .12s;
+}
+
+.chip-x:hover{color:var(--accent)}
+
+/* Analyse mode buttons */
+.mode-bar{
+  display:flex;
+  gap:5px;
+  margin-bottom:10px;
+}
+
+.mdbtn{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.6rem;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  padding:4px 10px;
+  border-radius:2px;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--muted);
+  cursor:pointer;
+  transition:all .13s;
+}
+
+.mdbtn:hover{
+  border-color:var(--muted);
+  color:var(--ink);
+}
+
+.mdbtn.on-dev{
+  background:var(--ink);
+  color:var(--paper);
+  border-color:var(--ink);
+}
+
+.mdbtn.on-psy{
+  background:var(--purple);
+  color:var(--paper);
+  border-color:var(--purple);
+}
+
+.mdbtn.on-res{
+  background:var(--accent);
+  color:var(--paper);
+  border-color:var(--accent);
+}
+
+.aout{
+  font-size:.88rem;
+  line-height:1.7;
+  color:var(--ink);
+  flex:1;
+  overflow-y:auto;
+  white-space:pre-wrap;
+  padding:9px;
+  background:var(--paper);
+  border-radius:3px;
+  min-height:90px;
+}
+
+.aout.ph{
+  color:var(--muted);
+  font-style:italic;
+}
+
+.abar{
+  display:flex;
+  gap:7px;
+  align-items:center;
+  margin-top:9px;
+  border-top:1px solid var(--paper3);
+  padding-top:9px;
+}
+
+.nminput{
+  flex:1;
+  font-family:'Crimson Pro',serif;
+  font-size:.86rem;
+  padding:5px 9px;
+  border:1px solid var(--border);
+  border-radius:3px;
+  background:var(--paper);
+  color:var(--ink);
+  outline:none;
+}
+
+.nminput:focus{border-color:var(--muted)}
+
+.slist{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  overflow-y:auto;
+  flex:1;
+}
+
+.si{
+  padding:9px 12px;
+  border:1px solid var(--border);
+  border-radius:3px;
+  transition:all .13s;
+  display:flex;
+  align-items:flex-start;
+  gap:9px;
+}
+
+.si:hover{background:var(--paper2)}
+
+.si-body{
+  flex:1;
+  min-width:0;
+}
+
+.si-name{
+  font-size:.88rem;
+  font-weight:500;
+  margin-bottom:2px;
+}
+
+.si-desc{
+  font-size:.74rem;
+  color:var(--muted);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.si-acts{
+  display:flex;
+  gap:4px;
+  flex-shrink:0;
+}
+
+/* === TEASER === */
+#sec-teaser{gap:14px}
+
+.tagrid{
+  display:grid;
+  grid-template-columns:3fr 2fr;
+  gap:14px;
+  flex:1;
+  min-height:0;
+}
+
+.tsrc{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.63rem;
+  color:var(--muted);
+  margin-bottom:7px;
+  font-style:italic;
+}
+
+.tarea{
+  font-family:'Crimson Pro',serif;
+  font-size:1rem;
+  line-height:1.82;
+  padding:14px;
+  border:1px solid var(--border);
+  border-radius:3px;
+  background:var(--paper);
+  color:var(--ink);
+  outline:none;
+  resize:none;
+  flex:1;
+  min-height:180px;
+  transition:border-color .15s;
+  width:100%;
+}
+
+.tarea:focus{border-color:var(--muted)}
+
+.tctrl{
+  display:flex;
+  gap:7px;
+  margin-top:9px;
+  align-items:center;
+}
+
+.ph2btn{
+  background:var(--green);
+  color:white;
+  border:none;
+  padding:6px 14px;
+  border-radius:3px;
+  font-family:'Crimson Pro',serif;
+  font-size:.86rem;
+  cursor:pointer;
+  transition:background .15s;
+}
+
+.ph2btn:hover{background:#2f5a3b}
+
+/* === PROJETS SECTION === */
+#sec-projets{gap:0}
+
+.proj-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+  gap:12px;
+  margin-top:20px;
+}
+
+.proj-card{
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:18px;
+  box-shadow:var(--shadow);
+  cursor:pointer;
+  transition:all .17s;
+  position:relative;
+}
+
+.proj-card:hover{
+  box-shadow:var(--shadow-lg);
+  transform:translateY(-1px);
+}
+
+.proj-card.active-proj{
+  border:2px solid var(--green);
+  background:#f6fbf7;
+}
+
+.proj-card-name{
+  font-family:'Playfair Display',serif;
+  font-size:1rem;
+  font-style:italic;
+  margin-bottom:4px;
+}
+
+.proj-card-meta{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.62rem;
+  color:var(--muted);
+}
+
+.proj-card-acts{
+  display:flex;
+  gap:5px;
+  margin-top:12px;
+}
+
+.new-proj-form{
+  background:var(--white);
+  border:1px dashed var(--border);
+  border-radius:4px;
+  padding:16px;
+  display:none;
+  flex-direction:column;
+  gap:9px;
+  margin-top:12px;
+}
+
+.new-proj-form.on{display:flex}
+
+/* === JOURNAL === */
+#journal-modal{
+  position:fixed;
+  inset:0;
+  background:rgba(17,16,9,.5);
+  backdrop-filter:blur(4px);
+  z-index:450;
+  display:none;
+  align-items:center;
+  justify-content:center;
+}
+
+#journal-modal.on{display:flex}
+
+#journal-inner{
+  background:var(--paper);
+  border:1px solid var(--border);
+  border-radius:5px;
+  width:580px;
+  max-width:95vw;
+  max-height:80vh;
+  display:flex;
+  flex-direction:column;
+  box-shadow:var(--shadow-lg);
+}
+
+#journal-hdr{
+  padding:16px 20px;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+#journal-hdr h3{
+  flex:1;
+  font-family:'Playfair Display',serif;
+  font-size:1rem;
+  font-style:italic;
+}
+
+#journal-list{
+  flex:1;
+  overflow-y:auto;
+  padding:14px 20px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.jentry{
+  display:flex;
+  gap:10px;
+  align-items:baseline;
+  padding:6px 0;
+  border-bottom:1px solid var(--paper3);
+}
+
+.jentry:last-child{border-bottom:none}
+
+.jtime{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.6rem;
+  color:var(--muted);
+  flex-shrink:0;
+  width:82px;
+}
+
+.jtype{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.6rem;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  flex-shrink:0;
+  width:90px;
+}
+
+.jtype.jt-nuage{color:var(--blue)}
+.jtype.jt-sens{color:var(--green)}
+.jtype.jt-combo{color:var(--orange)}
+.jtype.jt-teaser{color:var(--accent)}
+.jtype.jt-analyse{color:var(--purple)}
+
+.jtxt{
+  font-size:.83rem;
+  color:var(--ink);
+  flex:1;
+  line-height:1.4;
+}
+
+/* === DIALOG PANEL === */
+#dlgp{
+  position:fixed;
+  top:0;
+  right:0;
+  width:400px;
+  height:100vh;
+  background:rgba(246,243,238,.96);
+  backdrop-filter:blur(14px);
+  border-left:1px solid var(--border);
+  box-shadow:-2px 0 24px rgba(17,16,9,.09);
+  display:flex;
+  flex-direction:column;
+  transform:translateX(100%);
+  transition:transform .27s cubic-bezier(.4,0,.2,1);
+  z-index:200;
+}
+
+#dlgp.on{transform:translateX(0)}
+
+#dlghdr{
+  padding:14px 16px;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  gap:9px;
+  flex-shrink:0;
+}
+
+#dlgtitle{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.66rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--muted);
+  flex:1;
+}
+
+#dlgmode{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.6rem;
+  padding:2px 7px;
+  background:var(--paper3);
+  border-radius:10px;
+  color:var(--muted);
+}
+
+#dlgctx{
+  padding:9px 16px;
+  font-size:.78rem;
+  color:var(--muted);
+  font-style:italic;
+  border-bottom:1px solid var(--border);
+  line-height:1.45;
+  max-height:68px;
+  overflow:hidden;
+  display:none;
+}
+
+/* Dialog mode selector */
+#dlg-mode-bar{
+  display:flex;
+  gap:4px;
+  padding:8px 16px;
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+
+.dlgmdbtn{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.58rem;
+  letter-spacing:.07em;
+  text-transform:uppercase;
+  padding:3px 8px;
+  border-radius:2px;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--muted);
+  cursor:pointer;
+  transition:all .13s;
+  flex:1;
+  text-align:center;
+}
+
+.dlgmdbtn:hover{
+  border-color:var(--muted);
+  color:var(--ink);
+}
+
+.dlgmdbtn.on-dev{
+  background:var(--ink);
+  color:var(--paper);
+  border-color:var(--ink);
+}
+
+.dlgmdbtn.on-exp{
+  background:var(--blue);
+  color:var(--paper);
+  border-color:var(--blue);
+}
+
+.dlgmdbtn.on-psy{
+  background:var(--purple);
+  color:var(--paper);
+  border-color:var(--purple);
+}
+
+.dlgmdbtn.on-res{
+  background:var(--accent);
+  color:var(--paper);
+  border-color:var(--accent);
+}
+
+#dlgmsgs{
+  flex:1;
+  overflow-y:auto;
+  padding:12px 16px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.msg{
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+  max-width:90%;
+}
+
+.mu{
+  align-self:flex-end;
+  align-items:flex-end;
+}
+
+.mc{align-self:flex-start}
+
+.mb{
+  padding:8px 12px;
+  border-radius:3px;
+  font-size:.84rem;
+  line-height:1.6;
+  white-space:pre-wrap;
+}
+
+.mu .mb{
+  background:var(--ink);
+  color:var(--paper);
+}
+
+.mc .mb{
+  background:var(--white);
+  border:1px solid var(--border);
+  font-style:italic;
+}
+
+.mc.mc-exp .mb{
+  border-color:var(--blue);
+  background:#f0f6ff;
+}
+
+.mc.mc-psy .mb{
+  border-color:var(--purple);
+  background:#faf6ff;
+}
+
+.mc.mc-res .mb{
+  border-color:var(--accent);
+  background:#fff8f6;
+}
+
+.mlbl{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.57rem;
+  color:var(--muted);
+  letter-spacing:.05em;
+}
+
+#dlginp-a{
+  padding:10px 16px;
+  border-top:1px solid var(--border);
+  display:flex;
+  gap:6px;
+  flex-shrink:0;
+}
+
+#dlginp{
+  flex:1;
+  font-family:'Crimson Pro',serif;
+  font-size:.86rem;
+  padding:7px 9px;
+  border:1px solid var(--border);
+  border-radius:3px;
+  background:var(--paper);
+  color:var(--ink);
+  outline:none;
+  resize:none;
+  height:52px;
+  line-height:1.5;
+  transition:border-color .15s;
+}
+
+#dlginp:focus{border-color:var(--muted)}
+
+#dlg-meaning-zone{
+  padding:10px 16px;
+  border-top:1px solid var(--border);
+  background:var(--paper2);
+  flex-shrink:0;
+}
+
+#dlg-meaning-lbl{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.58rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin-bottom:5px;
+}
+
+#dlg-meaning-txt{
+  width:100%;
+  font-family:'Crimson Pro',serif;
+  font-size:.84rem;
+  padding:6px 9px;
+  border:1px solid var(--border);
+  border-radius:3px;
+  background:var(--white);
+  color:var(--ink);
+  outline:none;
+  resize:none;
+  height:48px;
+  line-height:1.5;
+  transition:border-color .15s;
+}
+
+#dlg-meaning-txt:focus{border-color:var(--green)}
+
+#dlg-meaning-bar{
+  display:flex;
+  gap:5px;
+  margin-top:5px;
+  align-items:center;
+}
+
+.meaning-status{
+  font-size:.74rem;
+  color:var(--green);
+  font-style:italic;
+  flex:1;
+}
+
+/* === GLOBAL MODAL === */
+#gm{
+  position:fixed;
+  inset:0;
+  background:rgba(17,16,9,.5);
+  backdrop-filter:blur(4px);
+  z-index:300;
+  display:none;
+  align-items:center;
+  justify-content:center;
+}
+
+#gm.on{display:flex}
+
+#gmi{
+  background:var(--paper);
+  border:1px solid var(--border);
+  border-radius:5px;
+  width:640px;
+  max-width:95vw;
+  max-height:80vh;
+  display:flex;
+  flex-direction:column;
+  box-shadow:var(--shadow-lg);
+}
+
+#gmhdr{
+  padding:16px 20px;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+#gmtitle{
+  flex:1;
+  font-family:'Playfair Display',serif;
+  font-size:1.05rem;
+  font-style:italic;
+}
+
+#gmmsgs{
+  flex:1;
+  overflow-y:auto;
+  padding:16px 20px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+#gminpa{
+  padding:12px 20px;
+  border-top:1px solid var(--border);
+  display:flex;
+  gap:7px;
+  flex-shrink:0;
+}
+
+#gminp{
+  flex:1;
+  font-family:'Crimson Pro',serif;
+  font-size:.88rem;
+  padding:8px 11px;
+  border:1px solid var(--border);
+  border-radius:3px;
+  background:var(--paper);
+  color:var(--ink);
+  outline:none;
+  resize:none;
+  height:60px;
+  line-height:1.5;
+  transition:border-color .15s;
+}
+
+#gminp:focus{border-color:var(--muted)}
+
+/* === SETUP MODAL === */
+#sm{
+  position:fixed;
+  inset:0;
+  background:rgba(17,16,9,.72);
+  backdrop-filter:blur(8px);
+  z-index:500;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+#smi{
+  background:var(--paper);
+  border:1px solid var(--border);
+  border-radius:5px;
+  padding:36px 40px;
+  width:490px;
+  max-width:95vw;
+  box-shadow:var(--shadow-lg);
+}
+
+.slogo{
+  font-family:'Playfair Display',serif;
+  font-size:1.9rem;
+  font-weight:600;
+  margin-bottom:4px;
+}
+
+.slogo em{
+  color:var(--accent);
+  font-style:italic;
+}
+
+.ssub{
+  color:var(--muted);
+  font-size:.86rem;
+  font-style:italic;
+  margin-bottom:24px;
+}
+
+.fg{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  margin-bottom:14px;
+}
+
+.fl{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.63rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+
+.fi{
+  font-family:'Crimson Pro',serif;
+  font-size:.92rem;
+  padding:8px 10px;
+  border:1px solid var(--border);
+  border-radius:3px;
+  background:var(--paper);
+  color:var(--ink);
+  outline:none;
+  transition:border-color .15s;
+}
+
+.fi:focus{border-color:var(--muted)}
+
+.snote{
+  font-size:.76rem;
+  color:var(--muted);
+  font-style:italic;
+  line-height:1.5;
+  margin-top:4px;
+}
+
+.snote a{color:var(--accent)}
+
+.setup-row{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  margin-top:4px;
+}
+
+.model-sel{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.7rem;
+  padding:5px 8px;
+  border:1px solid var(--border);
+  border-radius:3px;
+  background:var(--paper);
+  color:var(--ink);
+  outline:none;
+  cursor:pointer;
+}
+
+/* === COMPARE === */
+#cpm{
+  position:fixed;
+  inset:0;
+  background:rgba(17,16,9,.5);
+  backdrop-filter:blur(4px);
+  z-index:400;
+  display:none;
+  align-items:center;
+  justify-content:center;
+}
+
+#cpm.on{display:flex}
+
+#cpmi{
+  background:var(--paper);
+  border:1px solid var(--border);
+  border-radius:5px;
+  width:800px;
+  max-width:96vw;
+  max-height:82vh;
+  display:flex;
+  flex-direction:column;
+  box-shadow:var(--shadow-lg);
+}
+
+#cpmhdr{
+  padding:14px 20px;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+#cpmhdr h3{
+  flex:1;
+  font-family:'Playfair Display',serif;
+  font-size:.98rem;
+  font-style:italic;
+}
+
+#cpmbody{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  flex:1;
+  overflow:hidden;
+}
+
+.ccol{
+  padding:18px;
+  overflow-y:auto;
+  border-right:1px solid var(--border);
+}
+
+.ccol:last-child{border-right:none}
+
+.cctitle{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.65rem;
+  color:var(--muted);
+  margin-bottom:10px;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+
+.ccitem{
+  padding:7px 9px;
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:3px;
+  font-size:.84rem;
+  line-height:1.45;
+  margin-bottom:5px;
+}
+
+.ccana{
+  font-size:.86rem;
+  line-height:1.68;
+  font-style:italic;
+  white-space:pre-wrap;
+  color:var(--ink);
+  margin-top:12px;
+}
+
+/* === NOTIF === */
+#notif{
+  position:fixed;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%) translateY(14px);
+  background:var(--ink);
+  color:var(--paper);
+  padding:8px 16px;
+  border-radius:3px;
+  font-size:.82rem;
+  opacity:0;
+  transition:all .22s;
+  z-index:9998;
+  pointer-events:none;
+  white-space:nowrap;
+}
+
+#notif.on{
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
+}
+
+/* === LOADING === */
+.loading{
+  display:inline-flex;
+  gap:4px;
+  align-items:center;
+}
+
+.loading span{
+  width:5px;
+  height:5px;
+  background:var(--muted);
+  border-radius:50%;
+  animation:db 1.2s infinite;
+}
+
+.loading span:nth-child(2){animation-delay:.2s}
+.loading span:nth-child(3){animation-delay:.4s}
+
+@keyframes db{
+  0%,80%,100%{
+    transform:translateY(0);
+    opacity:.4;
+  }
+  40%{
+    transform:translateY(-5px);
+    opacity:1;
+  }
+}
+
+/* === SCROLLBAR === */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+.fi-ta{
+  font-family:'Crimson Pro',serif;
+  font-size:.85rem;
+  padding:7px 9px;
+  border:1px solid var(--border);
+  border-radius:3px;
+  background:var(--paper);
+  color:var(--ink);
+  outline:none;
+  resize:none;
+  line-height:1.5;
+  transition:border-color .15s;
+}
+
+.fi-ta:focus{border-color:var(--muted)}
+
+/* PHASE 2 MAP NODES */
+.mapnode{background:var(--paper);border:2px solid var(--border);border-radius:4px;padding:8px 16px;font-size:.85rem;cursor:pointer;transition:all .15s;display:inline-block}
+.mapnode:hover{border-color:var(--accent);box-shadow:var(--shadow)}
+.mapnode.done{border-color:var(--green);background:#f6fbf7}
+
+/* NARRATIVE CLOUDS CARDS */
+.ncloud-card{background:var(--white);border:2px solid var(--border);border-radius:4px;padding:14px;display:flex;align-items:flex-start;gap:10px;transition:all .17s;cursor:pointer}
+.ncloud-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-1px)}
+.ncloud-card.selected{border-color:var(--green);background:#f6fbf7}
+.ncloud-check{width:18px;height:18px;cursor:pointer;flex-shrink:0;margin-top:2px}
+.ncloud-name{font-size:.92rem;font-weight:600;margin-bottom:4px;color:var(--ink)}
+.ncloud-desc{font-size:.8rem;line-height:1.5;color:var(--muted)}
+
+/* TIMELINE VISUAL */
+.timeline-point{display:flex;align-items:center;gap:12px;padding:10px;border-left:3px solid var(--border);margin-bottom:8px;transition:all .15s}
+.timeline-point:hover{border-left-color:var(--accent);background:var(--paper2)}
+.timeline-minute{font-family:'IBM Plex Mono',monospace;font-size:.7rem;color:var(--muted);width:60px;flex-shrink:0}
+.timeline-label{font-weight:600;font-size:.88rem;color:var(--ink)}
+.timeline-desc{font-size:.78rem;color:var(--muted);line-height:1.4;margin-top:3px}
+
+/* ACTS */
+.act-tab{font-family:'IBM Plex Mono',monospace;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;padding:8px 14px;border:none;background:transparent;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
+.act-tab:hover{color:var(--ink)}
+.act-tab.active{color:var(--ink);border-bottom-color:var(--accent)}
+.act-tab.validated{color:var(--green)}
+
+/* ACT CLOUDS WITH LEVELS */
+.act-clouds-section{margin-bottom:20px}
+.level-group{margin-bottom:16px}
+.level-header{font-family:'IBM Plex Mono',monospace;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.level-badge{width:14px;height:14px;border-radius:50%;flex-shrink:0}
+.level-badge.l1{background:#bf3c18}
+.level-badge.l2{background:#c47a1a}
+.level-badge.l3{background:#3a6b49}
+
+.act-cloud-item{background:var(--white);border:1px solid var(--border);border-radius:3px;padding:10px;margin-bottom:6px;transition:all .15s}
+.act-cloud-item:hover{box-shadow:var(--shadow)}
+.act-cloud-content{width:100%}
+.act-cloud-text{flex:1;font-size:.85rem;line-height:1.5;margin-bottom:8px}
+.act-cloud-textarea{width:100%;min-height:80px;font-family:'Crimson Pro',serif;font-size:.85rem;line-height:1.6;padding:8px;border:1px solid var(--border);border-radius:3px;background:var(--paper);resize:vertical;margin-top:8px}
+.act-cloud-header{display:flex;align-items:flex-start;gap:10px}
+.act-cloud-actions{display:flex;gap:4px;flex-shrink:0}
+.level-btn{font-family:'IBM Plex Mono',monospace;font-size:.65rem;padding:3px 7px;border-radius:2px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .13s}
+.level-btn:hover{background:var(--paper2)}
+.level-btn.active{border-color:transparent;color:white}
+.level-btn.l1.active{background:#bf3c18}
+.level-btn.l2.active{background:#c47a1a}
+.level-btn.l3.active{background:#3a6b49}
+
+.act-narrative{margin:20px 0}
+.act-narrative-label{font-family:'IBM Plex Mono',monospace;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.act-narrative-area{width:100%;min-height:200px;font-family:'Crimson Pro',serif;font-size:.95rem;line-height:1.8;padding:14px;border:1px solid var(--border);border-radius:4px;background:var(--paper);resize:vertical}
+
+/* CONTINUITY MODE SELECT */
+.continuity-mode-select{font-family:'IBM Plex Mono',monospace;font-size:.75rem;padding:6px 10px;border:1px solid var(--border);border-radius:3px;background:var(--white);color:var(--ink);cursor:pointer}
+
+/* CONTINUITY MODAL */
+.continuity-modal{position:fixed;inset:0;background:rgba(17,16,9,.6);backdrop-filter:blur(4px);z-index:500;display:flex;align-items:center;justify-content:center;animation:fadeIn .2s}
+.continuity-modal-inner{background:var(--paper);border:1px solid var(--border);border-radius:6px;width:700px;max-width:95vw;max-height:85vh;display:flex;flex-direction:column;box-shadow:var(--shadow-lg)}
+.continuity-modal-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.continuity-modal-title{font-family:'Playfair Display',serif;font-size:1.1rem;font-style:italic;color:var(--ink)}
+.continuity-modal-body{flex:1;overflow-y:auto;padding:20px}
+.continuity-modal-footer{padding:16px 20px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end}
+.continuity-textarea{width:100%;min-height:300px;font-family:'Crimson Pro',serif;font-size:.95rem;line-height:1.8;padding:14px;border:1px solid var(--border);border-radius:4px;background:var(--white);resize:vertical}
+.continuity-controls{display:flex;gap:8px;margin-bottom:16px;align-items:center}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     SETUP MODAL
+     ══════════════════════════════════════════ -->
+<div id="sm">
+  <div id="smi">
+    <div class="slogo">Seren<em>deep</em></div>
+    <div class="ssub">Outil de développement narratif — Looker Films</div>
+    <div class="fg">
+      <label class="fl">Clé API Anthropic</label>
+      <input class="fi" id="s-key" type="password" placeholder="sk-ant-..." autocomplete="off">
+      <div class="snote">Stockée localement. <a href="https://console.anthropic.com/account/keys" target="_blank" rel="noopener">Obtenir une clé →</a></div>
+    </div>
+    <div class="fg">
+      <label class="fl">Modèle</label>
+      <div class="setup-row">
+        <select class="model-sel" id="s-model">
+          <option value="claude-sonnet-4-20250514">Sonnet 4 — rapide, économique</option>
+          <option value="claude-opus-4-20250514">Opus 4 — plus nuancé, plus coûteux</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-ink" style="width:100%;margin-top:10px;padding:10px" onclick="setupDone()">Commencer →</button>
+  </div>
+</div>
+
+<!-- NOTIF -->
+<div id="notif"></div>
+
+<!-- ══════════════════════════════════════════
+     JOURNAL MODAL
+     ══════════════════════════════════════════ -->
+<div id="journal-modal">
+  <div id="journal-inner">
+    <div id="journal-hdr">
+      <h3>Journal de bord</h3>
+      <button class="btn btn-sm" onclick="closeModal('journal-modal')">Fermer</button>
+    </div>
+    <div id="journal-list"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     COMPARE MODAL
+     ══════════════════════════════════════════ -->
+<div id="cpm">
+  <div id="cpmi">
+    <div id="cpmhdr">
+      <h3 id="cpmtitle">Comparaison</h3>
+      <button class="btn btn-sm" onclick="closeModal('cpm')">Fermer</button>
+    </div>
+    <div id="cpmbody">
+      <div class="ccol" id="cpl"></div>
+      <div class="ccol" id="cpr"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     GLOBAL MODAL
+     ══════════════════════════════════════════ -->
+<div id="gm">
+  <div id="gmi">
+    <div id="gmhdr">
+      <span id="gmtitle">Dialogue Global</span>
+      <button class="btn btn-sm" onclick="closeModal('gm')">Fermer</button>
+    </div>
+    <div id="gmmsgs"></div>
+    <div id="gminpa">
+      <textarea id="gminp" class="fi-ta" style="flex:1;height:60px" placeholder="Quels patterns émergent ? Quelle histoire se dessine ?…"></textarea>
+      <button class="btn btn-ink btn-sm" onclick="sendGlobal()" style="align-self:flex-end">Envoyer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     DIALOG PANEL (Focalisé)
+     ══════════════════════════════════════════ -->
+<div id="dlgp">
+  <div id="dlghdr">
+    <span id="dlgtitle">Dialogue</span>
+    <span id="dlgmode">Focalisé</span>
+    <button class="btn btn-sm btn-ghost" onclick="closeModal('dlgp')">✕</button>
+  </div>
+  <div id="dlgctx"></div>
+  <div id="dlg-mode-bar">
+    <button class="dlgmdbtn on-exp" id="dmb-exp" onclick="setDlgMode('exp')">Explorer</button>
+    <button class="dlgmdbtn" id="dmb-psy" onclick="setDlgMode('psy')">Approfondir</button>
+    <button class="dlgmdbtn" id="dmb-res" onclick="setDlgMode('res')">Résister</button>
+  </div>
+  <div id="dlgmsgs"></div>
+  <div id="dlginp-a">
+    <textarea id="dlginp" placeholder="Explorer ce nuage…"></textarea>
+    <button class="btn btn-ink btn-sm" onclick="sendFocused()" style="align-self:flex-end">→</button>
+  </div>
+  <div id="dlg-meaning-zone">
+    <div id="dlg-meaning-lbl">Sens validé</div>
+    <textarea id="dlg-meaning-txt" placeholder="Ce que ce nuage signifie vraiment…"></textarea>
+    <div id="dlg-meaning-bar">
+      <span class="meaning-status" id="meaning-status"></span>
+      <button class="btn btn-sm btn-green" onclick="validateMeaning()">✓ Valider</button>
+      <button class="btn btn-sm btn-ghost" onclick="clearMeaning()">Effacer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     APP
+     ══════════════════════════════════════════ -->
+<div id="app">
+  
+  <!-- HEADER -->
+  <div id="hdr">
+    <div class="hdr-l">
+      <span class="logo" onclick="showHome()" style="cursor:pointer">Seren<em>deep</em></span>
+      <span id="proj-lbl" onclick="showProjectSelector()">—</span>
+    </div>
+    <div class="hdr-r">
+      <button class="btn btn-sm" onclick="toggleNewProjForm()">+ Nouveau</button>
+      <button class="btn btn-sm" onclick="showProjectSelector()">Projets</button>
+      <button class="btn btn-sm" onclick="openJournal()">◷ Journal</button>
+      <button class="btn btn-sm" onclick="exportProject()">↓ Exporter</button>
+      <button class="btn btn-sm btn-ghost" onclick="openSetup()">⚙</button>
+    </div>
+  </div>
+
+  <!-- PHASE SWITCHER -->
+  <div id="phase-switcher">
+    <button class="phase-btn active" id="phase1-btn" onclick="switchToPhase(1)">
+      <span class="phase-dot">●</span> Phase 1
+    </button>
+    <button class="phase-btn" id="phase2-btn" onclick="switchToPhase(2)">
+      <span class="phase-dot">○</span> Phase 2
+    </button>
+  </div>
+
+  <!-- TABS (contextual) -->
+  <div id="tabs">
+    <!-- Phase 1 tabs -->
+    <button class="tab phase1-tab on" onclick="showTab('nuages',this)">Nuages</button>
+    <button class="tab phase1-tab" onclick="showTab('tests',this)">Combinaisons</button>
+    <button class="tab phase1-tab" onclick="showTab('teaser',this)">Teaser</button>
+    
+    <!-- Phase 2 tabs -->
+    <button class="tab phase2-tab" onclick="showTab('p2brief',this)" style="display:none">Brief</button>
+    <button class="tab phase2-tab" onclick="showTab('p2struct',this)" style="display:none">Structure & Actes</button>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div id="main">
+
+    <!-- ══════════════════════════════════════════
+         SECTION: HOME
+         ══════════════════════════════════════════ -->
+    <div id="sec-home" class="sec on">
+      <div style="max-width:800px;margin:60px auto;text-align:center;padding:0 20px">
+        <div style="font-family:'Playfair Display',serif;font-size:2.5rem;font-weight:400;font-style:italic;margin-bottom:16px">
+          Seren<span style="color:var(--accent)">deep</span>
+        </div>
+        <div style="font-size:1.1rem;color:var(--muted);margin-bottom:48px;line-height:1.6">
+          Outil de développement narratif par saturation/émergence<br>
+          Pour la fiction audiovisuelle
+        </div>
+        
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-bottom:48px">
+          <div class="panel" style="padding:32px;cursor:pointer;transition:all .2s" onclick="toggleNewProjForm()" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
+            <div style="font-size:2rem;margin-bottom:12px">+</div>
+            <div style="font-family:'Playfair Display',serif;font-size:1.2rem;font-style:italic;margin-bottom:8px">Nouveau projet</div>
+            <div style="font-size:.85rem;color:var(--muted)">Commencer un développement narratif</div>
+          </div>
+          
+          <div class="panel" style="padding:32px;cursor:pointer;transition:all .2s" onclick="showProjectSelector()" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
+            <div style="font-size:2rem;margin-bottom:12px">◎</div>
+            <div style="font-family:'Playfair Display',serif;font-size:1.2rem;font-style:italic;margin-bottom:8px">Ouvrir un projet</div>
+            <div style="font-size:.85rem;color:var(--muted)" id="home-project-count">0 projet</div>
+          </div>
+        </div>
+        
+        <div style="background:var(--paper2);border:1px solid var(--border);border-radius:6px;padding:32px;text-align:left">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:16px">Méthodologie</div>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:20px">
+            <div>
+              <div style="font-weight:500;margin-bottom:6px">Phase 1 : Saturation</div>
+              <div style="font-size:.85rem;color:var(--muted);line-height:1.6">Déposer idées, nuages, intuitions. Laisser émerger patterns sans structure prématurée.</div>
+            </div>
+            <div>
+              <div style="font-weight:500;margin-bottom:6px">Phase 2 : Structuration</div>
+              <div style="font-size:.85rem;color:var(--muted);line-height:1.6">Brief, architecture narrative, actes. Du matériau brut au pitch structuré.</div>
+            </div>
+          </div>
+        </div>
+        
+        <div style="margin-top:48px;font-size:.75rem;color:var(--muted)">
+          Looker Films — Outil de création narrative
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         SECTION: NUAGES
+         ══════════════════════════════════════════ -->
+    <div id="sec-nuages" class="sec">
+      
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <button class="fbtn on" onclick="setF('all',this)">Tous</button>
+        <button class="fbtn" onclick="setF('important',this)">Importants</button>
+        <button class="fbtn" onclick="setF('explored',this)">Explorés</button>
+        <button class="fbtn" onclick="setF('unused',this)">Non utilisés</button>
+        <button class="fbtn" onclick="setF('images',this)">Avec images</button>
+        <div class="tsep"></div>
+        <div class="srch-w">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="m21 21-4.35-4.35"/>
+          </svg>
+          <input id="srch" type="text" placeholder="Rechercher…" oninput="debounceSearch()">
+        </div>
+        <div class="tsep"></div>
+        <button class="btn btn-sm" onclick="toggleAddForm()">+ Nouveau nuage</button>
+      </div>
+
+      <!-- Add Form -->
+      <div id="add-form">
+        <textarea id="add-txt" placeholder="Déposez une idée, une image mentale, une intuition…"></textarea>
+        <div class="form-row">
+          <div class="img-drop" id="img-drop">+ Image (optionnel)</div>
+          <input type="file" id="img-in" accept="image/*" onchange="imgFile(event)">
+          <div id="img-prev" style="display:none;position:relative">
+            <img id="img-prev-img" style="height:44px;width:66px;object-fit:cover;border-radius:2px;display:block" alt="Aperçu">
+            <button onclick="clearImg()" style="position:absolute;top:2px;right:2px;background:rgba(17,16,9,.6);color:white;border:none;width:15px;height:15px;cursor:pointer;font-size:9px;border-radius:2px" aria-label="Supprimer l'image">✕</button>
+          </div>
+          <button class="btn btn-sm btn-ink" onclick="addCloud()">Déposer</button>
+          <button class="btn btn-sm btn-ghost" onclick="cancelAdd()">Annuler</button>
+        </div>
+      </div>
+
+      <!-- Cloud Grid -->
+      <div id="cgrid"></div>
+
+      <!-- Legend -->
+      <div class="legend">
+        <div class="li"><div class="ls lx"></div>Exploré</div>
+        <div class="li"><div class="ls li_"></div>Important</div>
+        <div class="li"><div class="ls lc"></div>Dans combinaison</div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         SECTION: TESTS
+         ══════════════════════════════════════════ -->
+    <div id="sec-tests" class="sec">
+      <div class="tgrid">
+        
+        <!-- Combinaison active -->
+        <div class="panel" style="grid-row:1/3">
+          <div class="ptitle">
+            <span>Combinaison active</span>
+            <button class="btn btn-sm btn-green" onclick="saveCombo()">✓ Sauvegarder</button>
+          </div>
+          <div id="chips" class="chips">
+            <span style="font-style:italic;font-size:.8rem;color:var(--muted)">Sélectionnez des nuages…</span>
+          </div>
+          <div class="mode-bar">
+            <button class="mdbtn on-dev" id="cmb-dev" onclick="setComboMode('dev')">Développer</button>
+            <button class="mdbtn" id="cmb-psy" onclick="setComboMode('psy')">Approfondir</button>
+            <button class="mdbtn" id="cmb-res" onclick="setComboMode('res')">Résister</button>
+          </div>
+          <div style="display:flex;gap:7px;margin-bottom:10px;flex-wrap:wrap">
+            <button class="btn btn-sm btn-ink" onclick="analyzeCombo()">Qu'est-ce que ça raconte ?</button>
+            <button class="btn btn-sm" onclick="clearCombo()">Effacer</button>
+          </div>
+          <div id="aout" class="aout ph">L'analyse apparaîtra ici…</div>
+          <div class="abar">
+            <input class="nminput" id="cbname" placeholder="Nom de la combinaison…">
+          </div>
+        </div>
+
+        <!-- Combinaisons sauvegardées -->
+        <div class="panel">
+          <div class="ptitle">Combinaisons sauvegardées</div>
+          <div id="slist" class="slist">
+            <div class="empty">
+              <div class="ei">○</div>
+              <span style="font-size:.8rem">Aucune combinaison</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mini liste nuages -->
+        <div class="panel">
+          <div class="ptitle">Nuages — clic pour ajouter</div>
+          <div id="tmini" style="overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:5px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         SECTION: TEASER
+         ══════════════════════════════════════════ -->
+    <div id="sec-teaser" class="sec">
+      <div class="tagrid">
+        
+        <!-- Zone teaser -->
+        <div class="panel" style="display:flex;flex-direction:column">
+          <div class="ptitle"><span>Teaser narratif</span></div>
+          <div id="tsrc" class="tsrc" style="display:none"></div>
+          <textarea id="tarea" class="tarea" placeholder="Première approche de l'histoire…&#10;&#10;Écrivez librement ou demandez à Claude de proposer un point de départ."></textarea>
+          <div class="tctrl">
+            <button class="btn btn-sm" onclick="proposeTeaser()">◎ Je propose un teaser</button>
+            <button class="btn btn-sm btn-ghost" onclick="clearTeaser()">Effacer</button>
+            <button class="ph2btn" onclick="activateP2()" style="margin-left:auto">→ Activer Phase 2</button>
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div style="display:flex;flex-direction:column;gap:10px">
+          
+          <!-- Depuis combinaison -->
+          <div class="panel" style="flex:1">
+            <div class="ptitle">Depuis une combinaison</div>
+            <div id="tcombo" style="overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:5px">
+              <div style="font-style:italic;font-size:.8rem;color:var(--muted)">Aucune combinaison.</div>
+            </div>
+          </div>
+
+          <!-- Dialogue teaser -->
+          <div class="panel" style="flex:0">
+            <div class="ptitle">Dialogue — Teaser</div>
+            <div id="tdlgmsgs" style="max-height:110px;overflow-y:auto;margin-bottom:7px;display:flex;flex-direction:column;gap:7px"></div>
+            <div style="display:flex;gap:6px">
+              <textarea id="tdlginp" class="fi-ta" style="flex:1;height:48px" placeholder="Affiner, orienter…"></textarea>
+              <button class="btn btn-ink btn-sm" onclick="sendTDlg()" style="align-self:flex-end">→</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         SECTION: PROJETS
+         ══════════════════════════════════════════ -->
+    <div id="sec-projets" class="sec">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <div>
+          <h2 style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:400;font-style:italic">Mes projets</h2>
+          <p style="font-size:.84rem;color:var(--muted);margin-top:3px">Chaque projet est isolé — nuages, combinaisons, journal.</p>
+        </div>
+        <div style="display:flex;gap:7px">
+          <button class="btn btn-sm" onclick="toggleNewProjForm()">+ Nouveau projet</button>
+          <button class="btn btn-sm" onclick="exportProject()">↓ Exporter</button>
+          <label class="btn btn-sm" style="cursor:pointer">
+            ↑ Importer
+            <input type="file" id="import-in" accept=".json" style="display:none" onchange="importProject(event)">
+          </label>
+        </div>
+      </div>
+
+      <!-- New project form -->
+      <div id="new-proj-form" class="new-proj-form">
+        <div class="fg" style="margin-bottom:0">
+          <label class="fl">Nom du projet</label>
+          <input class="fi" id="np-name" placeholder="Ex: Divisés, HYPNOS…">
+        </div>
+        <div class="fg" style="margin-bottom:0">
+          <label class="fl">Auteur</label>
+          <input class="fi" id="np-author" placeholder="Ex: Sacha Dupont">
+        </div>
+        <div style="display:flex;gap:7px;margin-top:4px">
+          <button class="btn btn-sm btn-ink" onclick="createProject()">Créer →</button>
+          <button class="btn btn-sm btn-ghost" onclick="toggleNewProjForm()">Annuler</button>
+        </div>
+      </div>
+
+      <!-- Projects grid -->
+      <div id="proj-grid" class="proj-grid"></div>
+    </div>
+
+    <!-- PHASE 2 BRIEF -->
+    <div id="sec-p2brief" class="sec">
+      <div style="margin-bottom:20px">
+        <div style="font-family:'Playfair Display',serif;font-size:1.3rem;font-style:italic">Brief du projet</div>
+        <div style="font-size:.88rem;color:var(--muted);margin-top:3px">Format, durée, genre, tonalité</div>
+      </div>
+
+      <!-- BRIEF FORM -->
+      <div id="brief-form-container" class="panel">
+        <div class="ptitle">Informations projet</div>
+        
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:16px">
+          <div class="fg" style="margin:0">
+            <label class="fl">Format</label>
+            <select class="fi" id="brief-format" onchange="updateBriefInputs()" style="cursor:pointer">
+              <option value="">Sélectionner...</option>
+              <option value="long">Long-métrage</option>
+              <option value="serie">Série</option>
+              <option value="podcast">Podcast</option>
+              <option value="doc">Documentaire</option>
+            </select>
+          </div>
+          
+          <div class="fg" style="margin:0" id="brief-duration-group">
+            <label class="fl">Durée (minutes)</label>
+            <input class="fi" type="number" id="brief-duration" placeholder="Ex: 90">
+          </div>
+          
+          <div class="fg" style="margin:0;display:none" id="brief-episodes-group">
+            <label class="fl">Nombre d'épisodes</label>
+            <input class="fi" type="number" id="brief-episodes" placeholder="Ex: 8">
+          </div>
+          
+          <div class="fg" style="margin:0">
+            <label class="fl">Genre</label>
+            <input class="fi" id="brief-genre" placeholder="Thriller, Drame...">
+          </div>
+          
+          <div class="fg" style="margin:0">
+            <label class="fl">Tonalité</label>
+            <input class="fi" id="brief-tone" placeholder="Sombre, Ironique...">
+          </div>
+        </div>
+        
+        <button class="btn btn-ink" onclick="validateBrief()">→ Valider le brief</button>
+      </div>
+      
+      <!-- BRIEF VALIDATED -->
+      <div id="brief-validated" style="display:none">
+        <div class="panel" style="background:var(--paper2)">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+            <span style="color:var(--green);font-size:1.2rem">✓</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:.75rem;color:var(--green)">BRIEF VALIDÉ</span>
+          </div>
+          <div id="brief-summary" style="font-size:.9rem;line-height:1.6"></div>
+          <button class="btn btn-sm" style="margin-top:12px" onclick="editBrief()">✏️ Modifier</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHASE 2 ZONE STRUCTURE -->
+    <div id="sec-p2struct" class="sec">
+      <div style="margin-bottom:20px">
+        <div style="font-family:'Playfair Display',serif;font-size:1.3rem;font-style:italic">Structure & Actes</div>
+        <div style="font-size:.88rem;color:var(--muted);margin-top:3px">De l'architecture narrative au texte</div>
+      </div>
+
+      <!-- Message si brief pas validé -->
+      <div id="structure-need-brief" class="panel" style="background:var(--paper2);text-align:center;padding:40px">
+        <div style="font-size:1rem;color:var(--muted);margin-bottom:12px">Brief requis</div>
+        <div style="font-size:.85rem;color:var(--muted);margin-bottom:20px">Validez d'abord le brief du projet</div>
+        <button class="btn btn-ink" onclick="switchToPhase(2);showTab('p2brief',document.querySelector('[onclick*=p2brief]'))">→ Aller au brief</button>
+      </div>
+
+      <!-- ÉTAPE 1 : SÉLECTION STRUCTURES (caché par défaut) -->
+      <div id="structure-selection" style="display:none;margin-bottom:20px">
+        <div class="panel">
+          <div class="ptitle">Sélectionner 1 à 3 approches narratives</div>
+          
+          <div id="narrative-clouds-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:16px"></div>
+          
+          <div style="display:flex;gap:10px;align-items:center">
+            <button class="btn btn-ink" onclick="generateStructure()" id="gen-struct-btn" disabled>→ Générer la structure</button>
+            <span id="narr-count" style="font-size:.8rem;color:var(--muted);font-style:italic">Sélectionnez au moins une approche</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ÉTAPE 2 : ACTES (caché par défaut) -->
+      <div id="structure-acts" style="display:none">
+        <div class="panel">
+          <div class="ptitle">
+            <span id="struct-title">Structure générée</span>
+            <button class="btn btn-sm" onclick="showStructureSelection()">← Changer structure</button>
+          </div>
+          
+          <div id="struct-info" style="margin-bottom:16px"></div>
+          
+          <!-- Tabs actes -->
+          <div style="display:flex;gap:6px;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:8px" id="acts-tabs"></div>
+          
+          <!-- Contenu acte -->
+          <div id="act-content"></div>
+        </div>
+      </div>
+
+    </div>
+
+  </div><!-- end main -->
+</div><!-- end app -->
+
+<script>
+/* ══════════════════════════════════════════
+   SERENDEEP - APPLICATION LOGIC
+   ══════════════════════════════════════════ */
+
+'use strict';
+
+// ══════════════════════════════════════════
+// UTILITIES
+// ══════════════════════════════════════════
+const id = x => document.getElementById(x);
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+
+// Global config (shared across projects)
+let CFG = { 
+  apiKey: '', 
+  model: 'claude-sonnet-4-20250514' 
+};
+
+// All projects store
+let PROJECTS = {}; // { [pid]: ProjectData }
+let ACTIVE_PID = null;
+
+// Current project shorthand
+function P() { 
+  return PROJECTS[ACTIVE_PID] || emptyProject('—','—'); 
+}
+
+function emptyProject(name, author) {
+  return {
+    id: 'p'+Date.now().toString(36),
+    name, 
+    author,
+    clouds: [], 
+    combo: [], 
+    savedCombos: [],
+    teaserText: '', 
+    teaserFrom: null,
+    dlgH: {}, 
+    gblH: [], 
+    tdlgH: [],
+    focId: null, 
+    filter: 'all',
+    comboMode: 'dev', 
+    dlgMode: 'exp',
+    nid: 1,
+    journal: [],
+    phase2: {
+      active: false,
+      activatedAt: null,
+      brief: {format:'',duration:0,validated:false},
+      selected_narrative_clouds: [],
+      structure: {type:'',based_on:[],name:'',schema:null,validated:false},
+      characters: [],
+      logline: {current:'',versions:[],validated:false},
+      synopsis: {acte1:{text:'',validated:false},acte2:{text:'',validated:false},acte3:{text:'',validated:false}},
+      noteIntention: {text:'',validated:false},
+      reports: [],
+      current_report_id: null
+    }
+  };
+}
+
+let addImg = null;
+
+function uid() { 
+  const p = P(); 
+  return 'c'+(p.nid++)+'_'+Date.now().toString(36); 
+}
+
+// ══════════════════════════════════════════
+// JOURNAL
+// ══════════════════════════════════════════
+const J_TYPES = {
+  nuage:'jt-nuage', 
+  sens:'jt-sens', 
+  combo:'jt-combo', 
+  teaser:'jt-teaser', 
+  analyse:'jt-analyse'
+};
+
+function jlog(type, txt) {
+  if(!ACTIVE_PID) return;
+  P().journal.unshift({ ts: Date.now(), type, txt });
+  if(P().journal.length > 200) P().journal.pop();
+  save();
+}
+
+function openJournal() {
+  const list = id('journal-list');
+  list.innerHTML = '';
+  const j = P().journal;
+  if(!j.length) { 
+    list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-style:italic">Aucune entrée</div>'; 
+  } else {
+    j.forEach(e => {
+      const d = document.createElement('div');
+      d.className = 'jentry';
+      const dt = new Date(e.ts);
+      const ts = dt.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'}) + ' ' + 
+                 dt.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+      d.innerHTML = `<span class="jtime">${ts}</span><span class="jtype ${J_TYPES[e.type]||''}">${e.type}</span><span class="jtxt">${esc(e.txt)}</span>`;
+      list.appendChild(d);
+    });
+  }
+  id('journal-modal').classList.add('on');
+}
+
+// ══════════════════════════════════════════
+// PERSISTENCE
+// ══════════════════════════════════════════
+function save() {
+  try {
+    localStorage.setItem('srd_cfg', JSON.stringify(CFG));
+    localStorage.setItem('srd_pids', JSON.stringify(Object.keys(PROJECTS)));
+    localStorage.setItem('srd_active', ACTIVE_PID||'');
+    
+    Object.entries(PROJECTS).forEach(([pid,p]) => {
+      // Strip images from localStorage save (kept in memory only)
+      const slim = Object.assign({}, p, {
+        clouds: p.clouds.map(c => Object.assign({}, c, {img: c.img ? '__IMG__' : null}))
+      });
+      localStorage.setItem('srd_p_'+pid, JSON.stringify(slim));
+      
+      // Store images separately, keyed by cloud id
+      p.clouds.forEach(c => {
+        if(c.img) {
+          try { 
+            localStorage.setItem('srd_img_'+c.id, c.img); 
+          } catch(e) {
+            console.warn('Image storage failed for', c.id);
+          }
+        }
+      });
+    });
+  } catch(e) { 
+    notif('⚠ Stockage plein — exportez votre projet'); 
+    console.error('Save failed:', e);
+  }
+}
+
+function load() {
+  try {
+    const cfg = localStorage.getItem('srd_cfg');
+    if(cfg) Object.assign(CFG, JSON.parse(cfg));
+    
+    const pids = JSON.parse(localStorage.getItem('srd_pids')||'[]');
+    pids.forEach(pid => {
+      const raw = localStorage.getItem('srd_p_'+pid);
+      if(raw) {
+        const p = JSON.parse(raw);
+        // Restore images from separate keys
+        p.clouds.forEach(c => {
+          if(c.img === '__IMG__') {
+            c.img = localStorage.getItem('srd_img_'+c.id) || null;
+          }
+        });
+        // Ensure phase2 structure exists
+        if(!p.phase2) p.phase2 = emptyProject('','').phase2;
+        // Migrate old 'dev' mode to 'exp'
+        if(p.dlgMode === 'dev') p.dlgMode = 'exp';
+        // Migrate clouds in acts to include cloudText field
+        if(p.phase2 && p.phase2.structure && p.phase2.structure.acts) {
+          p.phase2.structure.acts.forEach(act => {
+            if(act.clouds) {
+              act.clouds.forEach(c => {
+                if(c.cloudText === undefined) c.cloudText = '';
+              });
+            }
+          });
+        }
+        PROJECTS[pid] = p;
+      }
+    });
+    
+    ACTIVE_PID = localStorage.getItem('srd_active')||null;
+    if(ACTIVE_PID && !PROJECTS[ACTIVE_PID]) ACTIVE_PID = null;
+    if(!ACTIVE_PID && Object.keys(PROJECTS).length) {
+      ACTIVE_PID = Object.keys(PROJECTS)[0];
+    }
+  } catch(e) {
+    console.error('Load failed:', e);
+  }
+}
+
+// ══════════════════════════════════════════
+// EXPORT / IMPORT
+// ══════════════════════════════════════════
+function exportProject() {
+  if(!ACTIVE_PID) { notif('Aucun projet actif'); return; }
+  const p = P();
+  const blob = new Blob([JSON.stringify({version:2, project:p}, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  const d = new Date();
+  const ds = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  a.download = (p.name||'projet').replace(/\s+/g,'-').toLowerCase()+'_'+ds+'.json';
+  a.click(); 
+  URL.revokeObjectURL(a.href);
+  jlog('teaser','Export JSON du projet');
+  notif('Projet exporté');
+}
+
+function importProject(e) {
+  const file = e.target.files[0]; 
+  if(!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      const p = data.project || data; // support v1 and v2
+      
+      if(!p.id) p.id = 'p'+Date.now().toString(36);
+      if(!p.journal) p.journal = [];
+      if(!p.dlgMode) p.dlgMode = 'exp';
+      if(p.dlgMode === 'dev') p.dlgMode = 'exp';
+      if(!p.comboMode) p.comboMode = 'dev';
+      if(!p.phase2) p.phase2 = emptyProject('','').phase2;
+      
+      PROJECTS[p.id] = p;
+      ACTIVE_PID = p.id;
+      
+      save(); 
+      renderProjects(); 
+      updateHdr(); 
+      renderClouds(); 
+      renderSaved(); 
+      renderTCombo();
+      
+      notif('Projet importé : '+p.name);
+      jlog('nuage','Import JSON du projet');
+    } catch(err) { 
+      notif('⚠ Fichier invalide'); 
+      console.error('Import failed:', err);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// ══════════════════════════════════════════
+// SETUP
+// ══════════════════════════════════════════
+function openSetup() {
+  id('s-key').value = CFG.apiKey;
+  id('s-model').value = CFG.model;
+  id('sm').style.display = 'flex';
+}
+
+function setupDone() {
+  const k = id('s-key').value.trim();
+  if(!k) { notif('Clé API requise'); return; }
+  
+  CFG.apiKey = k;
+  CFG.model = id('s-model').value;
+  id('sm').style.display = 'none';
+  save();
+  
+  // Always show home first
+  showHome();
+  
+  // Update header if project exists
+  if(ACTIVE_PID) { 
+    updateHdr(); 
+  }
+}
+
+function updateHdr() {
+  const p = ACTIVE_PID ? P() : null;
+  id('proj-lbl').textContent = p ? (p.name + (p.author?' — '+p.author:'')) : '— aucun projet';
+}
+
+function showHome() {
+  // Hide all sections
+  document.querySelectorAll('.sec').forEach(s => s.classList.remove('on'));
+  
+  // Show home
+  id('sec-home').classList.add('on');
+  
+  // Hide phase switcher and tabs on home
+  id('phase-switcher').style.display = 'none';
+  id('tabs').style.display = 'none';
+  
+  // Update project count
+  const count = Object.keys(PROJECTS).length;
+  const countEl = id('home-project-count');
+  if(countEl) {
+    countEl.textContent = count === 0 ? 'Aucun projet' : count + ' projet' + (count > 1 ? 's' : '');
+  }
+}
+
+// ══════════════════════════════════════════
+// TABS
+// ══════════════════════════════════════════
+// ══════════════════════════════════════════
+// PHASE SWITCHER
+// ══════════════════════════════════════════
+
+let currentPhase = 1; // 1 ou 2
+let phase1LastTab = 'nuages';
+let phase2LastTab = 'p2brief';
+
+function switchToPhase(phase) {
+  if(phase === currentPhase) return;
+  
+  currentPhase = phase;
+  
+  // Update switcher buttons
+  id('phase1-btn').classList.toggle('active', phase === 1);
+  id('phase2-btn').classList.toggle('active', phase === 2);
+  
+  // Update dot symbols
+  id('phase1-btn').querySelector('.phase-dot').textContent = phase === 1 ? '●' : '○';
+  id('phase2-btn').querySelector('.phase-dot').textContent = phase === 2 ? '●' : '○';
+  
+  // Show/hide tabs
+  document.querySelectorAll('.phase1-tab').forEach(t => t.style.display = phase === 1 ? '' : 'none');
+  document.querySelectorAll('.phase2-tab').forEach(t => t.style.display = phase === 2 ? '' : 'none');
+  
+  // Show last active tab for this phase
+  if(phase === 1) {
+    const tab = Array.from(document.querySelectorAll('.phase1-tab')).find(t => t.onclick.toString().includes(phase1LastTab));
+    if(tab) showTab(phase1LastTab, tab);
+  } else {
+    const p = P();
+    // If Phase 2 not activated, show brief first
+    if(!p.phase2.brief.validated) {
+      const tab = document.querySelector('[onclick*="p2brief"]');
+      showTab('p2brief', tab);
+      phase2LastTab = 'p2brief';
+    } else {
+      const tab = Array.from(document.querySelectorAll('.phase2-tab')).find(t => t.onclick.toString().includes(phase2LastTab));
+      if(tab) showTab(phase2LastTab, tab);
+    }
+  }
+  
+  save();
+}
+
+function showProjectSelector() {
+  // Old "Projets" tab functionality - now opens project selector
+  const modal = document.createElement('div');
+  modal.id = 'proj-selector-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(17,16,9,.5);backdrop-filter:blur(4px);z-index:400;display:flex;align-items:center;justify-content:center';
+  modal.onclick = e => {if(e.target===modal) modal.remove()};
+  
+  const inner = document.createElement('div');
+  inner.style.cssText = 'background:var(--paper);border:1px solid var(--border);border-radius:5px;width:500px;max-width:95vw;max-height:80vh;display:flex;flex-direction:column;box-shadow:var(--shadow-lg)';
+  
+  const projects = Object.values(PROJECTS);
+  
+  inner.innerHTML = `
+    <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+      <div style="font-family:'Playfair Display',serif;font-size:1rem;font-style:italic">Projets</div>
+      <button class="btn btn-sm" onclick="document.getElementById('proj-selector-modal').remove()">Fermer</button>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:16px 20px">
+      ${projects.length === 0 ? '<div style="text-align:center;color:var(--muted);padding:40px 0">Aucun projet</div>' : projects.map(proj => `
+        <div style="padding:12px;border:1px solid ${proj.id === ACTIVE_PID ? 'var(--accent)' : 'var(--border)'};border-radius:3px;margin-bottom:8px;transition:all .15s;background:${proj.id === ACTIVE_PID ? 'var(--paper2)' : 'var(--white)'}">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+            <div style="flex:1;cursor:pointer" onclick="switchProject('${proj.id}');document.getElementById('proj-selector-modal').remove()">
+              <div style="font-weight:500">${esc(proj.name)}</div>
+              <div style="font-size:.75rem;color:var(--muted);margin-top:2px">${proj.clouds.length} nuages</div>
+            </div>
+            <button class="icbtn del" onclick="event.stopPropagation();deleteProjectFromModal('${proj.id}')" aria-label="Supprimer" title="Supprimer ce projet">✕</button>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+    <div style="padding:16px 20px;border-top:1px solid var(--border)">
+      <button class="btn btn-ink" style="width:100%" onclick="openNewProjectModal()">+ Nouveau projet</button>
+    </div>
+  `;
+  
+  modal.appendChild(inner);
+  document.body.appendChild(modal);
+}
+
+function openNewProjectModal() {
+  // Close project selector first
+  const projSelector = document.getElementById('proj-selector-modal');
+  if(projSelector) projSelector.remove();
+  
+  // Then open new project modal
+  toggleNewProjForm();
+}
+
+function deleteProjectFromModal(pid) {
+  if(!confirm('Supprimer ce projet ? Cette action est irréversible.')) return;
+  
+  delete PROJECTS[pid];
+  
+  // If deleting active project, switch to another or null
+  if(ACTIVE_PID === pid) {
+    const remaining = Object.keys(PROJECTS);
+    ACTIVE_PID = remaining.length > 0 ? remaining[0] : null;
+    
+    // Update interface if we switched projects
+    if(ACTIVE_PID) {
+      updateHdr();
+      renderClouds();
+      renderSaved();
+      renderTCombo();
+    } else {
+      updateHdr();
+    }
+  }
+  
+  save();
+  
+  // Refresh the modal
+  const modal = document.getElementById('proj-selector-modal');
+  if(modal) {
+    modal.remove();
+    showProjectSelector();
+  }
+  
+  notif('Projet supprimé');
+}
+
+// ══════════════════════════════════════════
+// TABS
+// ══════════════════════════════════════════
+
+function showTab(name, el) {
+  // Show phase switcher and tabs (hidden on home)
+  id('phase-switcher').style.display = 'flex';
+  id('tabs').style.display = 'flex';
+  
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  if(el) el.classList.add('on');
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
+  
+  // Memorize last tab per phase
+  if(['nuages','tests','teaser'].includes(name)) phase1LastTab = name;
+  if(['p2brief','p2struct'].includes(name)) phase2LastTab = name;
+  
+  id('sec-'+name).classList.add('on');
+  
+  if(name==='tests') { 
+    renderComboChips(); 
+    renderTMini(); 
+    renderModeBar(); 
+  }
+  if(name==='teaser') renderTCombo();
+  if(name==='p2brief') renderBriefZone();
+  if(name==='p2struct') renderStructureZone();
+}
+
+// ══════════════════════════════════════════
+// PROJECTS
+// ══════════════════════════════════════════
+function toggleNewProjForm() {
+  console.log('toggleNewProjForm called');
+  
+  // Check if modal already exists
+  if(document.getElementById('new-proj-modal')) {
+    console.log('Modal exists, removing');
+    document.getElementById('new-proj-modal').remove();
+    return;
+  }
+  
+  console.log('Creating new project modal');
+  
+  const modal = document.createElement('div');
+  modal.id = 'new-proj-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(17,16,9,.5);backdrop-filter:blur(4px);z-index:400;display:flex;align-items:center;justify-content:center';
+  modal.onclick = e => {if(e.target===modal) modal.remove()};
+  
+  const inner = document.createElement('div');
+  inner.style.cssText = 'background:var(--paper);border:1px solid var(--border);border-radius:5px;width:450px;max-width:95vw;padding:20px;box-shadow:var(--shadow-lg)';
+  
+  inner.innerHTML = `
+    <div style="font-family:'Playfair Display',serif;font-size:1.1rem;font-style:italic;margin-bottom:16px">Nouveau projet</div>
+    
+    <div class="fg" style="margin-bottom:12px">
+      <label class="fl">Nom du projet</label>
+      <input class="fi" id="np-name-modal" placeholder="Ex: Divisés, HYPNOS…">
+    </div>
+    
+    <div class="fg" style="margin-bottom:16px">
+      <label class="fl">Auteur</label>
+      <input class="fi" id="np-author-modal" placeholder="Ex: Sacha Dupont">
+    </div>
+    
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="document.getElementById('new-proj-modal').remove()">Annuler</button>
+      <button class="btn btn-ink" onclick="createProjectFromModal()">Créer →</button>
+    </div>
+  `;
+  
+  modal.appendChild(inner);
+  document.body.appendChild(modal);
+  
+  console.log('Modal appended to body');
+  
+  // Focus on name input
+  setTimeout(() => {
+    const nameInput = document.getElementById('np-name-modal');
+    if(nameInput) {
+      nameInput.focus();
+      console.log('Focus set on name input');
+    } else {
+      console.error('Name input not found');
+    }
+  }, 100);
+}
+
+function createProjectFromModal() {
+  const name = document.getElementById('np-name-modal').value.trim();
+  if(!name) { notif('Donnez un nom au projet'); return; }
+  
+  const author = document.getElementById('np-author-modal').value.trim();
+  const p = emptyProject(name, author);
+  PROJECTS[p.id] = p;
+  ACTIVE_PID = p.id;
+  
+  save(); 
+  updateHdr();
+  jlog('nuage','Projet créé : '+name);
+  notif('Projet créé : '+name);
+  
+  // Close modal
+  document.getElementById('new-proj-modal').remove();
+  
+  // Close project selector if open
+  const projSelector = document.getElementById('proj-selector-modal');
+  if(projSelector) projSelector.remove();
+  
+  // Render content
+  renderClouds(); 
+  renderSaved(); 
+  renderTCombo();
+  
+  // Show Phase 1
+  switchToPhase(1);
+}
+
+function createProject() {
+  const name = id('np-name').value.trim();
+  if(!name) { notif('Donnez un nom au projet'); return; }
+  
+  const author = id('np-author').value.trim();
+  const p = emptyProject(name, author);
+  PROJECTS[p.id] = p;
+  ACTIVE_PID = p.id;
+  
+  id('np-name').value = ''; 
+  id('np-author').value = '';
+  id('new-proj-form').classList.remove('on');
+  
+  save(); 
+  renderProjects(); 
+  updateHdr();
+  jlog('nuage','Projet créé : '+name);
+  notif('Projet créé : '+name);
+}
+
+function switchProject(pid) {
+  ACTIVE_PID = pid; 
+  save();
+  updateHdr(); 
+  renderClouds(); 
+  renderSaved(); 
+  renderTCombo(); 
+  notif('Projet : '+P().name);
+  
+  // Show Phase 1
+  switchToPhase(1);
+}
+
+function deleteProject(pid) {
+  if(!confirm('Supprimer ce projet ? Cette action est irréversible.')) return;
+  
+  delete PROJECTS[pid];
+  if(ACTIVE_PID===pid) ACTIVE_PID = Object.keys(PROJECTS)[0]||null;
+  
+  save(); 
+  renderProjects(); 
+  updateHdr();
+}
+
+function renderProjects() {
+  const grid = id('proj-grid'); 
+  grid.innerHTML='';
+  const pids = Object.keys(PROJECTS);
+  
+  if(!pids.length) {
+    grid.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="ei">◌</div><span>Aucun projet — créez-en un</span></div>';
+    return;
+  }
+  
+  pids.forEach(pid => {
+    const p = PROJECTS[pid];
+    const isActive = pid===ACTIVE_PID;
+    const card = document.createElement('div');
+    card.className = 'proj-card'+(isActive?' active-proj':'');
+    card.innerHTML = `
+      <div class="proj-card-name">${esc(p.name)}</div>
+      <div class="proj-card-meta">${p.author?esc(p.author)+' · ':''}${p.clouds.length} nuage${p.clouds.length!==1?'s':''} · ${p.savedCombos.length} combinaison${p.savedCombos.length!==1?'s':''}</div>
+      <div class="proj-card-acts">
+        ${!isActive?`<button class="btn btn-sm btn-ink" onclick="switchProject('${pid}')">Ouvrir</button>`:'<span style="font-family:\'IBM Plex Mono\',monospace;font-size:.62rem;color:var(--green)">● Actif</span>'}
+        <button class="btn btn-sm" onclick="exportProjectById('${pid}')">↓ Exporter</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteProject('${pid}')">✕</button>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+function exportProjectById(pid) {
+  const p = PROJECTS[pid]; 
+  if(!p) return;
+  
+  const blob = new Blob([JSON.stringify({version:2,project:p},null,2)],{type:'application/json'});
+  const a = document.createElement('a'); 
+  a.href = URL.createObjectURL(blob);
+  const d = new Date();
+  const ds = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  a.download = (p.name||'projet').replace(/\s+/g,'-').toLowerCase()+'_'+ds+'.json';
+  a.click(); 
+  URL.revokeObjectURL(a.href);
+}
+
+// ══════════════════════════════════════════
+// IMAGE HELPERS
+// ══════════════════════════════════════════
+function compressImg(dataUrl, cb) {
+  const img = new Image();
+  img.onload = () => {
+    const MAX = 800;
+    let w = img.width, h = img.height;
+    if(w>MAX||h>MAX){ 
+      const r = Math.min(MAX/w,MAX/h); 
+      w = Math.round(w*r); 
+      h = Math.round(h*r); 
+    }
+    const c = document.createElement('canvas'); 
+    c.width = w; 
+    c.height = h;
+    const ctx = c.getContext('2d');
+    ctx.drawImage(img,0,0,w,h);
+    cb(c.toDataURL('image/jpeg',0.72));
+  };
+  img.onerror = () => {
+    notif('⚠ Erreur de chargement d\'image');
+    cb(null);
+  };
+  img.src = dataUrl;
+}
+
+function imgFile(e) {
+  const f = e.target.files[0]; 
+  if(!f) return;
+  
+  const r = new FileReader(); 
+  r.onload = ev => compressImg(ev.target.result, d => {
+    if(d) {
+      addImg = d;
+      showImgPrev();
+    }
+  }); 
+  r.readAsDataURL(f);
+}
+
+function imgDrop(e) {
+  e.preventDefault(); 
+  id('img-drop').classList.remove('drag');
+  
+  const f = e.dataTransfer.files[0]; 
+  if(!f||!f.type.startsWith('image/')) return;
+  
+  const r = new FileReader(); 
+  r.onload = ev => compressImg(ev.target.result, d => {
+    if(d) {
+      addImg = d;
+      showImgPrev();
+    }
+  }); 
+  r.readAsDataURL(f);
+}
+
+function showImgPrev() { 
+  id('img-prev').style.display='flex'; 
+  id('img-drop').style.display='none'; 
+  id('img-prev-img').src=addImg; 
+}
+
+function clearImg() { 
+  addImg=null; 
+  id('img-prev').style.display='none'; 
+  id('img-drop').style.display='block'; 
+  id('img-in').value=''; 
+}
+
+// ══════════════════════════════════════════
+// CLOUD FORM
+// ══════════════════════════════════════════
+function toggleAddForm() {
+  if(!ACTIVE_PID){
+    notif('Ouvrez ou créez un projet');
+    showTab('projets',document.querySelectorAll('.tab')[3]);
+    return;
+  }
+  const f = id('add-form'); 
+  f.classList.toggle('on'); 
+  if(f.classList.contains('on')) id('add-txt').focus();
+}
+
+function cancelAdd() { 
+  id('add-form').classList.remove('on'); 
+  id('add-txt').value=''; 
+  clearImg(); 
+}
+
+function addCloud() {
+  const txt = id('add-txt').value.trim(); 
+  if(!txt){
+    notif('Écrivez quelque chose');
+    return;
+  }
+  
+  const cloud = {
+    id: uid(),
+    text: txt,
+    img: addImg||null,
+    state: 'normal',
+    meaning: '',
+    ts: Date.now()
+  };
+  
+  P().clouds.unshift(cloud);
+  
+  id('add-txt').value=''; 
+  clearImg(); 
+  id('add-form').classList.remove('on');
+  
+  jlog('nuage', txt.slice(0,60)+(txt.length>60?'…':''));
+  save(); 
+  renderClouds(); 
+  updateHdr();
+}
+
+function delCloud(cid) {
+  if(!confirm('Supprimer ce nuage ?')) return;
+  
+  const p = P(); 
+  p.clouds = p.clouds.filter(c=>c.id!==cid); 
+  p.combo = p.combo.filter(x=>x!==cid);
+  
+  save(); 
+  renderClouds(); 
+  updateHdr(); 
+  renderComboChips();
+}
+
+function toggleSt(cid,st) {
+  const c = P().clouds.find(x=>x.id===cid); 
+  if(!c) return;
+  c.state = c.state===st?'normal':st; 
+  save(); 
+  renderClouds();
+}
+
+function toggleCombo(cid) {
+  const p = P();
+  if(p.combo.includes(cid)) {
+    p.combo = p.combo.filter(x=>x!==cid); 
+  } else {
+    p.combo.push(cid);
+  }
+  save(); 
+  renderClouds(); 
+  renderComboChips(); 
+  renderTMini();
+}
+
+function rmImg(cid) { 
+  const c = P().clouds.find(x=>x.id===cid); 
+  if(c){
+    c.img = null;
+    save();
+    renderClouds();
+  } 
+}
+
+// ══════════════════════════════════════════
+// FILTERS & SEARCH
+// ══════════════════════════════════════════
+function setF(f,el) {
+  P().filter = f; 
+  document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('on')); 
+  el.classList.add('on'); 
+  renderClouds();
+}
+
+let searchTimeout = null;
+function debounceSearch() {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => renderClouds(), 300);
+}
+
+function renderClouds() {
+  if(!ACTIVE_PID){
+    id('cgrid').innerHTML='<div class="empty"><div class="ei">◌</div><span>Ouvrez un projet dans l\'onglet Projets</span></div>';
+    return;
+  }
+  
+  const p = P(); 
+  const q = id('srch').value.toLowerCase(); 
+  const f = p.filter; 
+  const cs = new Set(p.combo);
+  
+  let clouds = [...p.clouds];
+  
+  // Apply filters
+  if(f==='important') clouds = clouds.filter(c=>c.state==='important');
+  else if(f==='explored') clouds = clouds.filter(c=>c.state==='explored');
+  else if(f==='unused') clouds = clouds.filter(c=>!cs.has(c.id));
+  else if(f==='images') clouds = clouds.filter(c=>c.img);
+  
+  // Apply search
+  if(q) clouds = clouds.filter(c=>c.text.toLowerCase().includes(q));
+  
+  const grid = id('cgrid'); 
+  grid.innerHTML='';
+  
+  if(!clouds.length){
+    grid.innerHTML=`<div class="empty"><div class="ei">◌</div><span>Aucun nuage${q?' correspondant':''}</span></div>`;
+    return;
+  }
+  
+  clouds.forEach(c=>{
+    const inC = cs.has(c.id); 
+    const sv = c.meaning?'sv':'';
+    const stc = inC?'sc':(c.state==='important'?'si':c.state==='explored'?'se':'');
+    const ih = c.img?`<div class="cimg-w"><img src="${c.img}" alt=""><button class="rm-img" onclick="event.stopPropagation();rmImg('${c.id}')" aria-label="Supprimer l'image">✕</button></div>`:'';
+    const mh = c.meaning?`<div class="cmeaning">${esc(c.meaning)}</div>`:'';
+    
+    const d = document.createElement('div');
+    d.className = `ccard ${inC?'sel':''} ${stc} ${sv}`.trim();
+    d.onclick = () => toggleCombo(c.id);
+    d.innerHTML = `<div class="chk">${inC?'✓':''}</div>${ih}
+      <div class="ctxt">${esc(c.text)}</div>${mh}
+      <div class="cfooter">
+        <span class="tag${c.state==='important'?' t-imp':''}" onclick="event.stopPropagation();toggleSt('${c.id}','important')">${c.state==='important'?'★ Imp':'☆ Imp'}</span>
+        <span class="tag${c.state==='explored'?' t-exp':''}" onclick="event.stopPropagation();toggleSt('${c.id}','explored')">${c.state==='explored'?'✓ Exp':'Exp'}</span>
+        <span class="tag" onclick="event.stopPropagation();openFocused('${c.id}')">◎ Dlg</span>
+        <div class="cacts"><button class="icbtn del" onclick="event.stopPropagation();delCloud('${c.id}')" aria-label="Supprimer le nuage">✕</button></div>
+      </div>`;
+    grid.appendChild(d);
+  });
+}
+
+// ══════════════════════════════════════════
+// DIALOG MODES
+// ══════════════════════════════════════════
+const DLG_PROMPTS = {
+  exp: function(cloudTxt, meaning) {
+    const m = meaning ? " — Sens validé : " + meaning : "";
+    return "Tu es un explorateur narratif pour la fiction audiovisuelle. On explore ce nuage : \"" + cloudTxt + "\"" + m + ".\n\nTon travail : OUVRIR le champ des possibles. Détecte patterns, résonances, références culturelles ou narratives. Explore les connexions inattendues. Propose des pistes multiples sans fermer prématurément. Élargis plutôt que restreindre. Sois précis, stimulant, non complaisant. Réponds en français.";
+  },
+  psy: function(cloudTxt, meaning) {
+    const m = meaning ? " — Sens formulé : " + meaning : "";
+    return "Tu es un interprète à la frontière de la dramaturgie et de la psychanalyse. On explore ce nuage : \"" + cloudTxt + "\"" + m + ".\n\nTon travail : ne pas commenter le contenu narratif en surface, mais interroger ce qui parle à travers lui. Ce que ce matériau dit sans le dire. Les désirs, peurs, contradictions latentes. Les mots qui reviennent. Ce qui résiste à être formulé. Selon le moment : formule une interprétation courte et soumets-la, ou pose une question ouverte qui déplace. Alterne librement. Ne valide pas à vide. Réponds en français, sobrement.";
+  },
+  res: function(cloudTxt, meaning) {
+    const m = meaning ? " — Sens proposé : " + meaning : "";
+    return "Tu es un lecteur dramaturgique exigeant mais constructif. On examine ce nuage : \"" + cloudTxt + "\"" + m + ".\n\nTon travail : identifier ce qui ne fonctionne pas (failles logiques, contradictions, zones plates, patterns prévisibles), EXPLIQUER pourquoi c'est problématique dramaturgiquement, et PROPOSER des pistes d'amélioration concrètes (pas des solutions toutes faites). Conclus par 1-2 questions ouvertes pour itérer ensemble. Ton ton est exigeant mais bienveillant : tu veux que ce matériau devienne le meilleur possible. Structure : Diagnostic → Pourquoi problématique → Pistes → Questions. Réponds en français.";
+  }
+};
+
+const COMBO_PROMPTS = {
+  dev: function(clouds) {
+    return "Tu es un développeur narratif expert en fiction audiovisuelle française et européenne.\nAnalyse cette combinaison de nuages : qu'est-ce que ça raconte ?\n\nDonne en 180-260 mots : la tension dramatique centrale, le genre et la tonalité, ce qui rend cette combinaison singulière, une intuition sur le personnage ou le monde possible.\n\nNuages :\n" + clouds + "\n\nRéponds en prose fluide, sans liste à puces. Sois précis, non complaisant.";
+  },
+  psy: function(clouds) {
+    return "Tu es un interprète à la frontière de la dramaturgie et de la psychanalyse.\nExamine cette combinaison de nuages : que dit-elle sous la surface ?\n\nInterroge : quels désirs ou peurs structurent ce matériau ? Quels patterns latents ? Qu'est-ce qui résiste à être dit directement ? Y a-t-il des contradictions productives ?\n\nNuages :\n" + clouds + "\n\nRéponds en 180-250 mots. Formule des interprétations et pose des questions ouvertes. Sobre, précis, sans complaisance. En français.";
+  },
+  res: function(clouds) {
+    return "Tu es un lecteur dramaturgique exigeant mais constructif.\nExamine cette combinaison : qu'est-ce qui ne fonctionne pas encore ?\n\nIdentifie les problèmes (failles, répétitions stériles, fausses tensions, patterns prévisibles, éléments qui se neutralisent), EXPLIQUE pourquoi c'est problématique, et PROPOSE des pistes d'amélioration concrètes (3-4 directions). Conclus par 2 questions ouvertes pour itérer ensemble.\n\nNuages :\n" + clouds + "\n\nRéponds en 180-250 mots. Structure : Diagnostic → Pourquoi problématique → Pistes d'amélioration → Questions. Ton exigeant mais bienveillant. En français.";
+  }
+};
+
+function setDlgMode(mode) {
+  P().dlgMode = mode; 
+  save();
+  ['exp','psy','res'].forEach(m=>id('dmb-'+m).className='dlgmdbtn'+(mode===m?' on-'+m:''));
+  id('dlgmode').textContent = mode==='exp'?'Explorer':mode==='psy'?'Approfondir':'Résister';
+}
+
+function setComboMode(mode) {
+  P().comboMode = mode; 
+  save();
+  ['dev','psy','res'].forEach(m=>id('cmb-'+m).className='mdbtn'+(mode===m?' on-'+m:''));
+}
+
+function renderModeBar() {
+  const m = P().dlgMode||'exp';
+  ['exp','psy','res'].forEach(k=>id('dmb-'+k).className='dlgmdbtn'+(m===k?' on-'+k:''));
+  
+  const cm = P().comboMode||'dev';
+  ['dev','psy','res'].forEach(k=>id('cmb-'+k).className='mdbtn'+(cm===k?' on-'+cm:''));
+}
+
+// ══════════════════════════════════════════
+// FOCUSED DIALOG
+// ══════════════════════════════════════════
+function openFocused(cid) {
+  if(!ACTIVE_PID) return;
+  
+  const p = P(); 
+  const c = p.clouds.find(x=>x.id===cid); 
+  if(!c) return;
+  
+  p.focId = cid; 
+  if(!p.dlgH[cid]) p.dlgH[cid] = [];
+  
+  id('dlgtitle').textContent = 'Dialogue Focalisé';
+  const m = p.dlgMode||'exp';
+  id('dlgmode').textContent = m==='exp'?'Explorer':m==='psy'?'Approfondir':'Résister';
+  
+  ['exp','psy','res'].forEach(k=>id('dmb-'+k).className='dlgmdbtn'+(m===k?' on-'+k:''));
+  
+  id('dlgctx').style.display = 'block';
+  id('dlgctx').textContent = c.text.slice(0,110)+(c.text.length>110?'…':'');
+  
+  id('dlg-meaning-txt').value = c.meaning||'';
+  id('meaning-status').textContent = c.meaning?'Validé ✓':'';
+  
+  renderFDlgMsgs();
+  id('dlgp').classList.add('on');
+  
+  setTimeout(()=>id('dlginp').focus(),300);
+}
+
+function renderFDlgMsgs() {
+  const div = id('dlgmsgs'); 
+  div.innerHTML = '';
+  const p = P(); 
+  const cid = p.focId; 
+  const hist = p.dlgH[cid]||[];
+  
+  hist.forEach(m=>{
+    const d = document.createElement('div');
+    const modeClass = m.mode?'mc-'+m.mode:'';
+    d.className = 'msg '+(m.role==='user'?'mu':'mc '+modeClass);
+    d.innerHTML = `<span class="mlbl">${m.role==='user'?'Vous':'Claude'}</span><div class="mb">${esc(m.content)}</div>`;
+    div.appendChild(d);
+  });
+  
+  div.scrollTop = div.scrollHeight;
+}
+
+async function sendFocused() {
+  const inp = id('dlginp'); 
+  const txt = inp.value.trim(); 
+  if(!txt) return;
+  if(!CFG.apiKey){
+    notif('Clé API manquante');
+    return;
+  }
+  
+  inp.value = '';
+  
+  const p = P(); 
+  const cid = p.focId; 
+  if(!p.dlgH[cid]) p.dlgH[cid] = [];
+  
+  const mode = p.dlgMode||'exp';
+  p.dlgH[cid].push({role:'user',content:txt}); 
+  renderFDlgMsgs();
+  
+  const c = p.clouds.find(x=>x.id===cid);
+  const sys = DLG_PROMPTS[mode](c?c.text:'', c?c.meaning:'');
+  
+  // Build clean API messages: only role+content, content always string
+  const isFirst = p.dlgH[cid].length === 1;
+  let msgs;
+  
+  if(c&&c.img&&isFirst){
+    // First message on image cloud: send image + text multimodal
+    const mt = c.img.match(/^data:([^;]+)/)?.[1]||'image/jpeg';
+    const b64 = c.img.split(',')[1];
+    msgs = [{
+      role:'user',
+      content:[
+        {type:'image',source:{type:'base64',media_type:mt,data:b64}},
+        {type:'text',text:'Nuage : '+c.text+'\n\n'+txt}
+      ]
+    }];
+  } else {
+    // Normal text history - strip extra fields, keep only role+content as string
+    msgs = p.dlgH[cid].slice(-8).map(m => ({
+      role: m.role,
+      content: typeof m.content === 'string' ? m.content : 
+               (Array.isArray(m.content) ? 
+                 (m.content.find(b=>b.type==='text')?.text||txt) : 
+                 String(m.content))
+    }));
+  }
+  
+  const r = await callClaudeWithSystem(sys,msgs);
+  p.dlgH[cid].push({role:'assistant',content:r,mode});
+  
+  save(); 
+  renderFDlgMsgs();
+}
+
+function validateMeaning() {
+  const txt = id('dlg-meaning-txt').value.trim(); 
+  if(!txt){
+    notif('Rédigez un sens');
+    return;
+  }
+  
+  const c = P().clouds.find(x=>x.id===P().focId); 
+  if(!c) return;
+  
+  c.meaning = txt; 
+  id('meaning-status').textContent = 'Validé ✓';
+  
+  jlog('sens', c.text.slice(0,40)+' → '+txt.slice(0,40));
+  save(); 
+  renderClouds(); 
+  notif('Sens validé');
+}
+
+function clearMeaning() {
+  const c = P().clouds.find(x=>x.id===P().focId); 
+  if(!c) return;
+  
+  c.meaning = ''; 
+  id('dlg-meaning-txt').value = ''; 
+  id('meaning-status').textContent = '';
+  
+  save(); 
+  renderClouds();
+}
+
+// ══════════════════════════════════════════
+// TESTS — COMBOS
+// ══════════════════════════════════════════
+function renderComboChips() {
+  const p = P(); 
+  const div = id('chips'); 
+  div.innerHTML = '';
+  
+  if(!p.combo.length){
+    div.innerHTML = '<span style="font-style:italic;font-size:.8rem;color:var(--muted)">Sélectionnez des nuages…</span>';
+    return;
+  }
+  
+  p.combo.forEach(cid=>{
+    const c = p.clouds.find(x=>x.id===cid); 
+    if(!c) return;
+    
+    const chip = document.createElement('div'); 
+    chip.className = 'chip';
+    chip.innerHTML = `<span>${esc(c.text.slice(0,26)+(c.text.length>26?'…':''))}</span><span class="chip-x" onclick="toggleCombo('${cid}')">✕</span>`;
+    div.appendChild(chip);
+  });
+}
+
+function renderTMini() {
+  const p = P(); 
+  const div = id('tmini'); 
+  div.innerHTML = ''; 
+  const cs = new Set(p.combo);
+  
+  if(!p.clouds.length){
+    div.innerHTML = '<div style="font-style:italic;font-size:.8rem;color:var(--muted)">Aucun nuage.</div>';
+    return;
+  }
+  
+  p.clouds.forEach(c=>{
+    const inC = cs.has(c.id);
+    const item = document.createElement('div');
+    item.style.cssText = 'padding:6px 9px;background:'+(inC?'#eef6f1':'var(--white)')+';border:1px solid '+(inC?'var(--green)':'var(--border)')+';border-radius:3px;cursor:pointer;font-size:.82rem;transition:all .13s;display:flex;align-items:center;gap:7px';
+    item.innerHTML = `<span style="color:${inC?'var(--green)':'var(--muted)'};font-size:.78rem">${inC?'✓':'+'}</span><span style="flex:1">${esc(c.text.slice(0,50)+(c.text.length>50?'…':''))}</span>`;
+    item.onclick = () => {
+      toggleCombo(c.id);
+      renderTMini();
+    };
+    div.appendChild(item);
+  });
+}
+
+function clearCombo() {
+  P().combo = [];
+  id('aout').className = 'aout ph'; 
+  id('aout').textContent = "L'analyse apparaîtra ici…";
+  save(); 
+  renderClouds(); 
+  renderComboChips(); 
+  renderTMini();
+}
+
+async function analyzeCombo() {
+  const p = P();
+  if(!p.combo.length){
+    notif('Sélectionnez au moins un nuage');
+    return;
+  }
+  if(!CFG.apiKey){
+    notif('Clé API manquante');
+    return;
+  }
+  
+  const aout = id('aout'); 
+  aout.className = 'aout'; 
+  aout.innerHTML = '<div class="loading"><span></span><span></span><span></span></div>';
+  
+  const clouds = p.combo.map(cid=>p.clouds.find(x=>x.id===cid)).filter(Boolean);
+  const cloudsTxt = clouds.map((c,i)=>`NUAGE ${i+1} : ${c.text}${c.meaning?'\nSens : '+c.meaning:''}`).join('\n\n');
+  
+  const mode = p.comboMode||'dev';
+  const prompt = COMBO_PROMPTS[mode](cloudsTxt);
+  
+  const r = await callClaude([{role:'user',content:prompt}]);
+  aout.textContent = r;
+  
+  clouds.forEach(c=>{
+    if(c.state==='normal') c.state='explored';
+  });
+  
+  jlog('analyse','Combinaison ('+mode+'): '+clouds.map(c=>c.text.slice(0,20)).join(', '));
+  save(); 
+  renderClouds();
+}
+
+function saveCombo() {
+  const p = P();
+  if(!p.combo.length){
+    notif('Combinaison vide');
+    return;
+  }
+  
+  let nm = id('cbname').value.trim(); 
+  if(!nm) nm = 'Combinaison '+(p.savedCombos.length+1);
+  
+  const analysis = id('aout').textContent;
+  p.savedCombos.push({
+    id:'cb'+Date.now().toString(36),
+    name:nm,
+    cloudIds:[...p.combo],
+    analysis:analysis.includes('apparaîtra')?'':analysis
+  });
+  
+  id('cbname').value = '';
+  
+  jlog('combo','Sauvegardée : '+nm);
+  save(); 
+  renderSaved(); 
+  renderTCombo(); 
+  notif('Combinaison sauvegardée');
+}
+
+function renderSaved() {
+  const p = P(); 
+  const div = id('slist'); 
+  div.innerHTML = '';
+  
+  if(!p.savedCombos.length){
+    div.innerHTML = '<div class="empty" style="padding:16px"><div class="ei">○</div><span style="font-size:.78rem">Aucune combinaison</span></div>';
+    return;
+  }
+  
+  p.savedCombos.forEach(cb=>{
+    const clouds = cb.cloudIds.map(cid=>p.clouds.find(x=>x.id===cid)).filter(Boolean);
+    const item = document.createElement('div'); 
+    item.className = 'si';
+    item.innerHTML = `
+      <div class="si-body">
+        <div class="si-name">${esc(cb.name)}</div>
+        <div class="si-desc">${clouds.length} nuages : ${clouds.map(c=>c.text.slice(0,14)).join(', ')}</div>
+      </div>
+      <div class="si-acts">
+        <button class="btn btn-sm" onclick="loadCombo('${cb.id}')">Charger</button>
+        <button class="btn btn-sm" onclick="compareCombo('${cb.id}')">Comparer</button>
+        <button class="btn btn-sm btn-danger" onclick="delCombo('${cb.id}')">✕</button>
+      </div>`;
+    div.appendChild(item);
+  });
+}
+
+function loadCombo(cid) {
+  const p = P(); 
+  const cb = p.savedCombos.find(x=>x.id===cid); 
+  if(!cb) return;
+  
+  p.combo = [...cb.cloudIds];
+  id('aout').className = 'aout'; 
+  id('aout').textContent = cb.analysis||'Chargez puis analysez…';
+  
+  save(); 
+  renderClouds(); 
+  renderComboChips(); 
+  renderTMini();
+  
+  showTab('tests',document.querySelectorAll('.tab')[1]); 
+  notif('Combinaison chargée');
+}
+
+function delCombo(cid) {
+  if(!confirm('Supprimer cette combinaison ?')) return;
+  
+  P().savedCombos = P().savedCombos.filter(x=>x.id!==cid); 
+  save(); 
+  renderSaved(); 
+  renderTCombo();
+}
+
+function compareCombo(cid) {
+  const p = P(); 
+  const cb = p.savedCombos.find(x=>x.id===cid); 
+  if(!cb) return;
+  
+  const cbC = cb.cloudIds.map(x=>p.clouds.find(c=>c.id===x)).filter(Boolean);
+  const actC = p.combo.map(x=>p.clouds.find(c=>c.id===x)).filter(Boolean);
+  
+  id('cpmtitle').textContent = 'Comparaison — '+cb.name+' / active';
+  
+  id('cpl').innerHTML = `<div class="cctitle">${esc(cb.name)}</div>${cbC.map(c=>`<div class="ccitem">${esc(c.text)}</div>`).join('')}${cb.analysis?`<div class="ccana">${esc(cb.analysis)}</div>`:''}`;
+  
+  const an = id('aout').textContent;
+  id('cpr').innerHTML = `<div class="cctitle">Combinaison active</div>${actC.length?actC.map(c=>`<div class="ccitem">${esc(c.text)}</div>`).join(''):'<em style="color:var(--muted)">Vide</em>'}${an&&!an.includes('apparaîtra')?`<div class="ccana">${esc(an)}</div>`:''}`;
+  
+  id('cpm').classList.add('on');
+}
+
+// ══════════════════════════════════════════
+// TEASER
+// ══════════════════════════════════════════
+function renderTCombo() {
+  const p = P(); 
+  const div = id('tcombo'); 
+  div.innerHTML = '';
+  
+  if(!p.savedCombos.length){
+    div.innerHTML = '<div style="font-style:italic;font-size:.8rem;color:var(--muted)">Aucune combinaison.</div>';
+    return;
+  }
+  
+  p.savedCombos.forEach(cb=>{
+    const item = document.createElement('div');
+    item.style.cssText = 'padding:7px 11px;border:1px solid '+(p.teaserFrom===cb.id?'var(--green)':'var(--border)')+';border-radius:3px;cursor:pointer;transition:all .13s;font-size:.84rem;background:'+(p.teaserFrom===cb.id?'#eef6f1':'');
+    item.textContent = cb.name; 
+    item.onclick = () => selectTC(cb.id); 
+    div.appendChild(item);
+  });
+}
+
+function selectTC(cid) {
+  const p = P(); 
+  p.teaserFrom = cid;
+  
+  const cb = p.savedCombos.find(x=>x.id===cid);
+  id('tsrc').style.display = 'block'; 
+  id('tsrc').textContent = 'Depuis : '+cb.name;
+  
+  save(); 
+  renderTCombo();
+}
+
+async function proposeTeaser() {
+  if(!CFG.apiKey){
+    notif('Clé API manquante');
+    return;
+  }
+  
+  const p = P(); 
+  let ctx = '';
+  
+  if(p.teaserFrom){
+    const cb = p.savedCombos.find(x=>x.id===p.teaserFrom);
+    if(cb){
+      const clouds = cb.cloudIds.map(cid=>p.clouds.find(x=>x.id===cid)).filter(Boolean);
+      ctx = 'Combinaison "'+cb.name+'" :\n'+clouds.map(c=>c.text+(c.meaning?' [Sens: '+c.meaning+']':'')).join('\n');
+      if(cb.analysis) ctx += '\n\nAnalyse :\n'+cb.analysis;
+    }
+  } else {
+    ctx = 'Nuages :\n'+p.clouds.map(c=>c.text).join('\n');
+  }
+  
+  if(!ctx){
+    notif('Sélectionnez une combinaison');
+    return;
+  }
+  
+  const cur = id('tarea').value.trim();
+  const prompt = 'Tu es un auteur-développeur narratif pour la fiction audiovisuelle française et européenne.\nPropose un teaser — 150-200 mots max — qui ouvre l\'histoire sans tout dévoiler. Ton sobre, littéraire, sans clichés de pitch.\n'+(cur?'\nVersion en cours à transformer :\n'+cur+'\n':'')+'\n'+ctx+'\nÉcris directement le teaser, sans introduction.';
+  
+  id('tarea').value = '…';
+  
+  const r = await callClaude([{role:'user',content:prompt}]);
+  id('tarea').value = r; 
+  p.teaserText = r;
+  
+  jlog('teaser','Teaser généré'+(p.teaserFrom?' depuis '+id('tsrc').textContent:''));
+  save();
+}
+
+function clearTeaser() {
+  const p = P(); 
+  id('tarea').value = ''; 
+  p.teaserText = ''; 
+  p.teaserFrom = null;
+  id('tsrc').style.display = 'none'; 
+  save(); 
+  renderTCombo();
+}
+
+function activateP2() {
+  if(!ACTIVE_PID) {notif('Ouvrez un projet');return}
+  const p = P();
+  if(!p.teaserText || !p.teaserText.trim()) {notif('Rédigez d\'abord un teaser');return}
+  p.phase2.active = true;
+  p.phase2.activatedAt = Date.now();
+  save();
+  updateHdr();
+  jlog('teaser','Phase 2 activée');
+  notif('✓ Phase 2 activée');
+  
+  // Switch to Phase 2
+  switchToPhase(2);
+}
+
+async function sendTDlg() {
+  const inp = id('tdlginp'); 
+  const txt = inp.value.trim(); 
+  if(!txt) return;
+  if(!CFG.apiKey){
+    notif('Clé API manquante');
+    return;
+  }
+  
+  inp.value = ''; 
+  const p = P();
+  const teaser = id('tarea').value;
+  
+  const sys = 'Tu es un collaborateur dramaturgique spécialisé dans le teaser de fiction audiovisuelle. Aide à affiner, orienter, enrichir. Sois précis. Réponds en français.';
+  
+  p.tdlgH.push({role:'user',content:txt}); 
+  renderTDlgMsgs();
+  
+  p.tdlgH[p.tdlgH.length-1].content = (teaser?'Teaser en cours :\n'+teaser+'\n\n':'')+txt;
+  
+  const r = await callClaudeWithSystem(sys,[...p.tdlgH.slice(-8)]);
+  
+  p.tdlgH[p.tdlgH.length-1].content = txt;
+  p.tdlgH.push({role:'assistant',content:r}); 
+  
+  save();
+  renderTDlgMsgs();
+}
+
+function renderTDlgMsgs() {
+  const div = id('tdlgmsgs'); 
+  div.innerHTML = ''; 
+  const p = P();
+  
+  p.tdlgH.forEach(m=>{
+    const d = document.createElement('div');
+    d.className = 'msg '+(m.role==='user'?'mu':'mc');
+    d.innerHTML = `<span class="mlbl">${m.role==='user'?'Vous':'Claude'}</span><div class="mb">${esc(m.content)}</div>`;
+    div.appendChild(d);
+  });
+  
+  div.scrollTop = div.scrollHeight;
+}
+
+// ══════════════════════════════════════════
+// GLOBAL DIALOG
+// ══════════════════════════════════════════
+function openGlobalModal() {
+  id('gm').classList.add('on');
+  renderGMsgs();
+}
+
+function renderGMsgs() {
+  const div = id('gmmsgs'); 
+  div.innerHTML = ''; 
+  const p = P();
+  
+  p.gblH.forEach(m=>{
+    const d = document.createElement('div');
+    d.className = 'msg '+(m.role==='user'?'mu':'mc');
+    d.innerHTML = `<span class="mlbl">${m.role==='user'?'Vous':'Claude'}</span><div class="mb">${esc(m.content)}</div>`;
+    div.appendChild(d);
+  });
+  
+  div.scrollTop = div.scrollHeight;
+}
+
+async function sendGlobal() {
+  const inp = id('gminp'); 
+  const txt = inp.value.trim(); 
+  if(!txt) return;
+  if(!CFG.apiKey){
+    notif('Clé API manquante');
+    return;
+  }
+  
+  inp.value = ''; 
+  const p = P();
+  
+  const cl = p.clouds.map((c,i)=>`NUAGE ${i+1}: ${c.text}${c.meaning?' [Sens: '+c.meaning+']':''}`).join('\n');
+  const ctx = 'ENSEMBLE DES NUAGES ('+p.clouds.length+') :\n'+cl+'\n\nQUESTION : '+txt;
+  
+  const sys = 'Tu es un dramaturgiste expert. Analyse l\'ensemble des nuages d\'un projet de fiction audiovisuelle pour détecter patterns, tensions latentes, histoires possibles. Réponds en français, avec précision et exigence.';
+  
+  p.gblH.push({role:'user',content:txt}); 
+  renderGMsgs();
+  
+  const msgs = p.gblH.length===1 ? [{role:'user',content:ctx}] : [...p.gblH.slice(-6)];
+  
+  const r = await callClaudeWithSystem(sys,msgs);
+  p.gblH.push({role:'assistant',content:r}); 
+  
+  save(); 
+  renderGMsgs();
+}
+
+// ══════════════════════════════════════════
+// API
+// ══════════════════════════════════════════
+async function callClaude(messages) { 
+  return callClaudeWithSystem(null,messages); 
+}
+
+async function callClaudeWithSystem(system,messages) {
+  try{
+    // Merge consecutive messages from same role
+    const clean = [];
+    for(const m of messages){
+      if(clean.length && clean[clean.length-1].role===m.role){
+        const prev = clean[clean.length-1];
+        const addTxt = typeof m.content==='string' ? m.content : 
+                       (m.content.find(b=>b.type==='text')?.text||'');
+        if(Array.isArray(prev.content)) {
+          prev.content.push({type:'text',text:addTxt});
+        } else {
+          prev.content += '\n'+addTxt;
+        }
+      } else { 
+        clean.push({role:m.role,content:m.content}); 
+      }
+    }
+    
+    // Ensure first message is from user
+    if(!clean.length || clean[0].role!=='user') {
+      clean.unshift({role:'user',content:'Bonjour'});
+    }
+    
+    const body = {
+      model: CFG.model,
+      max_tokens: 1400,
+      messages: clean
+    };
+    
+    if(system) body.system = system;
+    
+    const resp = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key': CFG.apiKey,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body: JSON.stringify(body)
+    });
+    
+    if(!resp.ok){
+      const e = await resp.json().catch(()=>({error:{message:'Erreur réseau'}}));
+      const errMsg = e.error?.message || JSON.stringify(e);
+      console.error('API ERROR', resp.status, errMsg);
+      return '⚠ Erreur API ' + resp.status + ' : ' + errMsg;
+    }
+    
+    const data = await resp.json();
+    return data.content?.[0]?.text||'(réponse vide)';
+    
+  } catch(e) {
+    console.error('API call failed:', e);
+    return '⚠ Connexion : '+e.message;
+  }
+}
+
+// ══════════════════════════════════════════
+// NOTIF
+// ══════════════════════════════════════════
+let notifTimeout = null;
+
+function notif(msg){
+  const el = id('notif');
+  el.textContent = msg;
+  el.classList.add('on');
+  
+  clearTimeout(notifTimeout);
+  notifTimeout = setTimeout(()=>el.classList.remove('on'),2600);
+}
+
+// ══════════════════════════════════════════
+// MODAL HELPERS
+// ══════════════════════════════════════════
+function closeModal(modalId) {
+  id(modalId).classList.remove('on');
+}
+
+// ══════════════════════════════════════════
+// KEYBOARD SHORTCUTS
+// ══════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  // Escape closes all modals
+  if(e.key==='Escape'){
+    closeModal('dlgp');
+    closeModal('gm');
+    closeModal('cpm');
+    closeModal('journal-modal');
+    id('sm').style.display='none';
+  }
+  
+  // Cmd/Ctrl+Enter sends in dialogs
+  if((e.metaKey||e.ctrlKey) && e.key==='Enter'){
+    if(id('dlgp').classList.contains('on')) sendFocused();
+    else if(id('gm').classList.contains('on')) sendGlobal();
+  }
+});
+
+id('dlginp').addEventListener('keydown', e => {
+  if((e.metaKey||e.ctrlKey) && e.key==='Enter'){
+    e.preventDefault();
+    sendFocused();
+  }
+});
+
+id('gminp').addEventListener('keydown', e => {
+  if((e.metaKey||e.ctrlKey) && e.key==='Enter'){
+    e.preventDefault();
+    sendGlobal();
+  }
+});
+
+// ══════════════════════════════════════════
+// IMG DROP WIRING
+// ══════════════════════════════════════════
+function wireImgDrop(){
+  const drop = id('img-drop'); 
+  if(!drop) return;
+  
+  drop.addEventListener('click', () => id('img-in').click());
+  drop.addEventListener('dragover', e => {
+    e.preventDefault();
+    drop.classList.add('drag');
+  });
+  drop.addEventListener('dragleave', () => drop.classList.remove('drag'));
+  drop.addEventListener('drop', imgDrop);
+}
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+load();
+
+if(!CFG.apiKey){
+  id('sm').style.display = 'flex';
+} else {
+  id('sm').style.display = 'none';
+  if(ACTIVE_PID){ 
+    updateHdr(); 
+    renderClouds(); 
+    renderSaved(); 
+    renderTCombo(); 
+  } else { 
+    showTab('projets',document.querySelectorAll('.tab')[3]); 
+  }
+}
+
+wireImgDrop();
+
+// ══════════════════════════════════════════
+// PHASE 2: STRUCTURE ZONE
+// ══════════════════════════════════════════
+
+let selectedNarrClouds = [];
+let currentActId = null;
+
+// Bibliothèque structures par format
+const NARRATIVE_STRUCTURES = {
+  // ═══════════════════════════════════════
+  // LONG-MÉTRAGE (6 structures)
+  // ═══════════════════════════════════════
+  long: [
+    {
+      id: 'trois-actes',
+      name: 'Trois actes (Aristote/Field)',
+      desc: 'Structure classique universelle. Exposition → Confrontation → Résolution.',
+      examples: 'The Matrix, Parasite, La Haine',
+      timing: {act1: 25, act2: 50, act3: 25},
+      dramatic_logic: {
+        act1: 'Monde ordinaire. Incident déclencheur (plot point 1). Le héros entre dans un nouveau monde.',
+        act2: 'Obstacles croissants. Confrontation. Midpoint : révélation majeure. Point de non-retour (plot point 2).',
+        act3: 'Climax. Transformation du héros. Résolution. Nouveau monde.'
+      }
+    },
+    {
+      id: 'cinq-actes',
+      name: 'Cinq actes (Shakespeare/Freytag)',
+      desc: 'Tragédie européenne. Climax au centre, pas à la fin.',
+      examples: 'The Godfather, There Will Be Blood',
+      timing: {act1: 15, act2: 25, act3: 20, act4: 25, act5: 15},
+      dramatic_logic: {
+        act1: 'Exposition. Mise en place monde et désir.',
+        act2: 'Action montante. Complications, tension croissante.',
+        act3: 'Climax. Point culminant émotionnel et dramatique.',
+        act4: 'Action descendante. Conséquences, retournements.',
+        act5: 'Dénouement. Catharsis, résolution (tragique ou non).'
+      }
+    },
+    {
+      id: 'voyage-heros',
+      name: 'Voyage du héros (Campbell, 12 étapes)',
+      desc: 'Transformation mythologique. 12 étapes archétypales.',
+      examples: 'Star Wars, The Lord of the Rings, Mad Max Fury Road',
+      timing: {act1: 25, act2: 50, act3: 25},
+      dramatic_logic: {
+        act1: 'Monde ordinaire → Appel aventure → Refus → Rencontre mentor → Franchissement seuil.',
+        act2: 'Épreuves/Alliés/Ennemis → Approche grotte → Épreuve suprême → Récompense.',
+        act3: 'Chemin retour → Résurrection (dernière épreuve) → Retour avec élixir.'
+      }
+    },
+    {
+      id: 'sophocle',
+      name: 'Tragédie sophocléenne',
+      desc: 'Fatalisme structurel. Hamartia → Anagnorisis → Catharsis.',
+      examples: 'Oldboy, Requiem for a Dream',
+      timing: {prologue: 10, act1: 20, act2: 30, act3: 25, exodos: 15},
+      dramatic_logic: {
+        prologue: 'Situation initiale. Faille tragique (hamartia) posée.',
+        act1: 'Hubris. Le héros défie l\'ordre (divin/social). Ironie dramatique.',
+        act2: 'Némesis. Les forces supérieures se retournent contre lui.',
+        act3: 'Anagnorisis. Reconnaissance douloureuse de la vérité.',
+        exodos: 'Catharsis. Chute inéluctable. Pas de rédemption facile.'
+      }
+    },
+    {
+      id: 'haneke',
+      name: 'Glaciation progressive (Haneke)',
+      desc: 'Subversion violence. Normalité → Contamination → Effondrement sans catharsis.',
+      examples: 'Caché, Funny Games, The White Ribbon',
+      timing: {act1: 30, act2: 45, act3: 25},
+      dramatic_logic: {
+        act1: 'Normalité bourgeoise trompeuse. Détails troublants ignorés.',
+        act2: 'Contamination invisible. Violence latente qui s\'infiltre. Malaise croissant.',
+        act3: 'Effondrement. Anti-climax. Refus du spectaculaire. Malaise durable.'
+      }
+    },
+    {
+      id: 'nolan',
+      name: 'Puzzle non-linéaire (Nolan)',
+      desc: 'Fils temporels multiples. Révélation par assemblage.',
+      examples: 'Memento, Dunkirk, Babel, Arrival',
+      timing: {variable: true},
+      dramatic_logic: {
+        setup: '3-5 fils temporels distincts présentés en parallèle.',
+        development: 'Montage alterné. Indices éparpillés. Spectateur reconstruit.',
+        convergence: 'Point de convergence révélateur. Les fils se rejoignent.',
+        resolution: 'Résolution simultanée. Révélation structurelle (le comment éclaire le quoi).'
+      }
+    }
+  ],
+  
+  // ═══════════════════════════════════════
+  // SÉRIE TV (5 structures)
+  // ═══════════════════════════════════════
+  serie: [
+    {
+      id: 'arc-saison',
+      name: 'Arc trois actes saison (Breaking Bad)',
+      desc: 'Structure macro pour toute la saison. Chaque épisode = mini trois-actes imbriqué.',
+      examples: 'Breaking Bad, Better Call Saul, Succession',
+      timing: {act1: 30, act2: 45, act3: 25},
+      dramatic_logic: {
+        act1: 'Épisodes 1-3 : Nouveau status quo. Perturbation majeure. Questions posées.',
+        act2: 'Épisodes 4-8 : Escalade. Midpoint catastrophique (mi-saison). Point de non-retour.',
+        act3: 'Épisodes 9-13 : Course vers climax. Résolution arc saison. Ouverture saison suivante.'
+      }
+    },
+    {
+      id: 'david-simon',
+      name: 'Mosaïque institutionnelle (David Simon)',
+      desc: 'Fils narratifs multiples. Personnages = symptômes du système.',
+      examples: 'The Wire, Treme, Show Me a Hero',
+      timing: {phase1: 33, phase2: 40, phase3: 27},
+      dramatic_logic: {
+        phase1: 'Épisodes 1-4 : Installation pièces échiquier. 5-8 fils narratifs parallèles.',
+        phase2: 'Épisodes 5-9 : Collisions systémiques. Personnages confrontés aux institutions.',
+        phase3: 'Épisodes 10-13 : Conséquences. Système l\'emporte. Pas de résolution totale.'
+      }
+    },
+    {
+      id: 'anthologique',
+      name: 'Anthologique épisodique (Black Mirror)',
+      desc: 'Chaque épisode autonome. Trois actes condensés par épisode.',
+      examples: 'Black Mirror, Love Death + Robots, Inside No. 9',
+      timing: {per_episode: true},
+      dramatic_logic: {
+        per_episode: 'Trois actes condensés (20-40min). Monde → Perturbation → Twist final.',
+        thematic_arc: 'Fil rouge thématique (pas narratif). Variation sur idée centrale.',
+        creative_freedom: 'Liberté maximale. Chaque épisode = court-métrage.'
+      }
+    },
+    {
+      id: 'fleabag',
+      name: 'Adresse caméra + révélation (Fleabag)',
+      desc: '6 épisodes = 1 long-métrage. Brise 4ème mur comme structure dramatique.',
+      examples: 'Fleabag, I May Destroy You',
+      timing: {act1: 33, act2: 33, act3: 34},
+      dramatic_logic: {
+        act1: 'Épisodes 1-2 : Comédie. Narrateur fiable. Complicité spectateur.',
+        act2: 'Épisodes 3-4 : Fissures. Le masque se lézarde. Adresse caméra devient douleur.',
+        act3: 'Épisodes 5-6 : Twist narrateur. Révélation sur pourquoi elle nous parle. Catharsis.'
+      }
+    },
+    {
+      id: 'watchmen',
+      name: 'Épisode-rupture (Watchmen)',
+      desc: 'Arc classique + épisode flashback qui relit tout. Anagnorisis structurelle.',
+      examples: 'Watchmen (HBO), The Leftovers S2E8',
+      timing: {act1: 50, rupture: 10, act2: 40},
+      dramatic_logic: {
+        act1: 'Épisodes 1-5 : Arc présent. Mystère central. Questions accumulées.',
+        rupture: 'Épisode 6 : Flashback total. Révèle clé passée. Relit tout ce qu\'on a vu.',
+        act2: 'Épisodes 7-9 : Présent éclairé. Résolution avec nouvelle compréhension.'
+      }
+    }
+  ],
+  
+  // ═══════════════════════════════════════
+  // PODCAST FICTION (1 structure)
+  // ═══════════════════════════════════════
+  podcast: [
+    {
+      id: 'arc-court',
+      name: 'Arc narratif court (8-12 épisodes)',
+      desc: 'Fiction feuilleton. Trois actes adapté pour épisodes 15-25min.',
+      examples: 'Limetown, Homecoming, The Left Right Game',
+      timing: {act1: 30, act2: 45, act3: 25},
+      dramatic_logic: {
+        act1: 'Épisodes 1-3 : Exposition monde + désir protagoniste. Accroche mystère.',
+        act2: 'Épisodes 4-8 : Obstacles. Twist midpoint. Tension croissante.',
+        act3: 'Épisodes 9-12 : Climax. Résolution. Cliffhanger possible si saison 2.'
+      }
+    }
+  ],
+  
+  // ═══════════════════════════════════════
+  // DOCUMENTAIRE (3 structures)
+  // ═══════════════════════════════════════
+  doc: [
+    {
+      id: 'investigation',
+      name: 'Investigation documentaire (5 séquences)',
+      desc: 'Révélation progressive. Du mystère à la vérité documentée.',
+      examples: 'Making a Murderer, The Act of Killing, Citizenfour',
+      timing: {seq1: 10, seq2: 30, seq3: 20, seq4: 25, seq5: 15},
+      dramatic_logic: {
+        seq1: 'Mystère/Question centrale posée. Accroche.',
+        seq2: 'Enquête. Accumulation preuves/témoignages. Fausses pistes.',
+        seq3: 'Révélation/Twist. Document clé. Témoignage majeur.',
+        seq4: 'Conséquences. Approfondissement. Élargissement enjeux.',
+        seq5: 'Résolution (ou ouverture assumée). Synthèse.'
+      }
+    },
+    {
+      id: 'thematique',
+      name: 'Mosaïque thématique',
+      desc: 'Pas d\'actes. 4-6 chapitres thématiques. Accumulation signifiante.',
+      examples: 'Jiro Dreams of Sushi, 13th (Ava DuVernay)',
+      timing: {variable: true},
+      dramatic_logic: {
+        structure: '4-6 chapitres autonomes organisés par thème/concept.',
+        per_chapter: 'Exposition idée → Variation → Exemple concret → Synthèse partielle.',
+        global: 'Accumulation. Pas de climax classique. Conclusion = synthèse globale.',
+        freedom: 'Liberté formelle maximale. Profondeur thématique.'
+      }
+    },
+    {
+      id: 'essai',
+      name: 'Essai poétique (Marker/Herzog/Varda)',
+      desc: 'Flux de conscience. 5 mouvements contemplatifs. Associations libres.',
+      examples: 'Sans Soleil (Marker), Cave of Forgotten Dreams (Herzog), Les Glaneurs (Varda)',
+      timing: {mvt1: 15, mvt2: 25, mvt3: 20, mvt4: 25, mvt5: 15},
+      dramatic_logic: {
+        mvt1: 'Ouverture contemplative. Pose regard singulier.',
+        mvt2: 'Exploration sensitive. Images/sons. Dérive.',
+        mvt3: 'Réflexion philosophique. Voix off méditative.',
+        mvt4: 'Climax contemplatif. Montage émotionnel. Intensité poétique.',
+        mvt5: 'Résolution ouverte. Question sans réponse. Beauté du mystère.'
+      }
+    }
+  ]
+};
+
+function openStructure() {
+  if(!ACTIVE_PID) {notif('Ouvrez un projet');return}
+  showTab('p2struct',null);
+  renderStructureZone();
+}
+
+function renderBriefZone() {
+  const p = P();
+  
+  if(p.phase2.brief.validated) {
+    // Show validated brief
+    id('brief-form-container').style.display = 'none';
+    id('brief-validated').style.display = 'block';
+    
+    const formatLabels = {long: 'Long-métrage', serie: 'Série', podcast: 'Podcast', doc: 'Documentaire'};
+    const brief = p.phase2.brief;
+    
+    let summary = `<strong>Format :</strong> ${formatLabels[brief.format]}<br>`;
+    summary += `<strong>Durée :</strong> ${brief.duration} min`;
+    if(brief.format === 'serie' || brief.format === 'podcast') {
+      summary += ` × ${brief.episodes} épisodes`;
+    }
+    summary += `<br>`;
+    if(brief.genre) summary += `<strong>Genre :</strong> ${esc(brief.genre)}<br>`;
+    if(brief.tone) summary += `<strong>Tonalité :</strong> ${esc(brief.tone)}`;
+    
+    id('brief-summary').innerHTML = summary;
+  } else {
+    // Show form
+    id('brief-form-container').style.display = 'block';
+    id('brief-validated').style.display = 'none';
+    
+    // Load existing data if any
+    if(p.phase2.brief.format) {
+      id('brief-format').value = p.phase2.brief.format;
+      id('brief-duration').value = p.phase2.brief.duration || '';
+      id('brief-episodes').value = p.phase2.brief.episodes || '';
+      id('brief-genre').value = p.phase2.brief.genre || '';
+      id('brief-tone').value = p.phase2.brief.tone || '';
+      updateBriefInputs();
+    }
+  }
+}
+
+function editBrief() {
+  const p = P();
+  p.phase2.brief.validated = false;
+  save();
+  renderBriefZone();
+}
+
+function renderStructureZone() {
+  const p = P();
+  
+  // Check if brief validated
+  if(!p.phase2.brief.validated) {
+    id('structure-need-brief').style.display = 'block';
+    id('structure-selection').style.display = 'none';
+    id('structure-acts').style.display = 'none';
+    return;
+  }
+  
+  id('structure-need-brief').style.display = 'none';
+  
+  // Si structure validée, afficher actes
+  if(p.phase2.structure.validated) {
+    id('structure-selection').style.display = 'none';
+    id('structure-acts').style.display = 'block';
+    renderActs();
+  } else {
+    // Afficher sélection structures
+    id('structure-acts').style.display = 'none';
+    renderStructureSelection();
+  }
+}
+
+function updateBriefInputs() {
+  const format = id('brief-format').value;
+  const durationGroup = id('brief-duration-group');
+  const episodesGroup = id('brief-episodes-group');
+  
+  if(format === 'serie' || format === 'podcast') {
+    episodesGroup.style.display = 'block';
+  } else {
+    episodesGroup.style.display = 'none';
+  }
+}
+
+function validateBrief() {
+  const format = id('brief-format').value;
+  const duration = parseInt(id('brief-duration').value) || 0;
+  const episodes = parseInt(id('brief-episodes').value) || 0;
+  const genre = id('brief-genre').value.trim();
+  const tone = id('brief-tone').value.trim();
+  
+  if(!format) {notif('Sélectionnez un format');return}
+  if(!duration) {notif('Indiquez une durée');return}
+  if((format==='serie'||format==='podcast') && !episodes) {notif('Indiquez le nombre d\'épisodes');return}
+  
+  const p = P();
+  p.phase2.brief = {
+    format,
+    duration,
+    episodes: episodes || 1,
+    genre,
+    tone,
+    validated: true
+  };
+  
+  save();
+  jlog('analyse', 'Brief validé : '+format);
+  notif('✓ Brief validé');
+  
+  renderBriefZone();
+  
+  // Propose to go to structure
+  setTimeout(() => {
+    if(confirm('Brief validé ! Passer à la création de la structure ?')) {
+      showTab('p2struct', document.querySelector('[onclick*="p2struct"]'));
+    }
+  }, 300);
+}
+
+function renderStructureSelection() {
+  const p = P();
+  const format = p.phase2.brief.format;
+  const structures = NARRATIVE_STRUCTURES[format] || [];
+  
+  const grid = id('narrative-clouds-grid');
+  grid.innerHTML = '';
+  
+  structures.forEach(s => {
+    const card = document.createElement('div');
+    card.className = 'ncloud-card';
+    card.dataset.id = s.id;
+    
+    const isSelected = selectedNarrClouds.includes(s.id);
+    if(isSelected) card.classList.add('selected');
+    
+    card.innerHTML = `
+      <input type="checkbox" class="ncloud-check" id="nc-${s.id}" ${isSelected?'checked':''} onchange="toggleNarrCloud('${s.id}')">
+      <label for="nc-${s.id}" style="cursor:pointer;flex:1">
+        <div class="ncloud-name">${esc(s.name)}</div>
+        <div class="ncloud-desc">${esc(s.desc)}</div>
+        ${s.examples ? `<div style="font-size:.7rem;color:var(--muted);margin-top:4px;font-style:italic">Ex: ${esc(s.examples)}</div>` : ''}
+      </label>
+    `;
+    
+    grid.appendChild(card);
+  });
+  
+  id('structure-selection').style.display = 'block';
+  updateNarrCount();
+}
+
+function toggleNarrCloud(ncid) {
+  const idx = selectedNarrClouds.indexOf(ncid);
+  const card = document.querySelector(`.ncloud-card[data-id="${ncid}"]`);
+  
+  if(idx > -1) {
+    selectedNarrClouds.splice(idx, 1);
+    if(card) card.classList.remove('selected');
+  } else {
+    if(selectedNarrClouds.length >= 3) {
+      notif('Maximum 3 approches');
+      document.getElementById(`nc-${ncid}`).checked = false;
+      return;
+    }
+    selectedNarrClouds.push(ncid);
+    if(card) card.classList.add('selected');
+  }
+  
+  updateNarrCount();
+}
+
+function updateNarrCount() {
+  const btn = id('gen-struct-btn');
+  const count = id('narr-count');
+  
+  if(selectedNarrClouds.length === 0) {
+    btn.disabled = true;
+    count.textContent = 'Sélectionnez au moins une approche';
+  } else {
+    btn.disabled = false;
+    count.textContent = `${selectedNarrClouds.length} approche${selectedNarrClouds.length>1?'s':''} sélectionnée${selectedNarrClouds.length>1?'s':''}`;
+  }
+}
+
+function showStructureSelection() {
+  id('structure-acts').style.display = 'none';
+  id('structure-selection').style.display = 'block';
+}
+
+async function generateStructure() {
+  if(!CFG.apiKey){notif('Clé API manquante');return}
+  if(selectedNarrClouds.length === 0){notif('Sélectionnez au moins une approche');return}
+  
+  const p = P();
+  const brief = p.phase2.brief;
+  const format = brief.format;
+  
+  // Get selected structures with full data
+  const selectedStructures = selectedNarrClouds.map(ncid => {
+    return NARRATIVE_STRUCTURES[format].find(s => s.id === ncid);
+  }).filter(Boolean);
+  
+  // Build format description
+  const formatDesc = {
+    long: `Long-métrage de ${brief.duration} minutes`,
+    serie: `Série de ${brief.episodes} épisodes de ${brief.duration} minutes`,
+    podcast: `Podcast de ${brief.episodes} épisodes de ${brief.duration} minutes`,
+    doc: `Documentaire de ${brief.duration} minutes`
+  };
+  
+  const teaser = p.teaserText || 'Aucun teaser disponible';
+  const nuages = p.clouds.slice(0,15).map((c,i) => `${i+1}. ${c.text}`).join('\n');
+  
+  // Build structures detailed info
+  const structuresInfo = selectedStructures.map(s => {
+    let info = `
+### ${s.name}
+**Description** : ${s.desc}
+**Exemples** : ${s.examples}
+
+**LOGIQUE DRAMATIQUE** :`;
+    
+    Object.entries(s.dramatic_logic).forEach(([key, value]) => {
+      info += `\n- ${key} : ${value}`;
+    });
+    
+    if(s.timing && !s.timing.variable && !s.timing.per_episode) {
+      info += `\n\n**PROPORTIONS TEMPORELLES** :`;
+      Object.entries(s.timing).forEach(([key, value]) => {
+        info += `\n- ${key} : ${value}%`;
+      });
+    }
+    
+    return info;
+  }).join('\n\n---\n');
+  
+  const systemPrompt = `Tu es un architecte narratif expert travaillant avec Looker Films.
+
+**PROJET**
+Format : ${formatDesc[format]}
+Genre : ${brief.genre || 'Non spécifié'}
+Tonalité : ${brief.tone || 'Non spécifié'}
+
+**APPROCHES NARRATIVES SÉLECTIONNÉES** (${selectedNarrClouds.length}) :
+${structuresInfo}
+
+**TEASER DU PROJET** :
+${teaser}
+
+**NUAGES PHASE 1** (matériau narratif déposé par le créateur) :
+${nuages || 'Aucun nuage'}
+
+---
+
+**TÂCHE** : Génère une structure narrative HYBRIDE qui combine intelligemment les ${selectedNarrClouds.length} approche(s) sélectionnée(s).
+
+**PRINCIPES** :
+- Si 1 approche : applique sa logique dramatique pure
+- Si 2-3 approches : hybride les logiques (ex: structure Sophocle + temporalité Nolan)
+- Utilise les proportions temporelles pour calculer les timeRange
+- Adapte au format (série = structure par épisode OU macro-structure selon l'approche)
+- Labels courts, évocateurs, professionnels
+
+**CONTRAINTES FORMAT** :
+${format==='serie' ? `- Série ${brief.episodes} épisodes : génère ${brief.episodes} actes (1 par épisode) OU 3-5 actes macro selon l'approche choisie` : ''}
+${format==='podcast' ? `- Podcast ${brief.episodes} épisodes : génère ${brief.episodes} actes OU 3-5 actes macro` : ''}
+${format==='long' ? `- Long-métrage : génère 3-6 actes selon l'approche (Trois actes = 3, Cinq actes = 5, etc.)` : ''}
+${format==='doc' ? `- Documentaire : génère 3-6 sections selon l'approche (Investigation = 5, Thématique = 4-6, Essai = 5)` : ''}
+
+**DURÉE TOTALE** : ${format==='serie' || format==='podcast' ? brief.episodes*brief.duration : brief.duration} minutes
+
+**RÉPONSE** (JSON strict, sans markdown) :
+{
+  "name": "Nom de la structure hybride (60 car max)",
+  "acts": [
+    {"id": "act1", "label": "Nom de l'acte/épisode/séquence", "timeRange": "0-25 min"},
+    {"id": "act2", "label": "...", "timeRange": "25-75 min"}
+  ]
+}
+
+Réponds UNIQUEMENT avec le JSON (pas de texte avant/après, pas de balises markdown).`;
+  
+  notif('Génération...');
+  id('gen-struct-btn').disabled = true;
+  id('gen-struct-btn').textContent = '⏳ Génération…';
+  
+  try {
+    const response = await callClaude([{role:'user',content:systemPrompt}]);
+    
+    let clean = response.trim();
+    if(clean.startsWith('```json')) clean = clean.replace(/```json|```/g,'').trim();
+    if(clean.startsWith('```')) clean = clean.replace(/```/g,'').trim();
+    
+    const structure = JSON.parse(clean);
+    
+    // Store
+    p.phase2.selected_narrative_clouds = [...selectedNarrClouds];
+    p.phase2.structure = {
+      type: 'custom-hybrid',
+      based_on: [...selectedNarrClouds],
+      name: structure.name,
+      acts: structure.acts.map(a => ({
+        id: a.id,
+        label: a.label,
+        timeRange: a.timeRange,
+        clouds: [],
+        narrative: '',
+        validated: false
+      })),
+      validated: true
+    };
+    
+    save();
+    jlog('analyse', 'Structure générée : ' + structure.name);
+    notif('✓ Structure générée');
+    
+    id('structure-selection').style.display = 'none';
+    id('structure-acts').style.display = 'block';
+    renderActs();
+    
+  } catch(err) {
+    console.error('Structure generation failed:', err);
+    notif('⚠ Erreur génération');
+  }
+  
+  id('gen-struct-btn').disabled = false;
+  id('gen-struct-btn').textContent = '→ Générer la structure';
+}
+
+function renderActs() {
+  const p = P();
+  const struct = p.phase2.structure;
+  
+  if(!struct || !struct.acts) return;
+  
+  // Header
+  id('struct-title').textContent = struct.name;
+  const basedOn = struct.based_on.map(nc => {
+    const all = Object.values(NARRATIVE_STRUCTURES).flat();
+    const found = all.find(s => s.id === nc);
+    return found ? found.name.split('(')[0].trim() : nc;
+  }).join(' + ');
+  
+  id('struct-info').innerHTML = `
+    <div style="font-size:.82rem;color:var(--muted)">Basée sur : ${basedOn}</div>
+    <div style="font-size:.82rem;color:var(--muted);margin-top:2px">Format : ${p.phase2.brief.format} — ${struct.acts.length} acte${struct.acts.length>1?'s':''}</div>
+  `;
+  
+  // Tabs
+  const tabs = id('acts-tabs');
+  tabs.innerHTML = '';
+  struct.acts.forEach(a => {
+    const tab = document.createElement('button');
+    tab.className = 'act-tab';
+    if(a.validated) tab.classList.add('validated');
+    if(currentActId === a.id) tab.classList.add('active');
+    tab.textContent = a.label;
+    tab.onclick = () => showAct(a.id);
+    tabs.appendChild(tab);
+  });
+  
+  // Show first act by default
+  if(!currentActId) currentActId = struct.acts[0].id;
+  showAct(currentActId);
+}
+
+function showAct(actId) {
+  currentActId = actId;
+  const p = P();
+  const act = p.phase2.structure.acts.find(a => a.id === actId);
+  if(!act) return;
+  
+  // Update tabs
+  document.querySelectorAll('.act-tab').forEach(t => t.classList.remove('active'));
+  const activeTab = Array.from(document.querySelectorAll('.act-tab')).find(t => t.textContent === act.label);
+  if(activeTab) activeTab.classList.add('active');
+  
+  // Render act content
+  const content = id('act-content');
+  content.innerHTML = `
+    <div style="font-size:.82rem;color:var(--muted);margin-bottom:16px">${act.timeRange}</div>
+    
+    <div class="act-clouds-section">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">Nuages (${act.clouds.length})</div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-sm" onclick="addCloudToAct('phase1')">+ Depuis Phase 1</button>
+          <button class="btn btn-sm" onclick="addCloudToAct('new')">+ Nouveau nuage</button>
+        </div>
+      </div>
+      
+      <div id="act-clouds-container"></div>
+    </div>
+    
+    <div class="act-narrative">
+      <div class="act-narrative-label">Rédaction narrative</div>
+      
+      ${!act.validated ? `
+      <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center">
+        <button class="btn btn-ink" id="propose-continuity-btn" onclick="proposeContinuity()" ${act.clouds.length === 0 ? 'disabled title="Ajoutez au moins un nuage"' : ''}>
+          💡 Proposer continuité
+        </button>
+        <select id="continuity-mode" class="continuity-mode-select">
+          <option value="exp">Mode : Explorer</option>
+          <option value="app">Mode : Approfondir</option>
+          <option value="res">Mode : Résister</option>
+        </select>
+      </div>
+      ` : ''}
+      
+      <textarea class="act-narrative-area" id="act-narrative-txt" oninput="saveActNarrative()" placeholder="Rédigez librement le contenu de cet acte…">${esc(act.narrative||'')}</textarea>
+    </div>
+    
+    <div style="display:flex;gap:8px;margin-top:12px;align-items:center">
+      ${act.validated 
+        ? '<button class="btn btn-accent" onclick="unlockAct()">🔓 Déverrouiller cet acte</button><span style="color:var(--green);font-size:.82rem;display:flex;align-items:center">✓ Validé</span>'
+        : '<button class="btn btn-ink" onclick="validateAct()">✓ Valider cet acte</button>'
+      }
+    </div>
+  `;
+  
+  renderActClouds();
+}
+
+function renderActClouds() {
+  const p = P();
+  const act = p.phase2.structure.acts.find(a => a.id === currentActId);
+  if(!act) return;
+  
+  const container = id('act-clouds-container');
+  container.innerHTML = '';
+  
+  // Group by level
+  const level1 = act.clouds.filter(c => c.level === 1);
+  const level2 = act.clouds.filter(c => c.level === 2);
+  const level3 = act.clouds.filter(c => c.level === 3);
+  
+  const renderLevel = (clouds, level, label, badge) => {
+    if(clouds.length === 0) return '';
+    
+    const group = document.createElement('div');
+    group.className = 'level-group';
+    group.innerHTML = `<div class="level-header"><div class="level-badge ${badge}"></div>${label} (${clouds.length})</div>`;
+    
+    clouds.forEach(c => {
+      const item = document.createElement('div');
+      item.className = 'act-cloud-item';
+      item.innerHTML = `
+        <div class="act-cloud-content">
+          <div class="act-cloud-header">
+            <div class="act-cloud-text">${esc(c.text)}</div>
+            <div class="act-cloud-actions">
+              <button class="level-btn l1 ${c.level===1?'active':''}" onclick="setCloudLevel('${c.id}',1)" title="Niveau 1">1</button>
+              <button class="level-btn l2 ${c.level===2?'active':''}" onclick="setCloudLevel('${c.id}',2)" title="Niveau 2">2</button>
+              <button class="level-btn l3 ${c.level===3?'active':''}" onclick="setCloudLevel('${c.id}',3)" title="Niveau 3">3</button>
+              <button class="icbtn del" onclick="removeCloudFromAct('${c.id}')" aria-label="Supprimer">✕</button>
+            </div>
+          </div>
+          <textarea class="act-cloud-textarea" id="cloud-txt-${c.id}" oninput="saveCloudText('${c.id}')" placeholder="Notes spécifiques pour ce nuage…">${esc(c.cloudText||'')}</textarea>
+        </div>
+      `;
+      group.appendChild(item);
+    });
+    
+    container.appendChild(group);
+  };
+  
+  renderLevel(level1, 1, 'Récit maître', 'l1');
+  renderLevel(level2, 2, 'Sous-intrigue', 'l2');
+  renderLevel(level3, 3, 'Texture / Détails', 'l3');
+  
+  if(act.clouds.length === 0) {
+    container.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-style:italic">Aucun nuage. Ajoutez-en pour enrichir cet acte.</div>';
+  }
+}
+
+function addCloudToAct(source) {
+  if(source === 'phase1') {
+    // Modal pour sélectionner depuis Phase 1
+    const p = P();
+    if(p.clouds.length === 0) {notif('Aucun nuage en Phase 1');return}
+    
+    const modal = document.createElement('div');
+    modal.id = 'cloud-select-modal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(17,16,9,.5);backdrop-filter:blur(4px);z-index:400;display:flex;align-items:center;justify-content:center';
+    modal.onclick = e => {if(e.target===modal) modal.remove()};
+    
+    const inner = document.createElement('div');
+    inner.style.cssText = 'background:var(--paper);border:1px solid var(--border);border-radius:5px;width:600px;max-width:95vw;max-height:80vh;display:flex;flex-direction:column;box-shadow:var(--shadow-lg)';
+    
+    inner.innerHTML = `
+      <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
+        <div style="flex:1;font-family:'Playfair Display',serif;font-size:1rem;font-style:italic">Sélectionner un nuage Phase 1</div>
+        <button class="btn btn-sm" onclick="document.getElementById('cloud-select-modal').remove()">Fermer</button>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:16px 20px">
+        ${p.clouds.map(c => `
+          <div style="padding:10px;border:1px solid var(--border);border-radius:3px;margin-bottom:8px;cursor:pointer;transition:all .15s" onmouseover="this.style.background='var(--paper2)'" onmouseout="this.style.background=''" onclick="selectCloudFromPhase1('${c.id}')">
+            <div style="font-size:.85rem">${esc(c.text)}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    
+    modal.appendChild(inner);
+    document.body.appendChild(modal);
+    
+  } else {
+    // Créer nouveau nuage
+    const text = prompt('Nouveau nuage :');
+    if(!text || !text.trim()) return;
+    
+    const p = P();
+    const act = p.phase2.structure.acts.find(a => a.id === currentActId);
+    if(!act) return;
+    
+    const cloudId = 'ac_'+Date.now().toString(36)+'_'+Math.random().toString(36).substr(2,5);
+    act.clouds.push({
+      id: cloudId,
+      text: text.trim(),
+      cloudText: '',
+      level: 2,
+      source: 'act'
+    });
+    
+    save();
+    renderActClouds();
+    notif('Nuage ajouté');
+  }
+}
+
+function selectCloudFromPhase1(cloudId) {
+  const p = P();
+  const cloud = p.clouds.find(c => c.id === cloudId);
+  if(!cloud) return;
+  
+  const act = p.phase2.structure.acts.find(a => a.id === currentActId);
+  if(!act) return;
+  
+  // Check if already added
+  if(act.clouds.find(c => c.id === cloudId)) {
+    notif('Ce nuage est déjà dans cet acte');
+    return;
+  }
+  
+  act.clouds.push({
+    id: cloudId,
+    text: cloud.text,
+    cloudText: '',
+    level: 2,
+    source: 'phase1'
+  });
+  
+  save();
+  renderActClouds();
+  document.getElementById('cloud-select-modal').remove();
+  notif('Nuage ajouté');
+}
+
+function setCloudLevel(cloudId, level) {
+  const p = P();
+  const act = p.phase2.structure.acts.find(a => a.id === currentActId);
+  if(!act) return;
+  
+  const cloud = act.clouds.find(c => c.id === cloudId);
+  if(!cloud) return;
+  
+  cloud.level = level;
+  save();
+  renderActClouds();
+}
+
+function removeCloudFromAct(cloudId) {
+  if(!confirm('Retirer ce nuage de cet acte ?')) return;
+  
+  const p = P();
+  const act = p.phase2.structure.acts.find(a => a.id === currentActId);
+  if(!act) return;
+  
+  act.clouds = act.clouds.filter(c => c.id !== cloudId);
+  save();
+  renderActClouds();
+}
+
+function saveActNarrative() {
+  const p = P();
+  const act = p.phase2.structure.acts.find(a => a.id === currentActId);
+  if(!act) return;
+  
+  act.narrative = id('act-narrative-txt').value;
+  save();
+}
+
+function saveCloudText(cloudId) {
+  const p = P();
+  const act = p.phase2.structure.acts.find(a => a.id === currentActId);
+  if(!act) return;
+  
+  const cloud = act.clouds.find(c => c.id === cloudId);
+  if(!cloud) return;
+  
+  const textarea = id(`cloud-txt-${cloudId}`);
+  if(textarea) {
+    cloud.cloudText = textarea.value;
+    save();
+  }
+}
+
+function validateAct() {
+  const p = P();
+  const act = p.phase2.structure.acts.find(a => a.id === currentActId);
+  if(!act) return;
+  
+  act.validated = true;
+  save();
+  jlog('analyse', `Acte validé : ${act.label}`);
+  notif('✓ Acte validé');
+  renderActs();
+}
+
+function unlockAct() {
+  if(!confirm('Déverrouiller cet acte pour le modifier ?')) return;
+  
+  const p = P();
+  const act = p.phase2.structure.acts.find(a => a.id === currentActId);
+  if(!act) return;
+  
+  act.validated = false;
+  save();
+  jlog('analyse', `Acte déverrouillé : ${act.label}`);
+  notif('🔓 Acte déverrouillé');
+  renderActs();
+}
+
+// ══════════════════════════════════════════
+// PROPOSER CONTINUITÉ
+// ══════════════════════════════════════════
+
+let currentContinuityProposal = '';
+
+async function proposeContinuity() {
+  if(!CFG.apiKey) {notif('Clé API manquante'); return}
+  
+  const p = P();
+  const act = p.phase2.structure.acts.find(a => a.id === currentActId);
+  if(!act) return;
+  
+  if(act.clouds.length === 0) {
+    notif('Ajoutez au moins un nuage');
+    return;
+  }
+  
+  const mode = id('continuity-mode').value;
+  const btn = id('propose-continuity-btn');
+  
+  btn.disabled = true;
+  btn.textContent = '⏳ Génération...';
+  
+  try {
+    // Build context
+    const context = buildContinuityContext(act);
+    const prompt = buildContinuityPrompt(context, mode);
+    
+    // Call Claude
+    const response = await callClaude([{role:'user', content: prompt}]);
+    
+    currentContinuityProposal = response.trim();
+    
+    // Show modal
+    showContinuityModal(act);
+    
+  } catch(err) {
+    console.error('Continuity generation failed:', err);
+    notif('⚠ Erreur génération');
+  }
+  
+  btn.disabled = false;
+  btn.textContent = '💡 Proposer continuité';
+}
+
+function buildContinuityContext(act) {
+  const p = P();
+  const struct = p.phase2.structure;
+  const brief = p.phase2.brief;
+  
+  // Get clouds by level
+  const cloudsN1 = act.clouds.filter(c => c.level === 1);
+  const cloudsN2 = act.clouds.filter(c => c.level === 2);
+  const cloudsN3 = act.clouds.filter(c => c.level === 3);
+  
+  // Get previous acts narratives
+  const actIndex = struct.acts.findIndex(a => a.id === act.id);
+  const previousNarratives = struct.acts
+    .slice(0, actIndex)
+    .filter(a => a.narrative && a.narrative.trim())
+    .map((a, i) => `## ${a.label}\n${a.narrative}`)
+    .join('\n\n');
+  
+  // Get dramatic logic for this act
+  const selectedStructures = struct.based_on.map(ncid => {
+    const all = Object.values(NARRATIVE_STRUCTURES).flat();
+    return all.find(s => s.id === ncid);
+  }).filter(Boolean);
+  
+  let dramaticLogic = '';
+  selectedStructures.forEach(s => {
+    if(s.dramatic_logic) {
+      const actKey = Object.keys(s.dramatic_logic)[actIndex] || Object.keys(s.dramatic_logic)[0];
+      if(actKey && s.dramatic_logic[actKey]) {
+        dramaticLogic += `${s.name} : ${s.dramatic_logic[actKey]}\n`;
+      }
+    }
+  });
+  
+  return {
+    actLabel: act.label,
+    actIndex: actIndex + 1,
+    totalActs: struct.acts.length,
+    structureName: struct.name,
+    format: brief.format,
+    genre: brief.genre || 'Non spécifié',
+    tone: brief.tone || 'Non spécifié',
+    cloudsN1,
+    cloudsN2,
+    cloudsN3,
+    currentNarrative: act.narrative || '',
+    previousNarratives,
+    dramaticLogic: dramaticLogic.trim() || 'Pas de logique dramatique spécifique'
+  };
+}
+
+function buildContinuityPrompt(ctx, mode) {
+  const modePrompts = {
+    exp: `Tu explores les possibles narratifs. Tu ouvres le champ, proposes des pistes multiples, détectes des patterns et résonances. Tu ne fermes pas.`,
+    app: `Tu approfondis psychanalytiquement. Tu cherches ce qui parle sous la surface : désirs, peurs, contradictions latentes.`,
+    res: `Tu adoptes un regard critique CONSTRUCTIF. Tu identifies ce qui ne fonctionne pas encore (incohérences, zones plates, contradictions narratives), tu expliques POURQUOI c'est problématique (diagnostic dramaturgique), et tu proposes des PISTES D'AMÉLIORATION concrètes (3-4 directions, pas solutions toutes faites). Tu conclus par 2-3 questions ouvertes pour itérer ensemble. Ton ton est exigeant mais bienveillant : tu veux que le récit soit le meilleur possible. Structure ta réponse : Diagnostic → Pourquoi problématique → Pistes d'amélioration → Questions pour itérer.`
+  };
+  
+  const prompt = `Tu travailles avec Looker Films sur un projet narratif ambitieux.
+
+**PROJET**
+Format : ${ctx.format}
+Genre : ${ctx.genre}
+Tonalité : ${ctx.tone}
+Structure : ${ctx.structureName}
+
+**TU TRAVAILLES SUR : ${ctx.actLabel}** (acte ${ctx.actIndex}/${ctx.totalActs})
+
+**LOGIQUE DRAMATIQUE DE CET ACTE** :
+${ctx.dramaticLogic}
+
+${ctx.previousNarratives ? `**ACTES PRÉCÉDENTS** (déjà écrits) :\n${ctx.previousNarratives}\n` : '**ACTES PRÉCÉDENTS** : Aucun (début du récit)\n'}
+
+**MATÉRIAU NARRATIF POUR CET ACTE** :
+
+**Nuages NIVEAU 1 (Récit maître — à AVANCER prioritairement)** :
+${ctx.cloudsN1.length > 0 ? ctx.cloudsN1.map((c,i) => `${i+1}. ${c.text}${c.cloudText ? '\n   Notes : '+c.cloudText : ''}`).join('\n') : 'Aucun'}
+
+**Nuages NIVEAU 2 (Sous-intrigue — à INTÉGRER)** :
+${ctx.cloudsN2.length > 0 ? ctx.cloudsN2.map((c,i) => `${i+1}. ${c.text}${c.cloudText ? '\n   Notes : '+c.cloudText : ''}`).join('\n') : 'Aucun'}
+
+**Nuages NIVEAU 3 (Texture/Détails — à ENRICHIR)** :
+${ctx.cloudsN3.length > 0 ? ctx.cloudsN3.map((c,i) => `${i+1}. ${c.text}${c.cloudText ? '\n   Notes : '+c.cloudText : ''}`).join('\n') : 'Aucun'}
+
+${ctx.currentNarrative ? `**TEXTE DÉJÀ ÉCRIT DANS CET ACTE** (${ctx.currentNarrative.split(/\s+/).length} mots) :\n${ctx.currentNarrative}\n` : '**TEXTE DÉJÀ ÉCRIT** : Aucun (zone vide)\n'}
+
+---
+
+**MODE : ${mode === 'exp' ? 'EXPLORER' : mode === 'app' ? 'APPROFONDIR' : 'RÉSISTER'}**
+${modePrompts[mode]}
+
+**TÂCHE** : Propose une continuité narrative de **200-300 mots** pour cet acte.
+
+**PRINCIPES** :
+1. **AVANCE le récit maître** (Nuages N1) — c'est la priorité absolue
+2. **INTÈGRE les sous-intrigues** (Nuages N2) subtilement, sans écraser N1
+3. **ENRICHIS avec détails** (Nuages N3) pour texture et profondeur
+4. Respecte la **logique dramatique** de cet acte
+5. Maintiens **cohérence** avec actes précédents
+6. ${ctx.currentNarrative ? 'Propose la SUITE du texte déjà écrit (ne répète pas)' : 'Commence l\'acte de manière forte'}
+7. **Ton professionnel** : prose narrative de qualité pitch, pas liste ni bullet points
+
+**LONGUEUR** : 200-300 mots (ni plus, ni moins)
+
+Réponds UNIQUEMENT avec le texte narratif (pas de préambule, pas de "Voici ma proposition", juste le texte).`;
+
+  return prompt;
+}
+
+function showContinuityModal(act) {
+  const modal = document.createElement('div');
+  modal.className = 'continuity-modal';
+  modal.id = 'continuity-modal';
+  modal.onclick = (e) => {if(e.target === modal) closeContinuityModal()};
+  
+  const inner = document.createElement('div');
+  inner.className = 'continuity-modal-inner';
+  
+  inner.innerHTML = `
+    <div class="continuity-modal-header">
+      <div class="continuity-modal-title">Continuité proposée — ${esc(act.label)}</div>
+      <button class="icbtn" onclick="closeContinuityModal()" aria-label="Fermer">✕</button>
+    </div>
+    
+    <div class="continuity-modal-body">
+      <div class="continuity-controls">
+        <select id="continuity-modal-mode" class="continuity-mode-select" onchange="regenerateContinuity()">
+          <option value="exp" ${id('continuity-mode').value === 'exp' ? 'selected' : ''}>Mode : Explorer</option>
+          <option value="app" ${id('continuity-mode').value === 'app' ? 'selected' : ''}>Mode : Approfondir</option>
+          <option value="res" ${id('continuity-mode').value === 'res' ? 'selected' : ''}>Mode : Résister</option>
+        </select>
+        <button class="btn btn-sm" onclick="regenerateContinuity()">🔄 Régénérer</button>
+      </div>
+      
+      <textarea class="continuity-textarea" id="continuity-proposal-txt">${esc(currentContinuityProposal)}</textarea>
+    </div>
+    
+    <div class="continuity-modal-footer">
+      <button class="btn" onclick="closeContinuityModal()">Annuler</button>
+      <button class="btn btn-ink" onclick="insertContinuity()">✓ Accepter et insérer</button>
+    </div>
+  `;
+  
+  modal.appendChild(inner);
+  document.body.appendChild(modal);
+}
+
+function closeContinuityModal() {
+  const modal = id('continuity-modal');
+  if(modal) modal.remove();
+}
+
+async function regenerateContinuity() {
+  const p = P();
+  const act = p.phase2.structure.acts.find(a => a.id === currentActId);
+  if(!act) return;
+  
+  const mode = id('continuity-modal-mode').value;
+  const textarea = id('continuity-proposal-txt');
+  
+  textarea.value = '⏳ Régénération...';
+  textarea.disabled = true;
+  
+  try {
+    const context = buildContinuityContext(act);
+    const prompt = buildContinuityPrompt(context, mode);
+    
+    const response = await callClaude([{role:'user', content: prompt}]);
+    
+    currentContinuityProposal = response.trim();
+    textarea.value = currentContinuityProposal;
+    textarea.disabled = false;
+    
+  } catch(err) {
+    console.error('Regeneration failed:', err);
+    textarea.value = 'Erreur lors de la régénération';
+    textarea.disabled = false;
+    notif('⚠ Erreur régénération');
+  }
+}
+
+function insertContinuity() {
+  const proposalText = id('continuity-proposal-txt').value.trim();
+  if(!proposalText) return;
+  
+  const narrativeArea = id('act-narrative-txt');
+  const existingText = narrativeArea.value.trim();
+  
+  if(existingText) {
+    // Add after existing text with double line break
+    narrativeArea.value = existingText + '\n\n' + proposalText;
+  } else {
+    // Insert directly
+    narrativeArea.value = proposalText;
+  }
+  
+  // Save
+  saveActNarrative();
+  
+  // Close modal
+  closeContinuityModal();
+  
+  // Notify and log
+  notif('✓ Continuité ajoutée');
+  jlog('analyse', 'Continuité narrative ajoutée');
+}
+
+console.log('Serendeep Phase 1 + Phase 2 — Ready');
+</script>
+</body>
+</html>
