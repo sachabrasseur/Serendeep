@@ -3967,13 +3967,23 @@ function saveCombo() {
   const comboKey = [...p.combo].sort().join('-');
   const dialogue = (p.comboDialogueTemp && p.comboDialogueTemp[comboKey]) ? p.comboDialogueTemp[comboKey] : [];
   const extractedElements = (p.comboExtractedTemp && p.comboExtractedTemp[comboKey]) ? p.comboExtractedTemp[comboKey] : [];
+  // Get modes data if exists
+  let modesData = null;
+  let finalMeaning = null;
+  let currentMode = 'developper';
   
+  if(p.comboModesTemp && p.comboModesTemp[comboKey]) {
+   modesData = p.comboModesTemp[comboKey].modes;
+    finalMeaning = p.comboModesTemp[comboKey].finalMeaning || null;
+    currentMode = p.comboModesTemp[comboKey].currentMode || 'developper';
+  }
   p.savedCombos.push({
     id:'cb'+Date.now().toString(36),
     name:nm,
     cloudIds:[...p.combo],
-    analysis:analysis.includes('apparaîtra')?'':analysis,
-    dialogue: dialogue,
+   modes: modesData,
+    currentMode: currentMode,
+    finalMeaning: finalMeaning
     extractedElements: extractedElements
   });
   
@@ -4051,7 +4061,7 @@ function renderComboDialogueMessages() {
   const div = id('combo-dlg-msgs');
   div.innerHTML = '';
   
-  comboDialogueHistory.forEach(m => {
+  const currentDialogue = comboModeState.modes[comboModeState.currentMode].dialogue;      currentDialogue.forEach(m => {
     const msgDiv = document.createElement('div');
     msgDiv.className = 'msg ' + (m.role === 'user' ? 'mu' : 'mc');
     msgDiv.innerHTML = `<span class="mlbl">${m.role === 'user' ? 'Vous' : 'Claude'}</span><div class="mb">${esc(m.content)}</div>`;
@@ -4073,7 +4083,7 @@ async function sendComboDialogue() {
   const cloudsTxt = clouds.map((c, i) => `NUAGE ${i+1}: ${c.text}${c.meaning ? '\nSens: ' + c.meaning : ''}`).join('\n\n');
   
   // Add user message
-  comboDialogueHistory.push({role: 'user', content: txt});
+  comboModeState.modes[comboModeState.currentMode].dialogue.push({role: 'user', content: txt});
   renderComboDialogueMessages();
   
   // Build system prompt
@@ -4094,12 +4104,13 @@ Ta mission : Aider à développer cette direction narrative. Propose des pistes,
     const response = await callClaudeWithSystem(systemPrompt, msgs);
     
     // Add assistant response
-    comboDialogueHistory.push({role: 'assistant', content: response});
+  comboModeState.modes[comboModeState.currentMode].dialogue.push({role: 'assistant', content: response});
     
-    // Save to temp storage
-    const comboKey = [...activeComboForDialogue].sort().join('-');
-    p.comboDialogueTemp[comboKey] = comboDialogueHistory;
-    save();
+    // Save
+    saveComboModeState();
+
+    
+
     
     renderComboDialogueMessages();
     
@@ -4110,28 +4121,58 @@ Ta mission : Aider à développer cette direction narrative. Propose des pistes,
 }
 
 function renderComboExtractedElements() {
-  const p = P();
-  const comboKey = [...activeComboForDialogue].sort().join('-');
+  const viewMode = comboModeState.elementsViewMode;
+  const currentMode = comboModeState.currentMode;
   
-  if(!p.comboExtractedTemp) p.comboExtractedTemp = {};
-  if(!p.comboExtractedTemp[comboKey]) p.comboExtractedTemp[comboKey] = [];
+  let elements;
   
-  const elements = p.comboExtractedTemp[comboKey];
+  // Mode Résister : affiche TOUS les éléments
+  if(viewMode === 'resister' && currentMode === 'resister') {
+    elements = [
+      ...comboModeState.modes.developper.extractedElements.map(el => ({...el, modeLabel: 'Dev'})),
+      ...comboModeState.modes.approfondir.extractedElements.map(el => ({...el, modeLabel: 'App'})),
+      ...comboModeState.modes.resister.extractedElements.map(el => ({...el, modeLabel: 'Res'}))
+    ];
+  } else {
+    elements = comboModeState.modes[viewMode].extractedElements;
+  }
+  
   const count = elements.length;
-  
-  id('combo-extracted-count').textContent = count;
   
   const listDiv = id('combo-extracted-list');
   const emptyDiv = id('combo-extracted-empty');
   
   if(count === 0) {
     emptyDiv.style.display = 'block';
-    // Remove any existing element divs
     Array.from(listDiv.children).forEach(child => {
       if(child.id !== 'combo-extracted-empty') child.remove();
     });
     return;
   }
+  
+  emptyDiv.style.display = 'none';
+  Array.from(listDiv.children).forEach(child => {
+    if(child.id !== 'combo-extracted-empty') child.remove();
+  });
+  
+  elements.forEach(el => {
+    const elDiv = document.createElement('div');
+    elDiv.style.cssText = 'background:var(--white);border:1px solid var(--border);border-radius:3px;padding:8px;margin-bottom:8px';
+    
+    const labelDisplay = el.modeLabel ? `<span style="font-size:.65rem;color:var(--muted)">[${el.modeLabel}]</span> ` : '';
+    const labelText = el.label ? `<span style="font-family:var(--mono);font-size:.65rem;text-transform:uppercase;color:var(--accent)">${esc(el.label)}</span>` : '';
+    
+    elDiv.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <div>${labelDisplay}${labelText}</div>
+        <button class="icbtn" onclick="deleteComboExtractedElement('${el.id}')" aria-label="Supprimer">✕</button>
+      </div>
+      <div style="font-size:.85rem;line-height:1.5">${esc(el.text)}</div>
+    `;
+    
+    listDiv.appendChild(elDiv);
+  });
+}
   
   emptyDiv.style.display = 'none';
   
@@ -4158,16 +4199,15 @@ function renderComboExtractedElements() {
 }
 
 function deleteComboExtractedElement(elId) {
-  const p = P();
-  const comboKey = [...activeComboForDialogue].sort().join('-');
+  // Find which mode contains this element
+  ['developper', 'approfondir', 'resister'].forEach(mode => {
+    comboModeState.modes[mode].extractedElements = 
+      comboModeState.modes[mode].extractedElements.filter(el => el.id !== elId);
+  });
   
-  if(!p.comboExtractedTemp) return;
-  if(!p.comboExtractedTemp[comboKey]) return;
-  
-  p.comboExtractedTemp[comboKey] = p.comboExtractedTemp[comboKey].filter(el => el.id !== elId);
-  save();
-  
+  saveComboModeState();
   renderComboExtractedElements();
+  updateComboElementTabsUI();
   notif('Élément supprimé');
 }
 
@@ -4252,11 +4292,11 @@ function saveComboExtractedElement() {
     extractedAt: Date.now()
   };
   
-  p.comboExtractedTemp[comboKey].push(element);
-  save();
+comboModeState.modes[comboModeState.currentMode].extractedElements.push(element);
+saveComboModeState();
   
   renderComboExtractedElements();
-  
+  updateComboElementTabsUI();
   document.querySelector('.extract-modal').remove();
   notif('✓ Élément extrait');
   jlog('extraction', 'Élément combo: ' + text.slice(0, 40));
@@ -4299,13 +4339,34 @@ function loadCombo(cid) {
   id('aout').className = 'aout'; 
   id('aout').textContent = cb.analysis||'Chargez puis analysez…';
   
-  // Load dialogue and extracted elements into temp storage
+  // Load modes structure
   const comboKey = [...cb.cloudIds].sort().join('-');
-  if(!p.comboDialogueTemp) p.comboDialogueTemp = {};
-  if(!p.comboExtractedTemp) p.comboExtractedTemp = {};
+  if(!p.comboModesTemp) p.comboModesTemp = {};
   
-  p.comboDialogueTemp[comboKey] = cb.dialogue || [];
-  p.comboExtractedTemp[comboKey] = cb.extractedElements || [];
+  if(cb.modes) {
+    // New format
+    p.comboModesTemp[comboKey] = {
+      modes: cb.modes,
+      currentMode: cb.currentMode || 'developper',
+      finalMeaning: cb.finalMeaning || null
+    };
+  } else {
+    // Old format migration
+    p.comboModesTemp[comboKey] = {
+      modes: {
+        developper: {
+          dialogue: cb.dialogue || [],
+          extractedElements: cb.extractedElements || [],
+          synthesis: null,
+          validated: false
+        },
+        approfondir: {dialogue: [], extractedElements: [], synthesis: null, validated: false},
+        resister: {dialogue: [], extractedElements: [], synthesis: null, validated: false}
+      },
+      currentMode: 'developper',
+      finalMeaning: null
+    };
+  }
   
   save(); 
   renderClouds(); 
