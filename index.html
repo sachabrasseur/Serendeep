@@ -3981,10 +3981,10 @@ function saveCombo() {
     id:'cb'+Date.now().toString(36),
     name:nm,
     cloudIds:[...p.combo],
+     analysis:analysis.includes('apparaîtra')?'':analysis,
    modes: modesData,
     currentMode: currentMode,
     finalMeaning: finalMeaning
-    extractedElements: extractedElements
   });
   
   id('cbname').value = '';
