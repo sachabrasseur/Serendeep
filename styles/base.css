@@ -1,0 +1,65 @@
+/* ══════════════════════════════════════════
+   SERENDEEP - BASE STYLES
+   Reset, Variables, Typography, Layout
+   ══════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@300;400&family=Crimson+Pro:wght@300;400;500;600&display=swap');
+
+/* === RESET === */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+/* === VARIABLES === */
+:root{
+  /* Palette papier/encre */
+  --ink:#111009;
+  --paper:#f6f3ee;
+  --paper2:#edeae4;
+  --paper3:#e2ddd6;
+  --white:#fff;
+  
+  /* Accents */
+  --accent:#bf3c18;
+  --muted:#8c8880;
+  --border:#cdc8c0;
+  --green:#3a6b49;
+  --orange:#c47a1a;
+  --blue:#2a5a8a;
+  --purple:#6b3a8a;
+  
+  /* Ombres */
+  --shadow:0 1px 8px rgba(17,16,9,.07),0 2px 20px rgba(17,16,9,.04);
+  --shadow-lg:0 4px 32px rgba(17,16,9,.12);
+}
+
+/* === BASE === */
+html,body{
+  height:100%;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'Crimson Pro',serif;
+  font-size:16px;
+  line-height:1.55;
+}
+
+/* Texture papier */
+body::after{
+  content:'';
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:9999;
+  opacity:.4;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='.07'/%3E%3C/svg%3E");
+}
+
+#app{
+  display:flex;
+  flex-direction:column;
+  height:100vh;
+  overflow:hidden;
+}
+
+/* === KEYFRAMES === */
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideInRight{from{transform:translateX(100%)}to{transform:translateX(0)}}
+@keyframes slideOutRight{from{transform:translateX(0)}to{transform:translateX(100%)}}

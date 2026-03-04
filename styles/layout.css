@@ -1,0 +1,213 @@
+/* ══════════════════════════════════════════
+   SERENDEEP - LAYOUT
+   Header, Phase Switcher, Tabs, Main
+   ══════════════════════════════════════════ */
+
+/* === HEADER === */
+#hdr{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:11px 24px;
+  border-bottom:1px solid var(--border);
+  background:rgba(246,243,238,.94);
+  backdrop-filter:blur(10px);
+  flex-shrink:0;
+  z-index:50;
+}
+
+.hdr-l{
+  display:flex;
+  align-items:baseline;
+  gap:14px;
+}
+
+.logo{
+  font-family:'Playfair Display',serif;
+  font-size:1.1rem;
+  font-weight:600;
+}
+
+.logo em{
+  color:var(--accent);
+  font-style:italic;
+}
+
+#proj-lbl{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.67rem;
+  color:var(--muted);
+  cursor:pointer;
+  border-bottom:1px dashed var(--border);
+  padding-bottom:1px;
+  transition:color .15s;
+  max-width:220px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+#proj-lbl:hover{color:var(--ink)}
+
+#ctr{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.62rem;
+  background:var(--paper3);
+  padding:2px 8px;
+  border-radius:20px;
+  color:var(--muted);
+}
+
+.hdr-r{
+  display:flex;
+  gap:7px;
+  align-items:center;
+}
+
+/* === PHASE SWITCHER === */
+#phase-switcher{
+  display:flex;
+  gap:0;
+  padding:8px 24px;
+  border-bottom:1px solid var(--border);
+  background:var(--paper2);
+}
+
+.phase-btn{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.72rem;
+  padding:6px 16px;
+  border:none;
+  background:transparent;
+  color:var(--muted);
+  cursor:pointer;
+  transition:all .2s;
+  border-radius:3px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.phase-btn:hover{
+  background:var(--paper);
+  color:var(--ink);
+}
+
+.phase-btn.active{
+  background:var(--paper);
+  color:var(--ink);
+  font-weight:500;
+}
+
+.phase-dot{
+  font-size:.9rem;
+  line-height:1;
+}
+
+.phase-btn.active .phase-dot{
+  color:var(--accent);
+}
+
+/* === MAIN CONTAINER === */
+#main{
+  flex:1;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+
+/* === HOME WELCOME === */
+#home{
+  padding:80px 24px;
+  text-align:center;
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+}
+
+#home h1{
+  font-family:'Playfair Display',serif;
+  font-size:2.2rem;
+  font-style:italic;
+  margin-bottom:16px;
+}
+
+#home h1 em{
+  color:var(--accent);
+}
+
+#home p{
+  color:var(--muted);
+  font-size:1.05rem;
+  max-width:450px;
+  margin:0 auto 40px;
+}
+
+/* === TABS NAVIGATION === */
+#tabs{
+  display:flex;
+  gap:0;
+  border-bottom:1px solid var(--border);
+  padding:0 24px;
+  background:var(--paper2);
+  overflow-x:auto;
+}
+
+.tab{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.72rem;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+  padding:10px 18px;
+  border:none;
+  background:transparent;
+  color:var(--muted);
+  cursor:pointer;
+  transition:all .17s;
+  border-bottom:2px solid transparent;
+  white-space:nowrap;
+}
+
+.tab:hover{
+  color:var(--ink);
+}
+
+.tab.active{
+  color:var(--ink);
+  font-weight:500;
+  border-bottom-color:var(--accent);
+}
+
+/* === SECTIONS (TAB CONTENT) === */
+.sec{
+  display:none;
+  flex:1;
+  overflow-y:auto;
+  padding:24px;
+}
+
+.sec.active{
+  display:block;
+}
+
+/* === PANELS === */
+.panel{
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:20px;
+  margin-bottom:16px;
+  box-shadow:var(--shadow);
+}
+
+.ptitle{
+  font-family:'Playfair Display',serif;
+  font-size:1.15rem;
+  font-style:italic;
+  margin-bottom:16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
