@@ -1,0 +1,4574 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Serendeep v2.1 — Tab Nuages</title>
+<meta name="description" content="Outil de développement narratif par saturation/émergence">
+
+<style>
+/* ══════════════════════════════════════════
+   SERENDEEP - Phase 1
+   Looker Films - Outil de développement narratif
+   ══════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@300;400&family=Crimson+Pro:wght@300;400;500;600&display=swap');
+
+/* === RESET & BASE === */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  /* Palette papier/encre */
+  --ink:#111009;
+  --paper:#f6f3ee;
+  --paper2:#edeae4;
+  --paper3:#e2ddd6;
+  --white:#fff;
+  
+  /* Accents */
+  --accent:#bf3c18;
+  --muted:#8c8880;
+  --border:#cdc8c0;
+  --green:#3a6b49;
+  --orange:#c47a1a;
+  --blue:#2a5a8a;
+  --purple:#6b3a8a;
+  
+  /* Ombres */
+  --shadow:0 1px 8px rgba(17,16,9,.07),0 2px 20px rgba(17,16,9,.04);
+  --shadow-lg:0 4px 32px rgba(17,16,9,.12);
+}
+
+html,body{
+  height:100%;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'Crimson Pro',serif;
+  font-size:16px;
+  line-height:1.55;
+}
+
+/* Texture papier */
+body::after{
+  content:'';
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:9999;
+  opacity:.4;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='.07'/%3E%3C/svg%3E");
+}
+
+#app{
+  display:flex;
+  flex-direction:column;
+  height:100vh;
+  overflow:hidden;
+}
+
+/* === HEADER === */
+#hdr{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:11px 24px;
+  border-bottom:1px solid var(--border);
+  background:rgba(246,243,238,.94);
+  backdrop-filter:blur(10px);
+  flex-shrink:0;
+  z-index:50;
+}
+
+.hdr-l{
+  display:flex;
+  align-items:baseline;
+  gap:14px;
+}
+
+.logo{
+  font-family:'Playfair Display',serif;
+  font-size:1.1rem;
+  font-weight:600;
+}
+
+.logo em{
+  color:var(--accent);
+  font-style:italic;
+}
+
+#proj-lbl{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.67rem;
+  color:var(--muted);
+  cursor:pointer;
+  border-bottom:1px dashed var(--border);
+  padding-bottom:1px;
+  transition:color .15s;
+  max-width:220px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+#proj-lbl:hover{color:var(--ink)}
+
+#ctr{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.62rem;
+  background:var(--paper3);
+  padding:2px 8px;
+  border-radius:20px;
+  color:var(--muted);
+}
+
+.hdr-r{
+  display:flex;
+  gap:7px;
+  align-items:center;
+}
+
+/* === PHASE SWITCHER === */
+#phase-switcher{
+  display:flex;
+  gap:0;
+  padding:8px 24px;
+  border-bottom:1px solid var(--border);
+  background:var(--paper2);
+}
+
+.phase-btn{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.72rem;
+  padding:6px 16px;
+  border:none;
+  background:transparent;
+  color:var(--muted);
+  cursor:pointer;
+  transition:all .2s;
+  border-radius:3px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.phase-btn:hover{
+  background:var(--paper);
+  color:var(--ink);
+}
+
+.phase-btn.active{
+  background:var(--paper);
+  color:var(--ink);
+  font-weight:500;
+}
+
+.phase-dot{
+  font-size:.9rem;
+  line-height:1;
+}
+
+.phase-btn.active .phase-dot{
+  color:var(--accent);
+}
+
+/* === BUTTONS === */
+.btn{
+  font-family:'Crimson Pro',serif;
+  font-size:.85rem;
+  padding:5px 13px;
+  border-radius:3px;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--ink);
+  cursor:pointer;
+  transition:all .15s;
+}
+
+.btn:hover{
+  background:var(--paper2);
+  border-color:var(--muted);
+}
+
+.btn-ink{
+  background:var(--ink);
+  color:var(--paper);
+  border-color:var(--ink);
+}
+
+.btn-ink:hover{
+  background:#2c2a26;
+}
+
+.btn-sm{
+  font-size:.77rem;
+  padding:4px 10px;
+}
+
+.btn-danger{
+  color:var(--accent);
+}
+
+.btn-danger:hover{
+  background:#fdf0ec;
+  border-color:#e8a898;
+}
+
+.btn-green{
+  color:var(--green);
+  border-color:var(--green);
+}
+
+.btn-green:hover{
+  background:#eef6f1;
+}
+
+.btn-ghost{
+  border-color:transparent;
+}
+
+.btn-ghost:hover{
+  background:var(--paper2);
+  border-color:var(--border);
+}
+
+/* === TABS === */
+#tabs{
+  display:flex;
+  padding:0 24px;
+  border-bottom:1px solid var(--border);
+  background:var(--paper);
+  flex-shrink:0;
+}
+
+.tab{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.68rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  padding:10px 16px;
+  border:none;
+  background:none;
+  color:var(--muted);
+  cursor:pointer;
+  border-bottom:2px solid transparent;
+  margin-bottom:-1px;
+  transition:all .15s;
+}
+
+.tab:hover{color:var(--ink)}
+
+.tab.on{
+  color:var(--ink);
+  border-bottom-color:var(--accent);
+}
+
+/* === MAIN === */
+#main{
+  flex:1;
+  overflow:hidden;
+  display:flex;
+  position:relative;
+}
+
+.sec{
+  display:none;
+  flex:1;
+  overflow-y:auto;
+  padding:22px 24px;
+  flex-direction:column;
+}
+
+.sec.on{display:flex}
+
+/* === TOOLBAR === */
+.toolbar{
+  display:flex;
+  gap:6px;
+  align-items:center;
+  flex-wrap:wrap;
+  margin-bottom:16px;
+}
+
+.fbtn{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.63rem;
+  letter-spacing:.07em;
+  text-transform:uppercase;
+  padding:4px 11px;
+  border-radius:2px;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--muted);
+  cursor:pointer;
+  transition:all .15s;
+}
+
+.fbtn:hover,.fbtn.on{
+  background:var(--ink);
+  color:var(--paper);
+  border-color:var(--ink);
+}
+
+.tsep{
+  width:1px;
+  height:20px;
+  background:var(--border);
+  margin:0 2px;
+}
+
+.srch-w{
+  position:relative;
+  display:flex;
+  align-items:center;
+}
+
+.srch-w svg{
+  position:absolute;
+  left:8px;
+  color:var(--muted);
+  pointer-events:none;
+}
+
+#srch{
+  font-family:'Crimson Pro',serif;
+  font-size:.87rem;
+  padding:5px 10px 5px 28px;
+  border:1px solid var(--border);
+  border-radius:3px;
+  background:var(--white);
+  color:var(--ink);
+  outline:none;
+  width:190px;
+  transition:border-color .15s;
+}
+
+#srch:focus{border-color:var(--muted)}
+#srch::placeholder{color:var(--muted);font-style:italic}
+
+/* === ADD FORM === */
+#add-form{
+  background:var(--white);
+  border:1px dashed var(--border);
+  border-radius:4px;
+  padding:13px;
+  margin-bottom:16px;
+  display:none;
+  flex-direction:column;
+  gap:9px;
+}
+
+#add-form.on{display:flex}
+
+#add-txt{
+  font-family:'Crimson Pro',serif;
+  font-size:.92rem;
+  line-height:1.6;
+  padding:9px;
+  border:1px solid var(--border);
+  border-radius:3px;
+  resize:vertical;
+  min-height:80px;
+  background:var(--paper);
+  color:var(--ink);
+  outline:none;
+  transition:border-color .15s;
+}
+
+#add-txt:focus{border-color:var(--muted)}
+
+.form-row{
+  display:flex;
+  gap:7px;
+  align-items:center;
+}
+
+.img-drop{
+  flex:1;
+  border:1px dashed var(--border);
+  border-radius:3px;
+  padding:7px 10px;
+  text-align:center;
+  cursor:pointer;
+  font-size:.78rem;
+  color:var(--muted);
+  font-style:italic;
+  transition:all .15s;
+}
+
+.img-drop:hover,.img-drop.drag{
+  background:var(--paper2);
+  border-color:var(--muted);
+}
+
+#img-in{display:none}
+
+/* === CLOUD GRID === */
+#cgrid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(225px,1fr));
+  gap:11px;
+  align-content:start;
+}
+
+.ccard{
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:12px;
+  cursor:pointer;
+  transition:all .17s;
+  position:relative;
+  box-shadow:var(--shadow);
+  display:flex;
+  flex-direction:column;
+  min-height:105px;
+  user-select:none;
+}
+
+.ccard:hover{
+  box-shadow:var(--shadow-lg);
+  transform:translateY(-1px);
+}
+
+.ccard.sel{
+  border:2px solid var(--green);
+  box-shadow:0 0 0 3px rgba(58,107,73,.13),var(--shadow);
+}
+
+.ccard.si{border-left:3px solid var(--orange)}
+.ccard.se{opacity:.56;background:var(--paper2)}
+.ccard.sc{border-left:3px solid var(--green)}
+.ccard.sv{border-top:2px solid var(--green)}
+
+.chk{
+  position:absolute;
+  top:8px;
+  right:8px;
+  width:16px;
+  height:16px;
+  border:1.5px solid var(--border);
+  border-radius:3px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:9px;
+  background:var(--white);
+  transition:all .13s;
+  pointer-events:none;
+}
+
+.ccard.sel .chk{
+  background:var(--green);
+  border-color:var(--green);
+  color:var(--paper);
+}
+
+.cimg-w{
+  position:relative;
+  margin-bottom:7px;
+}
+
+.cimg-w img{
+  width:100%;
+  height:76px;
+  object-fit:cover;
+  border-radius:2px;
+  display:block;
+}
+
+.rm-img{
+  position:absolute;
+  top:3px;
+  right:3px;
+  width:17px;
+  height:17px;
+  background:rgba(17,16,9,.6);
+  color:white;
+  border:none;
+  border-radius:2px;
+  cursor:pointer;
+  font-size:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  opacity:0;
+  transition:opacity .13s;
+}
+
+.cimg-w:hover .rm-img{opacity:1}
+
+.ctxt{
+  font-size:.85rem;
+  line-height:1.5;
+  flex:1;
+  overflow:hidden;
+  display:-webkit-box;
+  -webkit-line-clamp:5;
+  -webkit-box-orient:vertical;
+}
+
+.cmeaning{
+  font-size:.77rem;
+  color:var(--green);
+  font-style:italic;
+  line-height:1.45;
+  margin-top:6px;
+  padding-top:5px;
+  border-top:1px solid #d4e8db;
+}
+
+.cfooter{
+  display:flex;
+  gap:4px;
+  margin-top:8px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+.tag{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.58rem;
+  letter-spacing:.04em;
+  padding:2px 5px;
+  border-radius:2px;
+  border:1px solid var(--border);
+  color:var(--muted);
+  cursor:pointer;
+  transition:all .13s;
+}
+
+.tag:hover{background:var(--paper2)}
+
+.t-imp{
+  color:var(--orange);
+  border-color:var(--orange);
+  background:#fdf6ee;
+}
+
+.t-exp{background:var(--paper3)}
+
+.t-cmb{
+  color:var(--green);
+  border-color:var(--green);
+  background:#eef6f1;
+}
+
+.cacts{
+  display:flex;
+  gap:2px;
+  margin-left:auto;
+}
+
+.icbtn{
+  background:none;
+  border:none;
+  cursor:pointer;
+  color:var(--muted);
+  font-size:.78rem;
+  padding:2px 4px;
+  border-radius:2px;
+  transition:all .13s;
+}
+
+.icbtn:hover{
+  background:var(--paper2);
+  color:var(--ink);
+}
+
+.icbtn.del:hover{color:var(--accent)}
+
+.legend{
+  display:flex;
+  gap:14px;
+  margin-top:14px;
+  padding-top:11px;
+  border-top:1px solid var(--border);
+}
+
+.li{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  font-size:.76rem;
+  color:var(--muted);
+}
+
+.ls{
+  width:13px;
+  height:13px;
+  border-radius:2px;
+  border:2px solid currentColor;
+  flex-shrink:0;
+}
+
+.ls.lx{
+  border-color:var(--border);
+  background:var(--paper3);
+}
+
+.ls.li_{border-color:var(--orange)}
+.ls.lc{border-color:var(--green)}
+
+.empty{
+  grid-column:1/-1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:9px;
+  padding:46px 20px;
+  color:var(--muted);
+  text-align:center;
+  font-style:italic;
+}
+
+.empty .ei{
+  font-size:1.7rem;
+  opacity:.3;
+}
+
+/* === TESTS === */
+#sec-tests{gap:14px}
+
+.tgrid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+  flex:1;
+  min-height:0;
+}
+
+.panel{
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+
+.ptitle{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.63rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin-bottom:12px;
+  padding-bottom:9px;
+  border-bottom:1px solid var(--paper3);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.chips{
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px;
+  margin-bottom:10px;
+  min-height:30px;
+}
+
+.chip{
+  font-family:'Crimson Pro',serif;
+  font-size:.8rem;
+  padding:3px 9px;
+  background:var(--paper2);
+  border:1px solid var(--border);
+  border-radius:20px;
+  display:flex;
+  align-items:center;
+  gap:5px;
+}
+
+.chip-x{
+  cursor:pointer;
+  color:var(--muted);
+  line-height:1;
+  font-size:.88rem;
+  transition:color .12s;
+}
+
+.chip-x:hover{color:var(--accent)}
+
+/* Analyse mode buttons */
+.mode-bar{
+  display:flex;
+  gap:5px;
+  margin-bottom:10px;
+}
+
+.mdbtn{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.6rem;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  padding:4px 10px;
+  border-radius:2px;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--muted);
+  cursor:pointer;
+  transition:all .13s;
+}
+
+.mdbtn:hover{
+  border-color:var(--muted);
+  color:var(--ink);
+}
+
+.mdbtn.on-dev{
+  background:var(--ink);
+  color:var(--paper);
+  border-color:var(--ink);
+}
+
+.mdbtn.on-psy{
+  background:var(--purple);
+  color:var(--paper);
+  border-color:var(--purple);
+}
+
+.mdbtn.on-res{
+  background:var(--accent);
+  color:var(--paper);
+  border-color:var(--accent);
+}
+
+.aout{
+  font-size:.88rem;
+  line-height:1.7;
+  color:var(--ink);
+  flex:1;
+  overflow-y:auto;
+  white-space:pre-wrap;
+  padding:9px;
+  background:var(--paper);
+  border-radius:3px;
+  min-height:90px;
+}
+
+.aout.ph{
+  color:var(--muted);
+  font-style:italic;
+}
+
+.abar{
+  display:flex;
+  gap:7px;
+  align-items:center;
+  margin-top:9px;
+  border-top:1px solid var(--paper3);
+  padding-top:9px;
+}
+
+.nminput{
+  flex:1;
+  font-family:'Crimson Pro',serif;
+  font-size:.86rem;
+  padding:5px 9px;
+  border:1px solid var(--border);
+  border-radius:3px;
+  background:var(--paper);
+  color:var(--ink);
+  outline:none;
+}
+
+.nminput:focus{border-color:var(--muted)}
+
+.slist{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  overflow-y:auto;
+  flex:1;
+}
+
+.si{
+  padding:9px 12px;
+  border:1px solid var(--border);
+  border-radius:3px;
+  transition:all .13s;
+  display:flex;
+  align-items:flex-start;
+  gap:9px;
+}
+
+.si:hover{background:var(--paper2)}
+
+.si-body{
+  flex:1;
+  min-width:0;
+}
+
+.si-name{
+  font-size:.88rem;
+  font-weight:500;
+  margin-bottom:2px;
+}
+
+.si-desc{
+  font-size:.74rem;
+  color:var(--muted);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.si-acts{
+  display:flex;
+  gap:4px;
+  flex-shrink:0;
+}
+
+/* === TEASER === */
+#sec-teaser{gap:14px}
+
+.tagrid{
+  display:grid;
+  grid-template-columns:3fr 2fr;
+  gap:14px;
+  flex:1;
+  min-height:0;
+}
+
+.tsrc{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.63rem;
+  color:var(--muted);
+  margin-bottom:7px;
+  font-style:italic;
+}
+
+.tarea{
+  font-family:'Crimson Pro',serif;
+  font-size:1rem;
+  line-height:1.82;
+  padding:14px;
+  border:1px solid var(--border);
+  border-radius:3px;
+  background:var(--paper);
+  color:var(--ink);
+  outline:none;
+  resize:none;
+  flex:1;
+  min-height:180px;
+  transition:border-color .15s;
+  width:100%;
+}
+
+.tarea:focus{border-color:var(--muted)}
+
+.tctrl{
+  display:flex;
+  gap:7px;
+  margin-top:9px;
+  align-items:center;
+}
+
+.ph2btn{
+  background:var(--green);
+  color:white;
+  border:none;
+  padding:6px 14px;
+  border-radius:3px;
+  font-family:'Crimson Pro',serif;
+  font-size:.86rem;
+  cursor:pointer;
+  transition:background .15s;
+}
+
+.ph2btn:hover{background:#2f5a3b}
+
+/* === PROJETS SECTION === */
+#sec-projets{gap:0}
+
+.proj-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+  gap:12px;
+  margin-top:20px;
+}
+
+.proj-card{
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:18px;
+  box-shadow:var(--shadow);
+  cursor:pointer;
+  transition:all .17s;
+  position:relative;
+}
+
+.proj-card:hover{
+  box-shadow:var(--shadow-lg);
+  transform:translateY(-1px);
+}
+
+.proj-card.active-proj{
+  border:2px solid var(--green);
+  background:#f6fbf7;
+}
+
+.proj-card-name{
+  font-family:'Playfair Display',serif;
+  font-size:1rem;
+  font-style:italic;
+  margin-bottom:4px;
+}
+
+.proj-card-meta{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.62rem;
+  color:var(--muted);
+}
+
+.proj-card-acts{
+  display:flex;
+  gap:5px;
+  margin-top:12px;
+}
+
+.new-proj-form{
+  background:var(--white);
+  border:1px dashed var(--border);
+  border-radius:4px;
+  padding:16px;
+  display:none;
+  flex-direction:column;
+  gap:9px;
+  margin-top:12px;
+}
+
+.new-proj-form.on{display:flex}
+
+/* === JOURNAL === */
+#journal-modal{
+  position:fixed;
+  inset:0;
+  background:rgba(17,16,9,.5);
+  backdrop-filter:blur(4px);
+  z-index:450;
+  display:none;
+  align-items:center;
+  justify-content:center;
+}
+
+#journal-modal.on{display:flex}
+
+#journal-inner{
+  background:var(--paper);
+  border:1px solid var(--border);
+  border-radius:5px;
+  width:580px;
+  max-width:95vw;
+  max-height:80vh;
+  display:flex;
+  flex-direction:column;
+  box-shadow:var(--shadow-lg);
+}
+
+#journal-hdr{
+  padding:16px 20px;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+#journal-hdr h3{
+  flex:1;
+  font-family:'Playfair Display',serif;
+  font-size:1rem;
+  font-style:italic;
+}
+
+#journal-list{
+  flex:1;
+  overflow-y:auto;
+  padding:14px 20px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.jentry{
+  display:flex;
+  gap:10px;
+  align-items:baseline;
+  padding:6px 0;
+  border-bottom:1px solid var(--paper3);
+}
+
+.jentry:last-child{border-bottom:none}
+
+.jtime{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.6rem;
+  color:var(--muted);
+  flex-shrink:0;
+  width:82px;
+}
+
+.jtype{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.6rem;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  flex-shrink:0;
+  width:90px;
+}
+
+.jtype.jt-nuage{color:var(--blue)}
+.jtype.jt-sens{color:var(--green)}
+.jtype.jt-combo{color:var(--orange)}
+.jtype.jt-teaser{color:var(--accent)}
+.jtype.jt-analyse{color:var(--purple)}
+
+.jtxt{
+  font-size:.83rem;
+  color:var(--ink);
+  flex:1;
+  line-height:1.4;
+}
+
+/* === DIALOG PANEL === */
+#dlgp{
+  position:fixed;
+  top:0;
+  right:0;
+  width:900px;
+  max-width:95vw;
+  height:100vh;
+  background:rgba(246,243,238,.96);
+  backdrop-filter:blur(14px);
+  border-left:1px solid var(--border);
+  box-shadow:-2px 0 24px rgba(17,16,9,.09);
+  display:flex;
+  flex-direction:column;
+  transform:translateX(100%);
+  transition:transform .27s cubic-bezier(.4,0,.2,1);
+  z-index:200;
+}
+
+#dlgp.on{transform:translateX(0)}
+
+#dlghdr{
+  padding:14px 16px;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  gap:9px;
+  flex-shrink:0;
+}
+
+#dlgtitle{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.66rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--muted);
+  flex:1;
+}
+
+#dlgmode{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.6rem;
+  padding:2px 7px;
+  background:var(--paper3);
+  border-radius:10px;
+  color:var(--muted);
+}
+
+#dlgctx{
+  padding:9px 16px;
+  font-size:.78rem;
+  color:var(--muted);
+  font-style:italic;
+  border-bottom:1px solid var(--border);
+  line-height:1.45;
+  max-height:68px;
+  overflow:hidden;
+  display:none;
+}
+
+/* Dialog mode selector */
+#dlg-mode-bar{
+  display:flex;
+  gap:4px;
+  padding:8px 16px;
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+
+.dlgmdbtn{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.58rem;
+  letter-spacing:.07em;
+  text-transform:uppercase;
+  padding:3px 8px;
+  border-radius:2px;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--muted);
+  cursor:pointer;
+  transition:all .13s;
+  flex:1;
+  text-align:center;
+}
+
+.dlgmdbtn:hover{
+  border-color:var(--muted);
+  color:var(--ink);
+}
+
+.dlgmdbtn.on-dev{
+  background:var(--ink);
+  color:var(--paper);
+  border-color:var(--ink);
+}
+
+.dlgmdbtn.on-exp{
+  background:var(--blue);
+  color:var(--paper);
+  border-color:var(--blue);
+}
+
+.dlgmdbtn.on-psy{
+  background:var(--purple);
+  color:var(--paper);
+  border-color:var(--purple);
+}
+
+.dlgmdbtn.on-res{
+  background:var(--accent);
+  color:var(--paper);
+  border-color:var(--accent);
+}
+
+/* Dialogue extraction layout */
+#dlg-main-content{
+  flex:1;
+  display:flex;
+  overflow:hidden;
+}
+
+#dlg-dialogue-zone{
+  flex:65%;
+  display:flex;
+  flex-direction:column;
+  border-right:1px solid var(--border);
+}
+
+#dlg-extracted-zone{
+  flex:35%;
+  display:flex;
+  flex-direction:column;
+  background:var(--paper2);
+}
+
+#dlg-extracted-header{
+  padding:12px 16px;
+  border-bottom:1px solid var(--border);
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.65rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+
+#dlg-extracted-list{
+  flex:1;
+  overflow-y:auto;
+  padding:12px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.extracted-item{
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:3px;
+  padding:10px;
+  font-size:.85rem;
+  line-height:1.5;
+}
+
+.extracted-item-label{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.7rem;
+  color:var(--muted);
+  margin-bottom:4px;
+  text-transform:uppercase;
+}
+
+.extracted-item-text{
+  color:var(--ink);
+}
+
+.extracted-item-actions{
+  display:flex;
+  gap:6px;
+  margin-top:8px;
+  padding-top:8px;
+  border-top:1px solid var(--border);
+}
+
+#dlg-extracted-empty{
+  padding:40px 20px;
+  text-align:center;
+  color:var(--muted);
+  font-size:.85rem;
+  font-style:italic;
+}
+
+/* Extract selection button */
+#extract-selection-btn{
+  position:fixed;
+  background:var(--accent);
+  color:var(--white);
+  border:none;
+  padding:6px 12px;
+  border-radius:3px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.7rem;
+  text-transform:uppercase;
+  cursor:pointer;
+  box-shadow:var(--shadow);
+  z-index:300;
+  display:none;
+}
+
+#extract-selection-btn:hover{
+  background:#a03315;
+}
+
+/* Extract modal */
+.extract-modal{
+  position:fixed;
+  inset:0;
+  background:rgba(17,16,9,.6);
+  backdrop-filter:blur(4px);
+  z-index:400;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.extract-modal-inner{
+  background:var(--paper);
+  border:1px solid var(--border);
+  border-radius:6px;
+  width:600px;
+  max-width:95vw;
+  box-shadow:var(--shadow-lg);
+  padding:20px;
+}
+
+.extract-modal-title{
+  font-family:'Playfair Display',serif;
+  font-size:1.1rem;
+  font-style:italic;
+  margin-bottom:16px;
+}
+
+.extract-modal-textarea{
+  width:100%;
+  min-height:120px;
+  font-family:'Crimson Pro',serif;
+  font-size:.95rem;
+  line-height:1.7;
+  padding:12px;
+  border:1px solid var(--border);
+  border-radius:4px;
+  background:var(--white);
+  resize:vertical;
+  margin-bottom:12px;
+}
+
+.extract-modal-label-input{
+  width:100%;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.8rem;
+  padding:8px 12px;
+  border:1px solid var(--border);
+  border-radius:3px;
+  background:var(--white);
+  margin-bottom:16px;
+}
+
+.extract-modal-actions{
+  display:flex;
+  gap:10px;
+  justify-content:flex-end;
+}
+
+#dlgmsgs{
+  flex:1;
+  overflow-y:auto;
+  padding:12px 16px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.msg{
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+  max-width:90%;
+}
+
+.mu{
+  align-self:flex-end;
+  align-items:flex-end;
+}
+
+.mc{align-self:flex-start}
+
+.mb{
+  padding:8px 12px;
+  border-radius:3px;
+  font-size:.84rem;
+  line-height:1.6;
+  white-space:pre-wrap;
+}
+
+.mu .mb{
+  background:var(--ink);
+  color:var(--paper);
+}
+
+.mc .mb{
+  background:var(--white);
+  border:1px solid var(--border);
+  font-style:italic;
+}
+
+.mc.mc-exp .mb{
+  border-color:var(--blue);
+  background:#f0f6ff;
+}
+
+.mc.mc-psy .mb{
+  border-color:var(--purple);
+  background:#faf6ff;
+}
+
+.mc.mc-res .mb{
+  border-color:var(--accent);
+  background:#fff8f6;
+}
+
+.mlbl{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.57rem;
+  color:var(--muted);
+  letter-spacing:.05em;
+}
+
+#dlginp-a{
+  padding:10px 16px;
+  border-top:1px solid var(--border);
+  display:flex;
+  gap:6px;
+  flex-shrink:0;
+}
+
+#dlginp{
+  flex:1;
+  font-family:'Crimson Pro',serif;
+  font-size:.86rem;
+  padding:7px 9px;
+  border:1px solid var(--border);
+  border-radius:3px;
+  background:var(--paper);
+  color:var(--ink);
+  outline:none;
+  resize:none;
+  height:52px;
+  line-height:1.5;
+  transition:border-color .15s;
+}
+
+#dlginp:focus{border-color:var(--muted)}
+
+#dlg-meaning-zone{
+  padding:10px 16px;
+  border-top:1px solid var(--border);
+  background:var(--paper2);
+  flex-shrink:0;
+}
+
+#dlg-meaning-lbl{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.58rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin-bottom:5px;
+}
+
+#dlg-meaning-txt{
+  width:100%;
+  font-family:'Crimson Pro',serif;
+  font-size:.84rem;
+  padding:6px 9px;
+  border:1px solid var(--border);
+  border-radius:3px;
+  background:var(--white);
+  color:var(--ink);
+  outline:none;
+  resize:none;
+  height:48px;
+  line-height:1.5;
+  transition:border-color .15s;
+}
+
+#dlg-meaning-txt:focus{border-color:var(--green)}
+
+#dlg-meaning-bar{
+  display:flex;
+  gap:5px;
+  margin-top:5px;
+  align-items:center;
+}
+
+.meaning-status{
+  font-size:.74rem;
+  color:var(--green);
+  font-style:italic;
+  flex:1;
+}
+
+/* === GLOBAL MODAL === */
+#gm{
+  position:fixed;
+  inset:0;
+  background:rgba(17,16,9,.5);
+  backdrop-filter:blur(4px);
+  z-index:300;
+  display:none;
+  align-items:center;
+  justify-content:center;
+}
+
+#gm.on{display:flex}
+
+#gmi{
+  background:var(--paper);
+  border:1px solid var(--border);
+  border-radius:5px;
+  width:640px;
+  max-width:95vw;
+  max-height:80vh;
+  display:flex;
+  flex-direction:column;
+  box-shadow:var(--shadow-lg);
+}
+
+#gmhdr{
+  padding:16px 20px;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+#gmtitle{
+  flex:1;
+  font-family:'Playfair Display',serif;
+  font-size:1.05rem;
+  font-style:italic;
+}
+
+#gmmsgs{
+  flex:1;
+  overflow-y:auto;
+  padding:16px 20px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+#gminpa{
+  padding:12px 20px;
+  border-top:1px solid var(--border);
+  display:flex;
+  gap:7px;
+  flex-shrink:0;
+}
+
+#gminp{
+  flex:1;
+  font-family:'Crimson Pro',serif;
+  font-size:.88rem;
+  padding:8px 11px;
+  border:1px solid var(--border);
+  border-radius:3px;
+  background:var(--paper);
+  color:var(--ink);
+  outline:none;
+  resize:none;
+  height:60px;
+  line-height:1.5;
+  transition:border-color .15s;
+}
+
+#gminp:focus{border-color:var(--muted)}
+
+/* === SETUP MODAL === */
+#sm{
+  position:fixed;
+  inset:0;
+  background:rgba(17,16,9,.72);
+  backdrop-filter:blur(8px);
+  z-index:500;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+#smi{
+  background:var(--paper);
+  border:1px solid var(--border);
+  border-radius:5px;
+  padding:36px 40px;
+  width:490px;
+  max-width:95vw;
+  box-shadow:var(--shadow-lg);
+}
+
+.slogo{
+  font-family:'Playfair Display',serif;
+  font-size:1.9rem;
+  font-weight:600;
+  margin-bottom:4px;
+}
+
+.slogo em{
+  color:var(--accent);
+  font-style:italic;
+}
+
+.ssub{
+  color:var(--muted);
+  font-size:.86rem;
+  font-style:italic;
+  margin-bottom:24px;
+}
+
+.fg{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  margin-bottom:14px;
+}
+
+.fl{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.63rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+
+.fi{
+  font-family:'Crimson Pro',serif;
+  font-size:.92rem;
+  padding:8px 10px;
+  border:1px solid var(--border);
+  border-radius:3px;
+  background:var(--paper);
+  color:var(--ink);
+  outline:none;
+  transition:border-color .15s;
+}
+
+.fi:focus{border-color:var(--muted)}
+
+.snote{
+  font-size:.76rem;
+  color:var(--muted);
+  font-style:italic;
+  line-height:1.5;
+  margin-top:4px;
+}
+
+.snote a{color:var(--accent)}
+
+.setup-row{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  margin-top:4px;
+}
+
+.model-sel{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.7rem;
+  padding:5px 8px;
+  border:1px solid var(--border);
+  border-radius:3px;
+  background:var(--paper);
+  color:var(--ink);
+  outline:none;
+  cursor:pointer;
+}
+
+/* === COMPARE === */
+#cpm{
+  position:fixed;
+  inset:0;
+  background:rgba(17,16,9,.5);
+  backdrop-filter:blur(4px);
+  z-index:400;
+  display:none;
+  align-items:center;
+  justify-content:center;
+}
+
+#cpm.on{display:flex}
+
+#cpmi{
+  background:var(--paper);
+  border:1px solid var(--border);
+  border-radius:5px;
+  width:800px;
+  max-width:96vw;
+  max-height:82vh;
+  display:flex;
+  flex-direction:column;
+  box-shadow:var(--shadow-lg);
+}
+
+#cpmhdr{
+  padding:14px 20px;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+#cpmhdr h3{
+  flex:1;
+  font-family:'Playfair Display',serif;
+  font-size:.98rem;
+  font-style:italic;
+}
+
+#cpmbody{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  flex:1;
+  overflow:hidden;
+}
+
+.ccol{
+  padding:18px;
+  overflow-y:auto;
+  border-right:1px solid var(--border);
+}
+
+.ccol:last-child{border-right:none}
+
+.cctitle{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.65rem;
+  color:var(--muted);
+  margin-bottom:10px;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+
+.ccitem{
+  padding:7px 9px;
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:3px;
+  font-size:.84rem;
+  line-height:1.45;
+  margin-bottom:5px;
+}
+
+.ccana{
+  font-size:.86rem;
+  line-height:1.68;
+  font-style:italic;
+  white-space:pre-wrap;
+  color:var(--ink);
+  margin-top:12px;
+}
+
+/* === NOTIF === */
+#notif{
+  position:fixed;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%) translateY(14px);
+  background:var(--ink);
+  color:var(--paper);
+  padding:8px 16px;
+  border-radius:3px;
+  font-size:.82rem;
+  opacity:0;
+  transition:all .22s;
+  z-index:9998;
+  pointer-events:none;
+  white-space:nowrap;
+}
+
+#notif.on{
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
+}
+
+/* === LOADING === */
+.loading{
+  display:inline-flex;
+  gap:4px;
+  align-items:center;
+}
+
+.loading span{
+  width:5px;
+  height:5px;
+  background:var(--muted);
+  border-radius:50%;
+  animation:db 1.2s infinite;
+}
+
+.loading span:nth-child(2){animation-delay:.2s}
+.loading span:nth-child(3){animation-delay:.4s}
+
+@keyframes db{
+  0%,80%,100%{
+    transform:translateY(0);
+    opacity:.4;
+  }
+  40%{
+    transform:translateY(-5px);
+    opacity:1;
+  }
+}
+
+/* === SCROLLBAR === */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+.fi-ta{
+  font-family:'Crimson Pro',serif;
+  font-size:.85rem;
+  padding:7px 9px;
+  border:1px solid var(--border);
+  border-radius:3px;
+  background:var(--paper);
+  color:var(--ink);
+  outline:none;
+  resize:none;
+  line-height:1.5;
+  transition:border-color .15s;
+}
+
+.fi-ta:focus{border-color:var(--muted)}
+
+/* PHASE 2 MAP NODES */
+.mapnode{background:var(--paper);border:2px solid var(--border);border-radius:4px;padding:8px 16px;font-size:.85rem;cursor:pointer;transition:all .15s;display:inline-block}
+.mapnode:hover{border-color:var(--accent);box-shadow:var(--shadow)}
+.mapnode.done{border-color:var(--green);background:#f6fbf7}
+
+/* NARRATIVE CLOUDS CARDS */
+.ncloud-card{background:var(--white);border:2px solid var(--border);border-radius:4px;padding:14px;display:flex;align-items:flex-start;gap:10px;transition:all .17s;cursor:pointer}
+.ncloud-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-1px)}
+.ncloud-card.selected{border-color:var(--green);background:#f6fbf7}
+.ncloud-check{width:18px;height:18px;cursor:pointer;flex-shrink:0;margin-top:2px}
+.ncloud-name{font-size:.92rem;font-weight:600;margin-bottom:4px;color:var(--ink)}
+.ncloud-desc{font-size:.8rem;line-height:1.5;color:var(--muted)}
+
+/* TIMELINE VISUAL */
+.timeline-point{display:flex;align-items:center;gap:12px;padding:10px;border-left:3px solid var(--border);margin-bottom:8px;transition:all .15s}
+.timeline-point:hover{border-left-color:var(--accent);background:var(--paper2)}
+.timeline-minute{font-family:'IBM Plex Mono',monospace;font-size:.7rem;color:var(--muted);width:60px;flex-shrink:0}
+.timeline-label{font-weight:600;font-size:.88rem;color:var(--ink)}
+.timeline-desc{font-size:.78rem;color:var(--muted);line-height:1.4;margin-top:3px}
+
+/* ACTS */
+.act-tab{font-family:'IBM Plex Mono',monospace;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;padding:8px 14px;border:none;background:transparent;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
+.act-tab:hover{color:var(--ink)}
+.act-tab.active{color:var(--ink);border-bottom-color:var(--accent)}
+.act-tab.validated{color:var(--green)}
+
+/* ACT CLOUDS WITH LEVELS */
+.act-clouds-section{margin-bottom:20px}
+.level-group{margin-bottom:16px}
+.level-header{font-family:'IBM Plex Mono',monospace;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.level-badge{width:14px;height:14px;border-radius:50%;flex-shrink:0}
+.level-badge.l1{background:#bf3c18}
+.level-badge.l2{background:#c47a1a}
+.level-badge.l3{background:#3a6b49}
+
+.act-cloud-item{background:var(--white);border:1px solid var(--border);border-radius:3px;padding:10px;margin-bottom:6px;transition:all .15s}
+.act-cloud-item:hover{box-shadow:var(--shadow)}
+.act-cloud-content{width:100%}
+.act-cloud-text{flex:1;font-size:.85rem;line-height:1.5;margin-bottom:8px}
+.act-cloud-textarea{width:100%;min-height:80px;font-family:'Crimson Pro',serif;font-size:.85rem;line-height:1.6;padding:8px;border:1px solid var(--border);border-radius:3px;background:var(--paper);resize:vertical;margin-top:8px}
+.act-cloud-header{display:flex;align-items:flex-start;gap:10px}
+.act-cloud-actions{display:flex;gap:4px;flex-shrink:0}
+.level-btn{font-family:'IBM Plex Mono',monospace;font-size:.65rem;padding:3px 7px;border-radius:2px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .13s}
+.level-btn:hover{background:var(--paper2)}
+.level-btn.active{border-color:transparent;color:white}
+.level-btn.l1.active{background:#bf3c18}
+.level-btn.l2.active{background:#c47a1a}
+.level-btn.l3.active{background:#3a6b49}
+
+.act-narrative{margin:20px 0}
+.act-narrative-label{font-family:'IBM Plex Mono',monospace;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.act-narrative-area{width:100%;min-height:200px;font-family:'Crimson Pro',serif;font-size:.95rem;line-height:1.8;padding:14px;border:1px solid var(--border);border-radius:4px;background:var(--paper);resize:vertical}
+
+/* CONTINUITY MODE SELECT */
+.continuity-mode-select{font-family:'IBM Plex Mono',monospace;font-size:.75rem;padding:6px 10px;border:1px solid var(--border);border-radius:3px;background:var(--white);color:var(--ink);cursor:pointer}
+
+/* COMPLETENESS TABS */
+.completeness-tab{font-family:'IBM Plex Mono',monospace;font-size:.75rem;padding:8px 16px;border:none;background:transparent;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
+.completeness-tab:hover{color:var(--ink)}
+.completeness-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.completeness-tab-content{padding-top:12px}
+
+/* CONTINUITY MODAL */
+.continuity-modal{position:fixed;inset:0;background:rgba(17,16,9,.6);backdrop-filter:blur(4px);z-index:500;display:flex;align-items:center;justify-content:center;animation:fadeIn .2s}
+.continuity-modal-inner{background:var(--paper);border:1px solid var(--border);border-radius:6px;width:700px;max-width:95vw;max-height:85vh;display:flex;flex-direction:column;box-shadow:var(--shadow-lg)}
+.continuity-modal-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.continuity-modal-title{font-family:'Playfair Display',serif;font-size:1.1rem;font-style:italic;color:var(--ink)}
+.continuity-modal-body{flex:1;overflow-y:auto;padding:20px}
+.continuity-modal-footer{padding:16px 20px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end}
+.continuity-textarea{width:100%;min-height:300px;font-family:'Crimson Pro',serif;font-size:.95rem;line-height:1.8;padding:14px;border:1px solid var(--border);border-radius:4px;background:var(--white);resize:vertical}
+.continuity-controls{display:flex;gap:8px;margin-bottom:16px;align-items:center}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* ═══════════════════════════════════════════
+   TIMELINE & CARDS
+   ═══════════════════════════════════════════ */
+
+/* Timeline container */
+.timeline-section{margin:20px 0}
+.timeline-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.timeline-title{font-family:'IBM Plex Mono',monospace;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+
+/* Timeline grid */
+.timeline-grid{position:relative;background:var(--paper2);border:1px solid var(--border);border-radius:4px;padding:16px;min-height:200px}
+.timeline-ruler{display:flex;border-bottom:2px solid var(--border);padding-bottom:8px;margin-bottom:16px;position:relative}
+.timeline-marker{flex:1;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:.7rem;color:var(--muted);position:relative}
+.timeline-marker::before{content:'';position:absolute;bottom:-10px;left:50%;width:1px;height:6px;background:var(--border)}
+.timeline-marker:first-child{text-align:left}
+.timeline-marker:last-child{text-align:right}
+
+/* Timeline drop zone */
+.timeline-dropzone{min-height:150px;position:relative;border:2px dashed transparent;border-radius:4px;transition:all .2s}
+.timeline-dropzone.drag-over{border-color:var(--accent);background:rgba(191,60,24,.05)}
+
+/* Timeline card */
+.timeline-card{position:absolute;background:var(--white);border:2px solid;border-radius:4px;padding:8px 10px;cursor:grab;transition:box-shadow .2s;min-width:100px;max-width:200px}
+.timeline-card:active{cursor:grabbing}
+.timeline-card:hover{box-shadow:var(--shadow)}
+.timeline-card.level-1{border-color:#bf3c18}
+.timeline-card.level-2{border-color:#c47a1a}
+.timeline-card.level-3{border-color:#3a6b49}
+.timeline-card.expanded{position:relative;max-width:none;z-index:10}
+
+.timeline-card-header{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.timeline-card-level{font-family:'IBM Plex Mono',monospace;font-size:.65rem;font-weight:600;padding:2px 6px;border-radius:2px;color:white}
+.timeline-card-level.l1{background:#bf3c18}
+.timeline-card-level.l2{background:#c47a1a}
+.timeline-card-level.l3{background:#3a6b49}
+.timeline-card-time{font-family:'IBM Plex Mono',monospace;font-size:.65rem;color:var(--muted)}
+.timeline-card-actions{margin-left:auto;display:flex;gap:4px;opacity:0;transition:opacity .2s}
+.timeline-card:hover .timeline-card-actions{opacity:1}
+
+.timeline-card-text{font-size:.8rem;line-height:1.4;color:var(--ink);max-height:40px;overflow:hidden;text-overflow:ellipsis}
+.timeline-card.expanded .timeline-card-text{max-height:none;margin-bottom:8px}
+
+.timeline-card-expanded-content{display:none;border-top:1px solid var(--border);padding-top:8px;margin-top:8px}
+.timeline-card.expanded .timeline-card-expanded-content{display:block}
+
+.timeline-card-levels{display:flex;gap:4px;margin-bottom:8px}
+.timeline-card-level-btn{font-family:'IBM Plex Mono',monospace;font-size:.65rem;padding:4px 10px;border-radius:2px;border:1px solid var(--border);background:var(--paper);color:var(--muted);cursor:pointer;transition:all .15s}
+.timeline-card-level-btn:hover{background:var(--paper2)}
+.timeline-card-level-btn.active{border-color:transparent;color:white}
+.timeline-card-level-btn.active.l1{background:#bf3c18}
+.timeline-card-level-btn.active.l2{background:#c47a1a}
+.timeline-card-level-btn.active.l3{background:#3a6b49}
+
+.timeline-card-notes{width:100%;min-height:60px;font-family:'Crimson Pro',serif;font-size:.85rem;line-height:1.6;padding:8px;border:1px solid var(--border);border-radius:3px;background:var(--paper);resize:vertical;margin-bottom:8px}
+
+.timeline-card-footer{display:flex;gap:6px;justify-content:flex-end}
+
+/* Panel nuages disponibles */
+.timeline-clouds-panel{margin-bottom:20px}
+.timeline-clouds-header{font-family:'IBM Plex Mono',monospace;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+.timeline-clouds-list{display:flex;flex-wrap:wrap;gap:8px;padding:12px;background:var(--paper2);border:1px solid var(--border);border-radius:4px;min-height:60px}
+.timeline-cloud-chip{padding:6px 10px;background:var(--white);border:1px solid var(--border);border-radius:3px;font-size:.8rem;cursor:grab;transition:all .2s;display:flex;align-items:center;gap:6px}
+.timeline-cloud-chip:hover{border-color:var(--accent);box-shadow:var(--shadow)}
+.timeline-cloud-chip:active{cursor:grabbing}
+.timeline-cloud-chip-level{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.timeline-cloud-chip-level.l1{background:#bf3c18}
+.timeline-cloud-chip-level.l2{background:#c47a1a}
+.timeline-cloud-chip-level.l3{background:#3a6b49}
+
+/* Optimal order modal */
+.optimal-order-modal{position:fixed;inset:0;background:rgba(17,16,9,.6);backdrop-filter:blur(4px);z-index:500;display:flex;align-items:center;justify-content:center;animation:fadeIn .2s}
+.optimal-order-inner{background:var(--paper);border:1px solid var(--border);border-radius:6px;width:800px;max-width:95vw;max-height:85vh;display:flex;flex-direction:column;box-shadow:var(--shadow-lg)}
+.optimal-order-header{padding:16px 20px;border-bottom:1px solid var(--border)}
+.optimal-order-title{font-family:'Playfair Display',serif;font-size:1.1rem;font-style:italic;color:var(--ink)}
+.optimal-order-body{flex:1;overflow-y:auto;padding:20px}
+.optimal-order-section{margin-bottom:20px}
+.optimal-order-section-title{font-family:'IBM Plex Mono',monospace;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.optimal-order-footer{padding:16px 20px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end}
+
+.optimal-timeline-preview{display:flex;align-items:center;gap:8px;padding:16px;background:var(--paper2);border:1px solid var(--border);border-radius:4px;overflow-x:auto}
+.optimal-preview-card{padding:8px 12px;background:var(--white);border:2px solid;border-radius:3px;font-size:.75rem;white-space:nowrap;flex-shrink:0}
+.optimal-preview-card.level-1{border-color:#bf3c18}
+.optimal-preview-card.level-2{border-color:#c47a1a}
+.optimal-preview-card.level-3{border-color:#3a6b49}
+.optimal-preview-arrow{color:var(--muted);font-size:1.2rem;flex-shrink:0}
+
+
+/* ═══════════════════════════════════════════
+   CLOUDS TAB - NEW ARCHITECTURE
+   ═══════════════════════════════════════════ */
+
+/* Header */
+.clouds-header{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  margin-bottom:20px;
+  flex-wrap:wrap;
+}
+
+.clouds-filters{
+  display:flex;
+  gap:6px;
+  flex:1;
+}
+
+.filter-btn{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.7rem;
+  padding:6px 12px;
+  border:1px solid var(--border);
+  background:var(--paper);
+  color:var(--muted);
+  border-radius:3px;
+  cursor:pointer;
+  transition:all .15s;
+}
+
+.filter-btn:hover{
+  background:var(--paper2);
+  border-color:var(--muted);
+}
+
+.filter-btn.active{
+  background:var(--ink);
+  color:var(--paper);
+  border-color:var(--ink);
+}
+
+.clouds-search{
+  flex:0 0 200px;
+}
+
+.clouds-search input{
+  width:100%;
+  padding:6px 12px;
+  border:1px solid var(--border);
+  border-radius:3px;
+  font-family:'Crimson Pro',serif;
+  font-size:.9rem;
+}
+
+/* Add Form */
+.add-form{
+  display:none;
+  background:var(--white);
+  border:2px solid var(--accent);
+  border-radius:4px;
+  padding:20px;
+  margin-bottom:20px;
+  box-shadow:var(--shadow-lg);
+}
+
+.add-form.visible{
+  display:block;
+  animation:fadeIn .2s;
+}
+
+.add-form-inner h3{
+  font-family:'Playfair Display',serif;
+  font-size:1.1rem;
+  font-style:italic;
+  margin-bottom:16px;
+}
+
+.add-form textarea{
+  width:100%;
+  padding:12px;
+  border:1px solid var(--border);
+  border-radius:3px;
+  font-family:'Crimson Pro',serif;
+  font-size:.95rem;
+  line-height:1.6;
+  resize:vertical;
+  margin-bottom:16px;
+}
+
+.form-row{
+  display:flex;
+  gap:16px;
+  margin-bottom:16px;
+}
+
+.form-group{
+  flex:1;
+}
+
+.form-group label{
+  display:block;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.7rem;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin-bottom:6px;
+}
+
+.form-group select{
+  width:100%;
+  padding:8px 12px;
+  border:1px solid var(--border);
+  border-radius:3px;
+  font-family:'Crimson Pro',serif;
+  font-size:.9rem;
+  background:var(--white);
+}
+
+.image-drop-zone{
+  border:2px dashed var(--border);
+  border-radius:3px;
+  padding:20px;
+  text-align:center;
+  color:var(--muted);
+  transition:all .2s;
+}
+
+.image-drop-zone.drag-over{
+  border-color:var(--accent);
+  background:rgba(191,60,24,.05);
+}
+
+.form-actions{
+  display:flex;
+  gap:10px;
+  justify-content:flex-end;
+}
+
+/* Clouds Grid */
+.clouds-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:16px;
+}
+
+/* Cloud Card */
+.cloud-card{
+  background:var(--white);
+  border:2px solid var(--border);
+  border-radius:4px;
+  padding:16px;
+  transition:all .2s;
+  position:relative;
+}
+
+.cloud-card:hover{
+  box-shadow:var(--shadow-lg);
+  transform:translateY(-2px);
+}
+
+.cloud-card.cloud-important{
+  border-color:var(--accent);
+  background:rgba(191,60,24,.02);
+}
+
+.cloud-card.cloud-explored{
+  border-color:var(--green);
+}
+
+.cloud-card.cloud-with-meaning{
+  border-left:4px solid var(--green);
+}
+
+.cloud-level-badge{
+  position:absolute;
+  top:12px;
+  right:12px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.65rem;
+  font-weight:600;
+  padding:3px 8px;
+  border-radius:2px;
+  color:white;
+}
+
+.cloud-level-1 .cloud-level-badge{
+  background:var(--accent);
+}
+
+.cloud-level-2 .cloud-level-badge{
+  background:var(--orange);
+}
+
+.cloud-level-3 .cloud-level-badge{
+  background:var(--green);
+}
+
+.cloud-image{
+  position:relative;
+  margin-bottom:12px;
+}
+
+.cloud-image img{
+  width:100%;
+  height:150px;
+  object-fit:cover;
+  border-radius:3px;
+}
+
+.cloud-remove-image{
+  position:absolute;
+  top:8px;
+  right:8px;
+  width:24px;
+  height:24px;
+  border-radius:50%;
+  border:none;
+  background:rgba(0,0,0,.6);
+  color:white;
+  cursor:pointer;
+  opacity:0;
+  transition:opacity .2s;
+}
+
+.cloud-image:hover .cloud-remove-image{
+  opacity:1;
+}
+
+.cloud-text{
+  font-size:.9rem;
+  line-height:1.6;
+  margin-bottom:12px;
+}
+
+.cloud-meaning{
+  background:var(--paper2);
+  border-left:3px solid var(--green);
+  padding:10px;
+  font-size:.85rem;
+  font-style:italic;
+  color:var(--muted);
+  margin-bottom:12px;
+  border-radius:0 3px 3px 0;
+}
+
+.cloud-footer{
+  display:flex;
+  gap:6px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+.cloud-btn{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.65rem;
+  padding:5px 10px;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--muted);
+  border-radius:2px;
+  cursor:pointer;
+  transition:all .15s;
+}
+
+.cloud-btn:hover{
+  background:var(--paper2);
+  border-color:var(--muted);
+}
+
+.cloud-btn.active{
+  background:var(--accent);
+  color:white;
+  border-color:var(--accent);
+}
+
+.cloud-btn-important.active{
+  background:var(--accent);
+}
+
+.cloud-btn-explored.active{
+  background:var(--green);
+  border-color:var(--green);
+}
+
+.cloud-btn-delete{
+  margin-left:auto;
+  width:24px;
+  height:24px;
+  border-radius:50%;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--muted);
+  cursor:pointer;
+  transition:all .15s;
+}
+
+.cloud-btn-delete:hover{
+  background:var(--accent);
+  color:white;
+  border-color:var(--accent);
+}
+
+/* Empty State */
+.empty-state{
+  grid-column:1/-1;
+  text-align:center;
+  padding:60px 20px;
+  color:var(--muted);
+}
+
+.empty-icon{
+  font-size:4rem;
+  margin-bottom:16px;
+  opacity:.3;
+}
+
+.empty-text{
+  font-size:1.1rem;
+  margin-bottom:8px;
+}
+
+</style>
+
+</head>
+<body>
+<body>
+
+<!-- ══════════════════════════════════════════
+     SETUP MODAL
+     ══════════════════════════════════════════ -->
+<div id="sm">
+  <div id="smi">
+    <div class="slogo">Seren<em>deep</em></div>
+    <div class="ssub">Outil de développement narratif — Looker Films</div>
+    <div class="fg">
+      <label class="fl">Clé API Anthropic</label>
+      <input class="fi" id="s-key" type="password" placeholder="sk-ant-..." autocomplete="off">
+      <div class="snote">Stockée localement. <a href="https://console.anthropic.com/account/keys" target="_blank" rel="noopener">Obtenir une clé →</a></div>
+    </div>
+    <div class="fg">
+      <label class="fl">Modèle</label>
+      <div class="setup-row">
+        <select class="model-sel" id="s-model">
+          <option value="claude-sonnet-4-20250514">Sonnet 4 — rapide, économique</option>
+          <option value="claude-opus-4-20250514">Opus 4 — plus nuancé, plus coûteux</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-ink" id="s-done" style="width:100%;margin-top:10px;padding:10px">Commencer →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     APPLICATION
+     ══════════════════════════════════════════ -->
+<div id="app">
+  
+  <!-- HEADER -->
+  <div id="hdr">
+    <div class="hdr-l">
+      <div class="logo">Seren<em>deep</em></div>
+      <div id="proj-lbl">—</div>
+    </div>
+    <div class="hdr-r">
+      <div id="ctr">0 nuages</div>
+      <button class="btn btn-sm" title="Journal de bord">◷ Journal</button>
+      <button class="btn btn-sm" title="Exporter">↓ Exporter</button>
+      <button class="btn btn-sm" title="Paramètres">⚙</button>
+    </div>
+  </div>
+  
+  <!-- PHASE SWITCHER -->
+  <div id="phase-switcher">
+    <button class="phase-btn active" data-phase="1">
+      <span class="phase-dot">●</span>
+      <span>Phase 1 — Saturation</span>
+    </button>
+    <button class="phase-btn" data-phase="2">
+      <span class="phase-dot">●</span>
+      <span>Phase 2 — Structuration</span>
+    </button>
+  </div>
+  
+  <!-- MAIN CONTENT -->
+  <div id="main">
+    
+    <!-- HOME / WELCOME -->
+    <div id="home">
+      <h1>Seren<em>deep</em></h1>
+      <p>Outil de développement narratif par saturation/émergence pour la fiction audiovisuelle.</p>
+      <button class="btn btn-ink" onclick="window.serendeep.app.runTests()">🧪 Tester le système</button>
+    </div>
+    
+    <!-- TABS NAVIGATION (Phase 1) -->
+    <div id="tabs" style="display:none;">
+      <button class="tab active" data-tab="clouds">Nuages</button>
+      <button class="tab" data-tab="tests">Combinaisons</button>
+      <button class="tab" data-tab="teaser">Teaser</button>
+    </div>
+    
+    <!-- TAB CLOUDS -->
+    <div id="sec-clouds" class="sec">
+      
+      <!-- Header avec filtres et recherche -->
+      <div class="clouds-header">
+        <div class="clouds-filters">
+          <button class="filter-btn active" data-filter="all">Tous</button>
+          <button class="filter-btn" data-filter="important">Importants</button>
+          <button class="filter-btn" data-filter="explored">Explorés</button>
+          <button class="filter-btn" data-filter="unused">Non utilisés</button>
+          <button class="filter-btn" data-filter="withimg">Avec images</button>
+        </div>
+        <div class="clouds-search">
+          <input type="text" id="cloud-search" placeholder="Rechercher..." />
+        </div>
+        <button class="btn btn-ink" id="add-cloud-btn">+ Déposer un nuage</button>
+      </div>
+
+      <!-- Formulaire ajout nuage -->
+      <div id="add-cloud-form" class="add-form">
+        <div class="add-form-inner">
+          <h3>Nouveau nuage</h3>
+          <textarea id="add-cloud-text" placeholder="Écrivez votre idée intuitive..." rows="4"></textarea>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label>Niveau narratif</label>
+              <select id="add-cloud-level">
+                <option value="1">N1 — Récit maître</option>
+                <option value="2">N2 — Sous-intrigue</option>
+                <option value="3">N3 — Texture</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Image (optionnel)</label>
+            <div id="cloud-image-drop" class="image-drop-zone">
+              Glissez une image ou <input type="file" id="cloud-image-input" accept="image/*" style="display:inline;width:auto;" />
+            </div>
+            <div id="cloud-image-preview" style="display:none;margin-top:10px;">
+              <img src="" alt="Preview" style="max-width:200px;border-radius:3px;" />
+              <button class="btn btn-sm" onclick="window.serendeep.cloudsUI.clearImage()">Supprimer</button>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn cancel-btn">Annuler</button>
+            <button class="btn btn-ink submit-btn">Déposer</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grille des nuages -->
+      <div id="clouds-grid" class="clouds-grid">
+        <div class="empty-state">
+          <div class="empty-icon">◌</div>
+          <div class="empty-text">Aucun nuage pour le moment</div>
+          <p style="color:var(--muted);font-size:0.85rem;margin-top:8px;">
+            Déposez vos premières idées intuitives
+          </p>
+        </div>
+      </div>
+
+    </div>
+    
+    <!-- TAB TESTS (Combinaisons) -->
+    <div id="sec-tests" class="sec">
+      <div class="panel">
+        <div class="ptitle">Combinaisons</div>
+        <p style="color:var(--muted);">Section en cours de migration...</p>
+      </div>
+    </div>
+    
+    <!-- TAB TEASER -->
+    <div id="sec-teaser" class="sec">
+      <div class="panel">
+        <div class="ptitle">Teaser</div>
+        <p style="color:var(--muted);">Section en cours de migration...</p>
+      </div>
+    </div>
+    
+  </div><!-- end main -->
+</div><!-- end app -->
+
+<!-- JavaScript Modules -->
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// SERENDEEP v2.1 - CODE JAVASCRIPT INTÉGRÉ
+// ═══════════════════════════════════════════════════════════
+
+(function() {
+'use strict';
+
+// ═══ events.js ═══
+/**
+ * SERENDEEP - EVENT BUS
+ * Système d'événements pour communication inter-modules
+ */
+class EventBus {
+  constructor() {
+    this.events = {};
+  }
+  /**
+   * Écoute un événement
+   * @param {string} event - Nom de l'événement
+   * @param {Function} callback - Fonction callback
+   * @returns {Function} Fonction pour unsubscribe
+   */
+  on(event, callback) {
+    if (!this.events[event]) {
+      this.events[event] = [];
+    }
+    this.events[event].push(callback);
+    
+    // Retourne une fonction pour unsubscribe
+    return () => this.off(event, callback);
+  }
+  /**
+   * Arrête d'écouter un événement
+   * @param {string} event - Nom de l'événement
+   * @param {Function} callback - Fonction callback à retirer
+   */
+  off(event, callback) {
+    if (!this.events[event]) return;
+    
+    this.events[event] = this.events[event].filter(cb => cb !== callback);
+    
+    if (this.events[event].length === 0) {
+      delete this.events[event];
+    }
+  }
+  /**
+   * Émet un événement
+   * @param {string} event - Nom de l'événement
+   * @param {*} data - Données à passer aux listeners
+   */
+  emit(event, data) {
+    if (!this.events[event]) return;
+    
+    this.events[event].forEach(callback => {
+      try {
+        callback(data);
+      } catch (error) {
+        console.error(`Erreur dans listener de l'événement "${event}":`, error);
+      }
+    });
+  }
+  /**
+   * Écoute un événement une seule fois
+   * @param {string} event - Nom de l'événement
+   * @param {Function} callback - Fonction callback
+   */
+  once(event, callback) {
+    const onceCallback = (data) => {
+      callback(data);
+      this.off(event, onceCallback);
+    };
+    this.on(event, onceCallback);
+  }
+  /**
+   * Supprime tous les listeners
+   */
+  clear() {
+    this.events = {};
+  }
+  /**
+   * Liste tous les événements enregistrés
+   * @returns {string[]}
+   */
+  getEvents() {
+    return Object.keys(this.events);
+  }
+}
+// Instance singleton
+const eventBus = new EventBus();
+// Export de la classe pour tests
+{ EventBus };
+/**
+ * ÉVÉNEMENTS STANDARDS DE L'APPLICATION
+ */
+const EVENTS = {
+  // Projets
+  PROJECT_CREATED: 'project:created',
+  PROJECT_LOADED: 'project:loaded',
+  PROJECT_SWITCHED: 'project:switched',
+  PROJECT_DELETED: 'project:deleted',
+  PROJECT_UPDATED: 'project:updated',
+  
+  // Nuages
+  CLOUD_CREATED: 'cloud:created',
+  CLOUD_UPDATED: 'cloud:updated',
+  CLOUD_DELETED: 'cloud:deleted',
+  CLOUD_STATE_CHANGED: 'cloud:stateChanged',
+  
+  // Combinaisons
+  COMBO_SELECTED: 'combo:selected',
+  COMBO_SAVED: 'combo:saved',
+  COMBO_LOADED: 'combo:loaded',
+  COMBO_DELETED: 'combo:deleted',
+  
+  // Dialogues
+  DIALOGUE_OPENED: 'dialogue:opened',
+  DIALOGUE_CLOSED: 'dialogue:closed',
+  DIALOGUE_MESSAGE_SENT: 'dialogue:messageSent',
+  DIALOGUE_MESSAGE_RECEIVED: 'dialogue:messageReceived',
+  
+  // UI
+  TAB_CHANGED: 'ui:tabChanged',
+  PHASE_CHANGED: 'ui:phaseChanged',
+  NOTIFICATION_SHOWN: 'ui:notificationShown',
+  
+  // État
+  STATE_CHANGED: 'state:changed',
+  STATE_SAVED: 'state:saved',
+  STATE_LOADED: 'state:loaded'
+};
+
+// ═══ state.js ═══
+/**
+ * SERENDEEP - STATE MANAGEMENT
+ * Gestion centralisée de l'état de l'application
+ */
+/**
+ * Structure d'un projet vide
+ */
+function createEmptyProject(name = 'Nouveau Projet', author = 'Auteur') {
+  return {
+    id: `p${generateId()}`,
+    name,
+    author,
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+    
+    // Phase 1: Saturation
+    clouds: [],
+    combo: [],
+    savedCombos: [],
+    teaserText: '',
+    teaserFrom: null,
+    teaserAnalysis: null,
+    teaserValidated: false,
+    
+    // Dialogues & états temporaires
+    dlgH: {},  // Dialogues par nuage
+    gblH: [],  // Dialogue global
+    tdlgH: [], // Dialogue teaser
+    focId: null,
+    filter: 'all',
+    comboMode: 'dev',
+    dlgMode: 'exp',
+    
+    // Compteurs
+    nid: 1,
+    
+    // Journal
+    journal: [],
+    
+    // Stockage temporaire
+    comboDialogueTemp: {},
+    comboExtractedTemp: {},
+    comboModesTemp: {},
+    
+    // Phase 2: Structuration
+    phase2: {
+      active: false,
+      activatedAt: null,
+      brief: {
+        format: '',
+        duration: 0,
+        target: '',
+        tone: '',
+        references: '',
+        validated: false
+      },
+      teaser: {
+        v1: '',
+        v2: null,
+        v2_history: [],
+        analysis_v1: null,
+        validated: false
+      },
+      logline: {
+        proposals: [],
+        final: '',
+        validated: false
+      },
+      selected_narrative_clouds: [],
+      structure: {
+        type: '',
+        based_on: [],
+        name: '',
+        schema: null,
+        validated: false
+      },
+      characters: [],
+      synopsis: {
+        acte1: { text: '', validated: false },
+        acte2: { text: '', validated: false },
+        acte3: { text: '', validated: false }
+      },
+      noteIntention: {
+        text: '',
+        validated: false
+      },
+      reports: [],
+      current_report_id: null
+    }
+  };
+}
+class State {
+  constructor() {
+    // Configuration globale
+    this.config = {
+      apiKey: '',
+      model: 'claude-sonnet-4-20250514'
+    };
+    
+    // Projets
+    this.projects = {};
+    this.activeProjectId = null;
+    
+    // Initialisation
+    this.loadFromStorage();
+  }
+  /**
+   * Charge l'état depuis localStorage
+   */
+  loadFromStorage() {
+    // Charger config
+    const savedConfig = storage.loadConfig();
+    if (savedConfig) {
+      this.config = { ...this.config, ...savedConfig };
+    }
+    
+    // Charger projets
+    const savedData = storage.load();
+    if (savedData) {
+      this.projects = savedData.projects || {};
+      this.activeProjectId = savedData.activeProjectId || null;
+    }
+    
+    eventBus.emit(EVENTS.STATE_LOADED);
+  }
+  /**
+   * Sauvegarde l'état dans localStorage
+   * @returns {boolean}
+   */
+  save() {
+    const data = {
+      projects: this.projects,
+      activeProjectId: this.activeProjectId,
+      version: '1.0',
+      savedAt: Date.now()
+    };
+    
+    const success = storage.save(data);
+    if (success) {
+      eventBus.emit(EVENTS.STATE_SAVED, data);
+    }
+    return success;
+  }
+  /**
+   * Sauvegarde la configuration
+   * @returns {boolean}
+   */
+  saveConfig() {
+    return storage.saveConfig(this.config);
+  }
+  /**
+   * Récupère le projet actif
+   * @returns {Object}
+   */
+  getCurrentProject() {
+    if (!this.activeProjectId || !this.projects[this.activeProjectId]) {
+      return createEmptyProject();
+    }
+    return this.projects[this.activeProjectId];
+  }
+  /**
+   * Crée un nouveau projet
+   * @param {string} name - Nom du projet
+   * @param {string} author - Auteur
+   * @returns {Object}
+   */
+  createProject(name, author) {
+    const project = createEmptyProject(name, author);
+    this.projects[project.id] = project;
+    this.activeProjectId = project.id;
+    
+    this.save();
+    eventBus.emit(EVENTS.PROJECT_CREATED, project);
+    
+    return project;
+  }
+  /**
+   * Bascule vers un projet
+   * @param {string} projectId - ID du projet
+   * @returns {boolean}
+   */
+  switchProject(projectId) {
+    if (!this.projects[projectId]) {
+      console.error('Projet introuvable:', projectId);
+      return false;
+    }
+    
+    this.activeProjectId = projectId;
+    this.save();
+    
+    eventBus.emit(EVENTS.PROJECT_SWITCHED, this.getCurrentProject());
+    return true;
+  }
+  /**
+   * Supprime un projet
+   * @param {string} projectId - ID du projet
+   * @returns {boolean}
+   */
+  deleteProject(projectId) {
+    if (!this.projects[projectId]) {
+      return false;
+    }
+    
+    const wasActive = this.activeProjectId === projectId;
+    delete this.projects[projectId];
+    
+    if (wasActive) {
+      // Sélectionner un autre projet ou null
+      const projectIds = Object.keys(this.projects);
+      this.activeProjectId = projectIds.length > 0 ? projectIds[0] : null;
+    }
+    
+    this.save();
+    eventBus.emit(EVENTS.PROJECT_DELETED, projectId);
+    
+    return true;
+  }
+  /**
+   * Met à jour le projet actif
+   * @param {Object} updates - Propriétés à mettre à jour
+   */
+  updateCurrentProject(updates) {
+    if (!this.activeProjectId) return;
+    
+    const project = this.getCurrentProject();
+    Object.assign(project, updates);
+    project.updatedAt = Date.now();
+    
+    this.save();
+    eventBus.emit(EVENTS.PROJECT_UPDATED, project);
+  }
+  /**
+   * Liste tous les projets
+   * @returns {Array}
+   */
+  listProjects() {
+    return Object.values(this.projects);
+  }
+  /**
+   * Export des données
+   * @returns {string}
+   */
+  exportJSON() {
+    return storage.exportJSON();
+  }
+  /**
+   * Import de données
+   * @param {string} json - Données JSON
+   * @returns {boolean}
+   */
+  importJSON(json) {
+    const success = storage.importJSON(json);
+    if (success) {
+      this.loadFromStorage();
+    }
+    return success;
+  }
+  /**
+   * Réinitialise tout
+   */
+  reset() {
+    this.projects = {};
+    this.activeProjectId = null;
+    storage.clear();
+    eventBus.emit(EVENTS.STATE_CHANGED);
+  }
+}
+// Instance singleton
+const state = new State();
+// Export de la classe et fonction pour tests
+{ State, createEmptyProject };
+
+// ═══ storage.js ═══
+/**
+ * SERENDEEP - STORAGE
+ * Abstraction de localStorage avec gestion d'erreurs
+ */
+class Storage {
+  constructor() {
+    this.storageKey = 'serendeep_data';
+    this.configKey = 'serendeep_config';
+  }
+  /**
+   * Vérifie si localStorage est disponible
+   * @returns {boolean}
+   */
+  isAvailable() {
+    try {
+      const test = '__storage_test__';
+      localStorage.setItem(test, test);
+      localStorage.removeItem(test);
+      return true;
+    } catch (e) {
+      console.error('localStorage non disponible:', e);
+      return false;
+    }
+  }
+  /**
+   * Sauvegarde les données complètes
+   * @param {Object} data - Données à sauvegarder
+   * @returns {boolean} Succès
+   */
+  save(data) {
+    if (!this.isAvailable()) {
+      console.error('localStorage non disponible');
+      return false;
+    }
+    try {
+      const json = JSON.stringify(data);
+      localStorage.setItem(this.storageKey, json);
+      eventBus.emit(EVENTS.STATE_SAVED, data);
+      return true;
+    } catch (error) {
+      console.error('Erreur sauvegarde localStorage:', error);
+      
+      // Si quota dépassé, essayer de compresser
+      if (error.name === 'QuotaExceededError') {
+        console.warn('Quota localStorage dépassé');
+      }
+      
+      return false;
+    }
+  }
+  /**
+   * Charge les données
+   * @returns {Object|null}
+   */
+  load() {
+    if (!this.isAvailable()) {
+      return null;
+    }
+    try {
+      const json = localStorage.getItem(this.storageKey);
+      if (!json) return null;
+      
+      const data = JSON.parse(json);
+      eventBus.emit(EVENTS.STATE_LOADED, data);
+      return data;
+    } catch (error) {
+      console.error('Erreur chargement localStorage:', error);
+      return null;
+    }
+  }
+  /**
+   * Sauvegarde la configuration
+   * @param {Object} config - Configuration
+   * @returns {boolean}
+   */
+  saveConfig(config) {
+    if (!this.isAvailable()) return false;
+    try {
+      localStorage.setItem(this.configKey, JSON.stringify(config));
+      return true;
+    } catch (error) {
+      console.error('Erreur sauvegarde config:', error);
+      return false;
+    }
+  }
+  /**
+   * Charge la configuration
+   * @returns {Object|null}
+   */
+  loadConfig() {
+    if (!this.isAvailable()) return null;
+    try {
+      const json = localStorage.getItem(this.configKey);
+      return json ? JSON.parse(json) : null;
+    } catch (error) {
+      console.error('Erreur chargement config:', error);
+      return null;
+    }
+  }
+  /**
+   * Supprime les données
+   * @returns {boolean}
+   */
+  clear() {
+    if (!this.isAvailable()) return false;
+    try {
+      localStorage.removeItem(this.storageKey);
+      return true;
+    } catch (error) {
+      console.error('Erreur suppression données:', error);
+      return false;
+    }
+  }
+  /**
+   * Supprime toutes les données Serendeep
+   * @returns {boolean}
+   */
+  clearAll() {
+    if (!this.isAvailable()) return false;
+    try {
+      localStorage.removeItem(this.storageKey);
+      localStorage.removeItem(this.configKey);
+      return true;
+    } catch (error) {
+      console.error('Erreur suppression complète:', error);
+      return false;
+    }
+  }
+  /**
+   * Exporte les données en JSON
+   * @returns {string|null}
+   */
+  exportJSON() {
+    const data = this.load();
+    if (!data) return null;
+    try {
+      return JSON.stringify(data, null, 2);
+    } catch (error) {
+      console.error('Erreur export JSON:', error);
+      return null;
+    }
+  }
+  /**
+   * Importe des données depuis JSON
+   * @param {string} json - Données JSON
+   * @returns {boolean}
+   */
+  importJSON(json) {
+    try {
+      const data = JSON.parse(json);
+      return this.save(data);
+    } catch (error) {
+      console.error('Erreur import JSON:', error);
+      return false;
+    }
+  }
+  /**
+   * Récupère la taille utilisée en localStorage
+   * @returns {number} Taille en octets
+   */
+  getSize() {
+    if (!this.isAvailable()) return 0;
+    try {
+      const json = localStorage.getItem(this.storageKey);
+      return json ? new Blob([json]).size : 0;
+    } catch (error) {
+      return 0;
+    }
+  }
+  /**
+   * Récupère la taille formatée
+   * @returns {string}
+   */
+  getFormattedSize() {
+    const bytes = this.getSize();
+    if (bytes === 0) return '0 B';
+    
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+  }
+}
+// Instance singleton
+const storage = new Storage();
+// Export de la classe pour tests
+{ Storage };
+
+// ═══ utils.js ═══
+/**
+ * SERENDEEP - CORE UTILITIES
+ * Fonctions utilitaires globales
+ */
+/**
+ * Raccourci pour document.getElementById
+ * @param {string} x - ID de l'élément
+ * @returns {HTMLElement|null}
+ */
+const id = (x) => document.getElementById(x);
+/**
+ * Échappe les caractères HTML pour prévenir XSS
+ * @param {string} s - Chaîne à échapper
+ * @returns {string}
+ */
+const esc = (s) => 
+  String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+/**
+ * Génère un ID unique
+ * @returns {string}
+ */
+const generateId = () => {
+  return Date.now().toString(36) + Math.random().toString(36).substring(2);
+};
+/**
+ * Génère un UID pour les nuages
+ * @param {number} counter - Compteur de nuages
+ * @returns {string}
+ */
+const generateCloudId = (counter) => {
+  return `c${counter}_${Date.now().toString(36)}`;
+};
+/**
+ * Debounce function
+ * @param {Function} func - Fonction à debouncer
+ * @param {number} wait - Délai en ms
+ * @returns {Function}
+ */
+const debounce = (func, wait) => {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+};
+/**
+ * Formate une date en format lisible
+ * @param {number} timestamp - Timestamp
+ * @returns {string}
+ */
+const formatDate = (timestamp) => {
+  const date = new Date(timestamp);
+  return date.toLocaleDateString('fr-FR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+/**
+ * Compresse une image en base64
+ * @param {string} dataUrl - URL de l'image
+ * @param {Function} callback - Callback avec l'image compressée
+ * @param {number} maxWidth - Largeur max (défaut: 800)
+ * @param {number} quality - Qualité (défaut: 0.8)
+ */
+const compressImage = (dataUrl, callback, maxWidth = 800, quality = 0.8) => {
+  const img = new Image();
+  img.onload = () => {
+    const canvas = document.createElement('canvas');
+    let width = img.width;
+    let height = img.height;
+    
+    if (width > maxWidth) {
+      height = (height * maxWidth) / width;
+      width = maxWidth;
+    }
+    
+    canvas.width = width;
+    canvas.height = height;
+    
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, width, height);
+    
+    callback(canvas.toDataURL('image/jpeg', quality));
+  };
+  img.src = dataUrl;
+};
+/**
+ * Copie du texte dans le presse-papiers
+ * @param {string} text - Texte à copier
+ * @returns {Promise<void>}
+ */
+const copyToClipboard = async (text) => {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch (err) {
+    console.error('Erreur copie presse-papiers:', err);
+    return false;
+  }
+};
+/**
+ * Télécharge du contenu en tant que fichier
+ * @param {string} content - Contenu du fichier
+ * @param {string} filename - Nom du fichier
+ * @param {string} mimeType - Type MIME
+ */
+const downloadFile = (content, filename, mimeType = 'text/plain') => {
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+
+// ═══ Cloud.js ═══
+/**
+ * SERENDEEP - CLOUD MODEL
+ * Modèle de données pour un nuage
+ */
+/**
+ * États possibles d'un nuage
+ */
+const CLOUD_STATES = {
+  NORMAL: 'normal',
+  EXPLORED: 'explored',
+  IMPORTANT: 'important'
+};
+/**
+ * Niveaux narratifs
+ */
+const CLOUD_LEVELS = {
+  N1: 1,  // Récit maître
+  N2: 2,  // Sous-intrigue
+  N3: 3   // Texture
+};
+/**
+ * Classe Cloud
+ */
+class Cloud {
+  constructor(text, level = CLOUD_LEVELS.N1, image = null) {
+    this.id = null;  // Sera défini par le service
+    this.text = text;
+    this.level = level;
+    this.img = image;
+    this.state = CLOUD_STATES.NORMAL;
+    this.meaning = '';
+    this.ts = Date.now();
+    
+    // Dialogue et éléments extraits
+    this.dialogue = [];
+    this.extractedElements = [];
+  }
+  /**
+   * Valide les données du nuage
+   * @throws {Error} Si validation échoue
+   */
+  validate() {
+    if (!this.text || this.text.trim().length === 0) {
+      throw new Error('Le texte du nuage est requis');
+    }
+    
+    if (this.text.length > 5000) {
+      throw new Error('Le texte est trop long (max 5000 caractères)');
+    }
+    
+    if (!Object.values(CLOUD_LEVELS).includes(this.level)) {
+      throw new Error('Niveau invalide (doit être 1, 2 ou 3)');
+    }
+  }
+  /**
+   * Convertit le nuage en objet simple
+   * @returns {Object}
+   */
+  toJSON() {
+    return {
+      id: this.id,
+      text: this.text,
+      level: this.level,
+      img: this.img,
+      state: this.state,
+      meaning: this.meaning,
+      ts: this.ts,
+      dialogue: this.dialogue,
+      extractedElements: this.extractedElements
+    };
+  }
+  /**
+   * Crée un Cloud depuis un objet
+   * @param {Object} data - Données du nuage
+   * @returns {Cloud}
+   */
+  static fromJSON(data) {
+    const cloud = new Cloud(data.text, data.level, data.img);
+    cloud.id = data.id;
+    cloud.state = data.state || CLOUD_STATES.NORMAL;
+    cloud.meaning = data.meaning || '';
+    cloud.ts = data.ts;
+    cloud.dialogue = data.dialogue || [];
+    cloud.extractedElements = data.extractedElements || [];
+    return cloud;
+  }
+  /**
+   * Change l'état du nuage
+   * @param {string} newState - Nouvel état
+   */
+  setState(newState) {
+    if (!Object.values(CLOUD_STATES).includes(newState)) {
+      throw new Error('État invalide');
+    }
+    this.state = newState;
+  }
+  /**
+   * Définit le sens validé
+   * @param {string} meaning - Sens du nuage
+   */
+  setMeaning(meaning) {
+    this.meaning = meaning || '';
+  }
+  /**
+   * Ajoute un message au dialogue
+   * @param {Object} message - Message {role, content}
+   */
+  addDialogueMessage(message) {
+    this.dialogue.push({
+      ...message,
+      timestamp: Date.now()
+    });
+  }
+  /**
+   * Ajoute un élément extrait
+   * @param {Object} element - Élément {text, label}
+   */
+  addExtractedElement(element) {
+    this.extractedElements.push({
+      id: `el_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      text: element.text,
+      label: element.label || '',
+      extractedAt: Date.now()
+    });
+  }
+  /**
+   * Supprime un élément extrait
+   * @param {string} elementId - ID de l'élément
+   */
+  removeExtractedElement(elementId) {
+    this.extractedElements = this.extractedElements.filter(el => el.id !== elementId);
+  }
+  /**
+   * Vérifie si le nuage a été exploré (a du dialogue)
+   * @returns {boolean}
+   */
+  isExplored() {
+    return this.dialogue.length > 0 || this.state === CLOUD_STATES.EXPLORED;
+  }
+  /**
+   * Vérifie si le nuage est important
+   * @returns {boolean}
+   */
+  isImportant() {
+    return this.state === CLOUD_STATES.IMPORTANT;
+  }
+  /**
+   * Obtient un résumé court du texte
+   * @param {number} maxLength - Longueur max
+   * @returns {string}
+   */
+  getShortText(maxLength = 100) {
+    if (this.text.length <= maxLength) {
+      return this.text;
+    }
+    return this.text.substring(0, maxLength) + '…';
+  }
+}
+
+// ═══ CloudService.js ═══
+/**
+ * SERENDEEP - CLOUD SERVICE
+ * Logique métier pour la gestion des nuages
+ */
+class CloudService {
+  constructor(state) {
+    this.state = state;
+  }
+  /**
+   * Crée un nouveau nuage
+   * @param {string} text - Texte du nuage
+   * @param {number} level - Niveau (1, 2 ou 3)
+   * @param {string} image - Image en base64 (optionnel)
+   * @returns {Object} {success, cloud?, error?}
+   */
+  async createCloud(text, level = CLOUD_LEVELS.N1, image = null) {
+    try {
+      // Créer le nuage
+      const cloud = new Cloud(text, level, image);
+      cloud.validate();
+      
+      // Générer l'ID
+      const project = this.state.getCurrentProject();
+      cloud.id = generateCloudId(project.nid);
+      project.nid++;
+      
+      // Ajouter au projet (en début de liste)
+      project.clouds.unshift(cloud.toJSON());
+      
+      // Sauvegarder
+      this.state.save();
+      
+      // Logger dans le journal
+      this.logAction('nuage', cloud.getShortText(60));
+      
+      // Émettre événement
+      eventBus.emit(EVENTS.CLOUD_CREATED, cloud.toJSON());
+      
+      return { success: true, cloud: cloud.toJSON() };
+      
+    } catch (error) {
+      console.error('Erreur création nuage:', error);
+      return { success: false, error: error.message };
+    }
+  }
+  /**
+   * Récupère un nuage par son ID
+   * @param {string} cloudId - ID du nuage
+   * @returns {Object|null}
+   */
+  getCloud(cloudId) {
+    const project = this.state.getCurrentProject();
+    return project.clouds.find(c => c.id === cloudId) || null;
+  }
+  /**
+   * Récupère tous les nuages
+   * @returns {Array}
+   */
+  getAllClouds() {
+    const project = this.state.getCurrentProject();
+    return project.clouds;
+  }
+  /**
+   * Met à jour un nuage
+   * @param {string} cloudId - ID du nuage
+   * @param {Object} updates - Propriétés à mettre à jour
+   * @returns {Object} {success, cloud?, error?}
+   */
+  updateCloud(cloudId, updates) {
+    try {
+      const project = this.state.getCurrentProject();
+      const index = project.clouds.findIndex(c => c.id === cloudId);
+      
+      if (index === -1) {
+        return { success: false, error: 'Nuage introuvable' };
+      }
+      
+      // Mettre à jour
+      project.clouds[index] = {
+        ...project.clouds[index],
+        ...updates
+      };
+      
+      // Sauvegarder
+      this.state.save();
+      
+      // Émettre événement
+      eventBus.emit(EVENTS.CLOUD_UPDATED, project.clouds[index]);
+      
+      return { success: true, cloud: project.clouds[index] };
+      
+    } catch (error) {
+      console.error('Erreur mise à jour nuage:', error);
+      return { success: false, error: error.message };
+    }
+  }
+  /**
+   * Supprime un nuage
+   * @param {string} cloudId - ID du nuage
+   * @returns {Object} {success, error?}
+   */
+  deleteCloud(cloudId) {
+    try {
+      const project = this.state.getCurrentProject();
+      
+      // Vérifier que le nuage existe
+      const cloud = project.clouds.find(c => c.id === cloudId);
+      if (!cloud) {
+        return { success: false, error: 'Nuage introuvable' };
+      }
+      
+      // Supprimer des nuages
+      project.clouds = project.clouds.filter(c => c.id !== cloudId);
+      
+      // Supprimer des combinaisons si présent
+      project.combo = project.combo.filter(id => id !== cloudId);
+      
+      // Sauvegarder
+      this.state.save();
+      
+      // Logger
+      this.logAction('suppression', `Nuage supprimé: ${cloud.text.substring(0, 40)}...`);
+      
+      // Émettre événement
+      eventBus.emit(EVENTS.CLOUD_DELETED, cloudId);
+      
+      return { success: true };
+      
+    } catch (error) {
+      console.error('Erreur suppression nuage:', error);
+      return { success: false, error: error.message };
+    }
+  }
+  /**
+   * Change l'état d'un nuage
+   * @param {string} cloudId - ID du nuage
+   * @param {string} newState - Nouvel état
+   * @returns {Object} {success, cloud?, error?}
+   */
+  toggleState(cloudId, newState) {
+    const cloud = this.getCloud(cloudId);
+    if (!cloud) {
+      return { success: false, error: 'Nuage introuvable' };
+    }
+    
+    // Si déjà dans cet état, revenir à normal
+    const targetState = cloud.state === newState ? CLOUD_STATES.NORMAL : newState;
+    
+    const result = this.updateCloud(cloudId, { state: targetState });
+    
+    if (result.success) {
+      eventBus.emit(EVENTS.CLOUD_STATE_CHANGED, { cloudId, state: targetState });
+    }
+    
+    return result;
+  }
+  /**
+   * Définit le sens validé d'un nuage
+   * @param {string} cloudId - ID du nuage
+   * @param {string} meaning - Sens validé
+   * @returns {Object} {success, error?}
+   */
+  setMeaning(cloudId, meaning) {
+    return this.updateCloud(cloudId, { meaning });
+  }
+  /**
+   * Filtre les nuages selon des critères
+   * @param {string} filter - Type de filtre
+   * @returns {Array}
+   */
+  filterClouds(filter) {
+    const clouds = this.getAllClouds();
+    
+    switch (filter) {
+      case 'important':
+        return clouds.filter(c => c.state === CLOUD_STATES.IMPORTANT);
+      
+      case 'explored':
+        return clouds.filter(c => 
+          c.state === CLOUD_STATES.EXPLORED || 
+          (c.dialogue && c.dialogue.length > 0)
+        );
+      
+      case 'unused':
+        const project = this.state.getCurrentProject();
+        const usedIds = new Set(project.combo);
+        return clouds.filter(c => !usedIds.has(c.id));
+      
+      case 'withimg':
+        return clouds.filter(c => c.img);
+      
+      case 'n1':
+        return clouds.filter(c => c.level === CLOUD_LEVELS.N1);
+      
+      case 'n2':
+        return clouds.filter(c => c.level === CLOUD_LEVELS.N2);
+      
+      case 'n3':
+        return clouds.filter(c => c.level === CLOUD_LEVELS.N3);
+      
+      case 'all':
+      default:
+        return clouds;
+    }
+  }
+  /**
+   * Recherche des nuages par texte
+   * @param {string} query - Recherche
+   * @returns {Array}
+   */
+  searchClouds(query) {
+    if (!query || query.trim().length === 0) {
+      return this.getAllClouds();
+    }
+    
+    const searchTerm = query.toLowerCase().trim();
+    const clouds = this.getAllClouds();
+    
+    return clouds.filter(cloud => 
+      cloud.text.toLowerCase().includes(searchTerm) ||
+      (cloud.meaning && cloud.meaning.toLowerCase().includes(searchTerm))
+    );
+  }
+  /**
+   * Ajoute un message au dialogue d'un nuage
+   * @param {string} cloudId - ID du nuage
+   * @param {Object} message - Message {role, content}
+   * @returns {Object} {success, error?}
+   */
+  addDialogueMessage(cloudId, message) {
+    const cloud = this.getCloud(cloudId);
+    if (!cloud) {
+      return { success: false, error: 'Nuage introuvable' };
+    }
+    
+    const dialogue = cloud.dialogue || [];
+    dialogue.push({
+      ...message,
+      timestamp: Date.now()
+    });
+    
+    return this.updateCloud(cloudId, { dialogue });
+  }
+  /**
+   * Ajoute un élément extrait à un nuage
+   * @param {string} cloudId - ID du nuage
+   * @param {Object} element - Élément {text, label}
+   * @returns {Object} {success, element?, error?}
+   */
+  addExtractedElement(cloudId, element) {
+    const cloud = this.getCloud(cloudId);
+    if (!cloud) {
+      return { success: false, error: 'Nuage introuvable' };
+    }
+    
+    const extractedElements = cloud.extractedElements || [];
+    const newElement = {
+      id: `el_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      text: element.text,
+      label: element.label || '',
+      extractedAt: Date.now()
+    };
+    
+    extractedElements.push(newElement);
+    
+    const result = this.updateCloud(cloudId, { extractedElements });
+    
+    if (result.success) {
+      return { success: true, element: newElement };
+    }
+    
+    return result;
+  }
+  /**
+   * Supprime un élément extrait
+   * @param {string} cloudId - ID du nuage
+   * @param {string} elementId - ID de l'élément
+   * @returns {Object} {success, error?}
+   */
+  removeExtractedElement(cloudId, elementId) {
+    const cloud = this.getCloud(cloudId);
+    if (!cloud) {
+      return { success: false, error: 'Nuage introuvable' };
+    }
+    
+    const extractedElements = (cloud.extractedElements || [])
+      .filter(el => el.id !== elementId);
+    
+    return this.updateCloud(cloudId, { extractedElements });
+  }
+  /**
+   * Supprime l'image d'un nuage
+   * @param {string} cloudId - ID du nuage
+   * @returns {Object} {success, error?}
+   */
+  removeImage(cloudId) {
+    return this.updateCloud(cloudId, { img: null });
+  }
+  /**
+   * Statistiques sur les nuages
+   * @returns {Object}
+   */
+  getStats() {
+    const clouds = this.getAllClouds();
+    
+    return {
+      total: clouds.length,
+      important: clouds.filter(c => c.state === CLOUD_STATES.IMPORTANT).length,
+      explored: clouds.filter(c => 
+        c.state === CLOUD_STATES.EXPLORED || 
+        (c.dialogue && c.dialogue.length > 0)
+      ).length,
+      withImage: clouds.filter(c => c.img).length,
+      withMeaning: clouds.filter(c => c.meaning).length,
+      byLevel: {
+        n1: clouds.filter(c => c.level === CLOUD_LEVELS.N1).length,
+        n2: clouds.filter(c => c.level === CLOUD_LEVELS.N2).length,
+        n3: clouds.filter(c => c.level === CLOUD_LEVELS.N3).length
+      }
+    };
+  }
+  /**
+   * Log une action dans le journal
+   * @param {string} type - Type d'action
+   * @param {string} text - Texte de l'action
+   */
+  logAction(type, text) {
+    const project = this.state.getCurrentProject();
+    
+    project.journal.unshift({
+      ts: Date.now(),
+      type: `jt-${type}`,
+      txt: text
+    });
+    
+    // Limiter à 200 entrées
+    if (project.journal.length > 200) {
+      project.journal.pop();
+    }
+  }
+}
+
+// ═══ CloudsUI.js ═══
+/**
+ * SERENDEEP - CLOUDS UI
+ * Interface utilisateur pour le tab Nuages
+ */
+class CloudsUI {
+  constructor(cloudService, state) {
+    this.cloudService = cloudService;
+    this.state = state;
+    this.currentFilter = 'all';
+    this.currentSearch = '';
+    this.tempImage = null;
+    
+    this.init();
+  }
+  /**
+   * Initialise l'interface
+   */
+  init() {
+    this.setupEventListeners();
+    this.subscribeToEvents();
+    this.render();
+  }
+  /**
+   * Configure les event listeners DOM
+   */
+  setupEventListeners() {
+    // Bouton ajouter nuage
+    const addBtn = id('add-cloud-btn');
+    if (addBtn) {
+      addBtn.addEventListener('click', () => this.toggleAddForm());
+    }
+    // Formulaire ajout
+    const form = id('add-cloud-form');
+    if (form) {
+      const submitBtn = form.querySelector('.submit-btn');
+      if (submitBtn) {
+        submitBtn.addEventListener('click', () => this.handleAddCloud());
+      }
+      const cancelBtn = form.querySelector('.cancel-btn');
+      if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => this.toggleAddForm());
+      }
+    }
+    // Recherche avec debounce
+    const searchInput = id('cloud-search');
+    if (searchInput) {
+      let timeout;
+      searchInput.addEventListener('input', (e) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+          this.currentSearch = e.target.value;
+          this.render();
+        }, 300);
+      });
+    }
+    // Filtres
+    document.querySelectorAll('[data-filter]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        this.setFilter(e.target.dataset.filter);
+      });
+    });
+    // Upload image
+    const imgInput = id('cloud-image-input');
+    if (imgInput) {
+      imgInput.addEventListener('change', (e) => this.handleImageUpload(e));
+    }
+    // Drag & drop image
+    const dropZone = id('cloud-image-drop');
+    if (dropZone) {
+      dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('drag-over');
+      });
+      dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('drag-over');
+      });
+      dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('drag-over');
+        this.handleImageDrop(e);
+      });
+    }
+  }
+  /**
+   * S'abonne aux événements du système
+   */
+  subscribeToEvents() {
+    eventBus.on(EVENTS.CLOUD_CREATED, () => {
+      this.render();
+      this.updateHeader();
+    });
+    eventBus.on(EVENTS.CLOUD_UPDATED, () => {
+      this.render();
+    });
+    eventBus.on(EVENTS.CLOUD_DELETED, () => {
+      this.render();
+      this.updateHeader();
+    });
+    eventBus.on(EVENTS.PROJECT_SWITCHED, () => {
+      this.render();
+      this.updateHeader();
+    });
+  }
+  /**
+   * Affiche/cache le formulaire d'ajout
+   */
+  toggleAddForm() {
+    const form = id('add-cloud-form');
+    if (!form) return;
+    const isVisible = form.classList.contains('visible');
+    
+    if (isVisible) {
+      form.classList.remove('visible');
+      this.clearForm();
+    } else {
+      form.classList.add('visible');
+      const textarea = form.querySelector('textarea');
+      if (textarea) textarea.focus();
+    }
+  }
+  /**
+   * Gère l'ajout d'un nuage
+   */
+  async handleAddCloud() {
+    const textarea = id('add-cloud-text');
+    const levelSelect = id('add-cloud-level');
+    
+    if (!textarea) return;
+    const text = textarea.value.trim();
+    if (!text) {
+      notifications.error('Le texte du nuage est requis');
+      return;
+    }
+    const level = levelSelect ? parseInt(levelSelect.value) : CLOUD_LEVELS.N1;
+    // Créer le nuage
+    const result = await this.cloudService.createCloud(text, level, this.tempImage);
+    if (result.success) {
+      notifications.success('Nuage créé');
+      this.clearForm();
+      this.toggleAddForm();
+    } else {
+      notifications.error(result.error || 'Erreur lors de la création');
+    }
+  }
+  /**
+   * Nettoie le formulaire
+   */
+  clearForm() {
+    const textarea = id('add-cloud-text');
+    if (textarea) textarea.value = '';
+    const preview = id('cloud-image-preview');
+    if (preview) preview.style.display = 'none';
+    this.tempImage = null;
+  }
+  /**
+   * Gère l'upload d'image
+   */
+  handleImageUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      notifications.error('Le fichier doit être une image');
+      return;
+    }
+    this.processImage(file);
+  }
+  /**
+   * Gère le drop d'image
+   */
+  handleImageDrop(event) {
+    const file = event.dataTransfer.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      notifications.error('Le fichier doit être une image');
+      return;
+    }
+    this.processImage(file);
+  }
+  /**
+   * Traite et compresse une image
+   */
+  processImage(file) {
+    const reader = new FileReader();
+    
+    reader.onload = (e) => {
+      compressImage(e.target.result, (compressed) => {
+        this.tempImage = compressed;
+        this.showImagePreview(compressed);
+      });
+    };
+    reader.readAsDataURL(file);
+  }
+  /**
+   * Affiche la prévisualisation de l'image
+   */
+  showImagePreview(dataUrl) {
+    const preview = id('cloud-image-preview');
+    if (!preview) return;
+    const img = preview.querySelector('img');
+    if (img) {
+      img.src = dataUrl;
+      preview.style.display = 'block';
+    }
+  }
+  /**
+   * Supprime l'image temporaire
+   */
+  clearImage() {
+    this.tempImage = null;
+    const preview = id('cloud-image-preview');
+    if (preview) preview.style.display = 'none';
+  }
+  /**
+   * Change le filtre actif
+   */
+  setFilter(filter) {
+    this.currentFilter = filter;
+    
+    // Mettre à jour l'UI des boutons filtres
+    document.querySelectorAll('[data-filter]').forEach(btn => {
+      if (btn.dataset.filter === filter) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+    this.render();
+  }
+  /**
+   * Rend la liste des nuages
+   */
+  render() {
+    const grid = id('clouds-grid');
+    if (!grid) return;
+    // Récupérer les nuages filtrés
+    let clouds = this.cloudService.filterClouds(this.currentFilter);
+    // Appliquer la recherche
+    if (this.currentSearch) {
+      clouds = this.cloudService.searchClouds(this.currentSearch);
+    }
+    // Vider la grille
+    grid.innerHTML = '';
+    // Message si vide
+    if (clouds.length === 0) {
+      grid.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">◌</div>
+          <div class="empty-text">Aucun nuage${this.currentSearch ? ' correspondant' : ''}</div>
+        </div>
+      `;
+      return;
+    }
+    // Afficher les nuages
+    clouds.forEach(cloud => {
+      const cloudEl = this.createCloudElement(cloud);
+      grid.appendChild(cloudEl);
+    });
+  }
+  /**
+   * Crée l'élément DOM d'un nuage
+   */
+  createCloudElement(cloud) {
+    const div = document.createElement('div');
+    div.className = 'cloud-card';
+    div.dataset.cloudId = cloud.id;
+    // Classes d'état
+    if (cloud.state === 'important') div.classList.add('cloud-important');
+    if (cloud.state === 'explored') div.classList.add('cloud-explored');
+    if (cloud.meaning) div.classList.add('cloud-with-meaning');
+    // Niveau
+    div.classList.add(`cloud-level-${cloud.level}`);
+    // Image
+    let imageHTML = '';
+    if (cloud.img) {
+      imageHTML = `
+        <div class="cloud-image">
+          <img src="${cloud.img}" alt="">
+          <button class="cloud-remove-image" data-cloud-id="${cloud.id}">✕</button>
+        </div>
+      `;
+    }
+    // Sens validé
+    let meaningHTML = '';
+    if (cloud.meaning) {
+      meaningHTML = `
+        <div class="cloud-meaning">${esc(cloud.meaning)}</div>
+      `;
+    }
+    // Badge niveau
+    const levelLabels = { 1: 'N1', 2: 'N2', 3: 'N3' };
+    const levelLabel = levelLabels[cloud.level] || 'N1';
+    div.innerHTML = `
+      ${imageHTML}
+      <div class="cloud-level-badge">${levelLabel}</div>
+      <div class="cloud-text">${esc(cloud.text)}</div>
+      ${meaningHTML}
+      <div class="cloud-footer">
+        <button class="cloud-btn cloud-btn-important ${cloud.state === 'important' ? 'active' : ''}" 
+                data-cloud-id="${cloud.id}" 
+                data-action="toggle-important">
+          ${cloud.state === 'important' ? '★' : '☆'} Important
+        </button>
+        <button class="cloud-btn cloud-btn-explored ${cloud.state === 'explored' ? 'active' : ''}" 
+                data-cloud-id="${cloud.id}" 
+                data-action="toggle-explored">
+          ${cloud.state === 'explored' ? '✓' : ''} Exploré
+        </button>
+        <button class="cloud-btn cloud-btn-dialogue" 
+                data-cloud-id="${cloud.id}" 
+                data-action="open-dialogue">
+          💬 Dialoguer
+        </button>
+        <button class="cloud-btn-delete" 
+                data-cloud-id="${cloud.id}" 
+                data-action="delete">
+          ✕
+        </button>
+      </div>
+    `;
+    // Event listeners
+    this.attachCloudEventListeners(div, cloud.id);
+    return div;
+  }
+  /**
+   * Attache les event listeners à un nuage
+   */
+  attachCloudEventListeners(element, cloudId) {
+    // Toggle important
+    const importantBtn = element.querySelector('[data-action="toggle-important"]');
+    if (importantBtn) {
+      importantBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.toggleState(cloudId, 'important');
+      });
+    }
+    // Toggle explored
+    const exploredBtn = element.querySelector('[data-action="toggle-explored"]');
+    if (exploredBtn) {
+      exploredBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.toggleState(cloudId, 'explored');
+      });
+    }
+    // Open dialogue
+    const dialogueBtn = element.querySelector('[data-action="open-dialogue"]');
+    if (dialogueBtn) {
+      dialogueBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.openDialogue(cloudId);
+      });
+    }
+    // Delete
+    const deleteBtn = element.querySelector('[data-action="delete"]');
+    if (deleteBtn) {
+      deleteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.deleteCloud(cloudId);
+      });
+    }
+    // Remove image
+    const removeImgBtn = element.querySelector('.cloud-remove-image');
+    if (removeImgBtn) {
+      removeImgBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.removeImage(cloudId);
+      });
+    }
+  }
+  /**
+   * Toggle l'état d'un nuage
+   */
+  async toggleState(cloudId, state) {
+    const result = await this.cloudService.toggleState(cloudId, state);
+    if (!result.success) {
+      notifications.error(result.error || 'Erreur lors du changement d\'état');
+    }
+  }
+  /**
+   * Ouvre le dialogue d'un nuage
+   */
+  openDialogue(cloudId) {
+    // TODO: Implémenter le dialogue
+    notifications.info(`Dialogue nuage ${cloudId} (à implémenter)`);
+    eventBus.emit(EVENTS.DIALOGUE_OPENED, { cloudId });
+  }
+  /**
+   * Supprime un nuage
+   */
+  async deleteCloud(cloudId) {
+    if (!confirm('Supprimer ce nuage ?')) return;
+    const result = await this.cloudService.deleteCloud(cloudId);
+    if (result.success) {
+      notifications.success('Nuage supprimé');
+    } else {
+      notifications.error(result.error || 'Erreur lors de la suppression');
+    }
+  }
+  /**
+   * Supprime l'image d'un nuage
+   */
+  async removeImage(cloudId) {
+    const result = await this.cloudService.removeImage(cloudId);
+    if (result.success) {
+      notifications.success('Image supprimée');
+    } else {
+      notifications.error(result.error || 'Erreur');
+    }
+  }
+  /**
+   * Met à jour le header (compteur nuages)
+   */
+  updateHeader() {
+    const counter = id('ctr');
+    if (!counter) return;
+    const stats = this.cloudService.getStats();
+    counter.textContent = `${stats.total} nuage${stats.total > 1 ? 's' : ''}`;
+  }
+  /**
+   * Affiche les statistiques
+   */
+  showStats() {
+    const stats = this.cloudService.getStats();
+    console.log('📊 Statistiques nuages:', stats);
+    
+    const message = `${stats.total} nuages | ${stats.important} importants | ${stats.explored} explorés`;
+    notifications.info(message);
+  }
+}
+
+// ═══ Notifications.js ═══
+/**
+ * SERENDEEP - NOTIFICATIONS
+ * Système de notifications toast
+ */
+class Notifications {
+  constructor() {
+    this.container = null;
+    this.init();
+  }
+  /**
+   * Initialise le conteneur de notifications
+   */
+  init() {
+    // Créer le conteneur s'il n'existe pas
+    this.container = document.getElementById('notif-container');
+    
+    if (!this.container) {
+      this.container = document.createElement('div');
+      this.container.id = 'notif-container';
+      this.container.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 10000;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        pointer-events: none;
+      `;
+      document.body.appendChild(this.container);
+    }
+  }
+  /**
+   * Affiche une notification
+   * @param {string} message - Message à afficher
+   * @param {string} type - Type: success, error, info, warning
+   * @param {number} duration - Durée en ms (défaut: 3000)
+   */
+  show(message, type = 'info', duration = 3000) {
+    const notif = document.createElement('div');
+    notif.className = 'notification';
+    
+    // Styles selon le type
+    const colors = {
+      success: { bg: '#3a6b49', icon: '✓' },
+      error: { bg: '#bf3c18', icon: '✕' },
+      warning: { bg: '#c47a1a', icon: '⚠' },
+      info: { bg: '#2a5a8a', icon: 'ℹ' }
+    };
+    
+    const color = colors[type] || colors.info;
+    
+    notif.style.cssText = `
+      background: ${color.bg};
+      color: white;
+      padding: 12px 20px;
+      border-radius: 4px;
+      font-family: 'Crimson Pro', serif;
+      font-size: 0.9rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      pointer-events: auto;
+      cursor: pointer;
+      animation: slideInRight 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      max-width: 400px;
+    `;
+    
+    notif.innerHTML = `
+      <span style="font-size: 1.2rem;">${color.icon}</span>
+      <span>${message}</span>
+    `;
+    
+    this.container.appendChild(notif);
+    
+    // Clic pour fermer
+    notif.addEventListener('click', () => {
+      this.remove(notif);
+    });
+    
+    // Auto-fermeture
+    if (duration > 0) {
+      setTimeout(() => {
+        this.remove(notif);
+      }, duration);
+    }
+    
+    // Émettre événement
+    eventBus.emit(EVENTS.NOTIFICATION_SHOWN, { message, type });
+    
+    return notif;
+  }
+  /**
+   * Retire une notification
+   * @param {HTMLElement} notif - Élément notification
+   */
+  remove(notif) {
+    notif.style.animation = 'slideOutRight 0.3s ease';
+    setTimeout(() => {
+      if (notif.parentNode) {
+        notif.parentNode.removeChild(notif);
+      }
+    }, 300);
+  }
+  /**
+   * Notifications spécialisées
+   */
+  success(message, duration) {
+    return this.show(message, 'success', duration);
+  }
+  error(message, duration) {
+    return this.show(message, 'error', duration);
+  }
+  warning(message, duration) {
+    return this.show(message, 'warning', duration);
+  }
+  info(message, duration) {
+    return this.show(message, 'info', duration);
+  }
+  /**
+   * Supprime toutes les notifications
+   */
+  clearAll() {
+    if (this.container) {
+      this.container.innerHTML = '';
+    }
+  }
+}
+// Ajout des animations CSS
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes slideInRight {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideOutRight {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
+  
+  .notification:hover {
+    transform: scale(1.02);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+  }
+`;
+document.head.appendChild(style);
+// Instance singleton
+const notifications = new Notifications();
+// Export de la classe pour tests
+{ Notifications };
+
+// ═══ main.js ═══
+/**
+ * SERENDEEP - MAIN
+ * Point d'entrée de l'application
+ */
+/**
+ * Classe principale de l'application
+ */
+class SerendeepApp {
+  constructor() {
+    this.initialized = false;
+    this.cloudService = null;
+    this.cloudsUI = null;
+  }
+  /**
+   * Initialise l'application
+   */
+  async init() {
+    console.log('🌊 Serendeep - Initialisation...');
+    
+    try {
+      // Attendre que le DOM soit complètement rendu
+      await new Promise(resolve => {
+        if (document.readyState === 'complete') {
+          resolve();
+        } else {
+          window.addEventListener('load', resolve);
+        }
+      });
+      
+      // Setup event listeners AVANT tout (pour le bouton setup notamment)
+      this.setupEventListeners();
+      
+      // Vérifier la configuration
+      if (!state.config.apiKey) {
+        this.showSetup();
+        return;
+      }
+      
+      // Charger le projet actif ou créer un nouveau
+      if (!state.activeProjectId) {
+        const project = state.createProject('Mon Premier Projet', 'Auteur');
+        console.log('✓ Projet créé:', project.name);
+      }
+      
+      // Initialiser l'interface
+      this.initUI();
+      
+      this.initialized = true;
+      console.log('✓ Serendeep initialisé');
+      
+      // Notification de bienvenue
+      notifications.success('Serendeep chargé avec succès');
+      
+    } catch (error) {
+      console.error('Erreur initialisation:', error);
+      notifications.error('Erreur lors du chargement');
+    }
+  }
+  /**
+   * Affiche le modal de configuration
+   */
+  showSetup() {
+    const modal = id('sm');
+    if (modal) {
+      modal.style.display = 'flex';
+    }
+  }
+  /**
+   * Initialise l'interface utilisateur
+   */
+  initUI() {
+    const project = state.getCurrentProject();
+    
+    // Initialiser les services
+    this.cloudService = new CloudService(state);
+    this.cloudsUI = new CloudsUI(this.cloudService, state);
+    
+    // Mettre à jour le header
+    const projLabel = id('proj-lbl');
+    if (projLabel) {
+      projLabel.textContent = project.name;
+    }
+    
+    // Mettre à jour le compteur
+    const counter = id('ctr');
+    if (counter) {
+      counter.textContent = `${project.clouds.length} nuages`;
+    }
+    
+    // Afficher les tabs et le tab nuages par défaut
+    this.showTabs();
+    this.showTab('clouds');
+  }
+  /**
+   * Affiche la page d'accueil
+   */
+  showHome() {
+    const home = id('home');
+    if (home) {
+      home.style.display = 'flex';
+    }
+    
+    // Cacher les tabs et sections
+    const tabs = id('tabs');
+    if (tabs) tabs.style.display = 'none';
+    
+    document.querySelectorAll('.sec').forEach(sec => {
+      sec.classList.remove('active');
+    });
+  }
+  /**
+   * Affiche les tabs
+   */
+  showTabs() {
+    const home = id('home');
+    if (home) home.style.display = 'none';
+    const tabs = id('tabs');
+    if (tabs) tabs.style.display = 'flex';
+  }
+  /**
+   * Affiche un tab spécifique
+   */
+  showTab(tabName) {
+    // Mettre à jour les boutons tabs
+    document.querySelectorAll('.tab').forEach(tab => {
+      if (tab.dataset.tab === tabName) {
+        tab.classList.add('active');
+      } else {
+        tab.classList.remove('active');
+      }
+    });
+    // Afficher la section correspondante
+    document.querySelectorAll('.sec').forEach(sec => {
+      if (sec.id === `sec-${tabName}`) {
+        sec.classList.add('active');
+      } else {
+        sec.classList.remove('active');
+      }
+    });
+    eventBus.emit(EVENTS.TAB_CHANGED, tabName);
+  }
+  /**
+   * Configure les event listeners globaux
+   */
+  setupEventListeners() {
+    // Écouter les changements de projet
+    eventBus.on(EVENTS.PROJECT_CREATED, (project) => {
+      console.log('Projet créé:', project.name);
+      this.initUI();
+    });
+    
+    eventBus.on(EVENTS.PROJECT_SWITCHED, (project) => {
+      console.log('Projet chargé:', project.name);
+      this.initUI();
+    });
+    
+    eventBus.on(EVENTS.STATE_SAVED, () => {
+      console.log('État sauvegardé');
+    });
+    
+    // Listener pour le bouton setup
+    const setupBtn = id('s-done');
+    if (setupBtn) {
+      setupBtn.addEventListener('click', () => this.handleSetupDone());
+    }
+    
+    // Listener pour le label projet (modal projets)
+    const projLabel = id('proj-lbl');
+    if (projLabel) {
+      projLabel.addEventListener('click', () => this.showProjectSelector());
+    }
+    
+    // Listener pour les boutons de phase
+    document.querySelectorAll('.phase-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const phase = parseInt(e.currentTarget.dataset.phase);
+        this.switchPhase(phase);
+      });
+    });
+    // Listener pour les tabs
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', (e) => {
+        const tabName = e.target.dataset.tab;
+        this.showTab(tabName);
+      });
+    });
+  }
+  /**
+   * Gère la validation du setup
+   */
+  handleSetupDone() {
+    const keyInput = id('s-key');
+    const apiKey = keyInput ? keyInput.value.trim() : '';
+    
+    if (!apiKey) {
+      notifications.error('Clé API requise');
+      return;
+    }
+    
+    if (!apiKey.startsWith('sk-ant-')) {
+      notifications.warning('Format de clé API invalide');
+      return;
+    }
+    
+    // Sauvegarder la config
+    state.config.apiKey = apiKey;
+    state.saveConfig();
+    
+    // Fermer le modal
+    const modal = id('sm');
+    if (modal) {
+      modal.style.display = 'none';
+    }
+    
+    // Initialiser l'app
+    this.init();
+    
+    notifications.success('Configuration enregistrée');
+  }
+  /**
+   * Affiche le sélecteur de projets
+   */
+  showProjectSelector() {
+    notifications.info('Sélecteur de projets (à implémenter)');
+  }
+  /**
+   * Bascule entre les phases
+   * @param {number} phase - Numéro de phase (1 ou 2)
+   */
+  switchPhase(phase) {
+    console.log('Switch vers phase', phase);
+    
+    // Mettre à jour les boutons
+    document.querySelectorAll('.phase-btn').forEach(btn => {
+      if (parseInt(btn.dataset.phase) === phase) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+    
+    eventBus.emit(EVENTS.PHASE_CHANGED, phase);
+    notifications.info(`Phase ${phase} activée`);
+  }
+  /**
+   * Test du système
+   */
+  runTests() {
+    console.log('🧪 Tests du système...');
+    
+    // Test 1: État
+    console.log('State:', state);
+    console.log('Projet actif:', state.getCurrentProject());
+    
+    // Test 2: Événements
+    const unsubscribe = eventBus.on('test:event', (data) => {
+      console.log('✓ Événement reçu:', data);
+    });
+    eventBus.emit('test:event', { message: 'Hello' });
+    unsubscribe();
+    
+    // Test 3: Notifications
+    notifications.success('Test réussi !');
+    
+    console.log('✓ Tous les tests passés');
+  }
+}
+// Initialisation au chargement du DOM
+document.addEventListener('DOMContentLoaded', () => {
+  window.app = new SerendeepApp();
+  window.app.init();
+  
+  // Exposer pour debug
+  window.serendeep = {
+    state,
+    eventBus,
+    notifications,
+    app: window.app,
+    cloudService: window.app.cloudService,
+    cloudsUI: window.app.cloudsUI
+  };
+  
+  console.log('💡 Debug disponible via: window.serendeep');
+});
+// Export pour tests
+{ SerendeepApp };
+
+
+// ═══════════════════════════════════════════════════════════
+// INITIALISATION
+// ═══════════════════════════════════════════════════════════
+
+document.addEventListener('DOMContentLoaded', async () => {
+  // Attendre que tout soit chargé
+  await new Promise(resolve => {
+    if (document.readyState === 'complete') {
+      resolve();
+    } else {
+      window.addEventListener('load', resolve);
+    }
+  });
+  
+  window.app = new SerendeepApp();
+  await window.app.init();
+  
+  // Exposer pour debug
+  window.serendeep = {
+    state,
+    eventBus,
+    notifications,
+    app: window.app,
+    cloudService: window.app.cloudService,
+    cloudsUI: window.app.cloudsUI
+  };
+  
+  console.log('💡 Debug: window.serendeep');
+});
+
+})();
+</script>
+
+</body>
+</html>
