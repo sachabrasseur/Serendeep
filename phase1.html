@@ -1,0 +1,1932 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Serendeep — Phase 1</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0f0e0b;
+  --paper: #f7f4ef;
+  --paper2: #eeeae3;
+  --paper3: #e4dfd6;
+  --white: #fdfcfa;
+  --accent: #b83615;
+  --muted: #8a8679;
+  --border: #d4cfc6;
+  --green: #2d5c3e;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+/* ── HEADER ── */
+.app-header {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 0 40px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid rgba(247,244,239,0.06);
+}
+.header-brand {
+  font-family: 'Playfair Display', serif;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--paper);
+}
+.header-sep { color: rgba(247,244,239,0.2); font-size: 12px; }
+.header-projet {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: rgba(247,244,239,0.5);
+  text-transform: uppercase;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.header-format {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: rgba(247,244,239,0.3);
+  text-transform: uppercase;
+}
+.header-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.header-phase {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  padding: 4px 10px;
+  border: 1px solid rgba(184,54,21,0.3);
+}
+
+/* ── TABS ── */
+.tabs-bar {
+  background: var(--ink);
+  padding: 0 40px;
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid rgba(247,244,239,0.08);
+}
+.tab-btn {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(247,244,239,0.35);
+  padding: 14px 24px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+  position: relative;
+  bottom: -1px;
+}
+.tab-btn:hover { color: rgba(247,244,239,0.6); }
+.tab-btn.active {
+  color: var(--paper);
+  border-bottom-color: var(--accent);
+}
+.tab-btn.locked {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* ── CONTENU TABS ── */
+.tab-content { display: none; }
+.tab-content.active { display: flex; flex-direction: column; }
+
+/* ══════════════════════════════════
+   TAB NUAGES
+══════════════════════════════════ */
+
+#tab-nuages {
+  padding: 32px 40px;
+  gap: 24px;
+}
+
+/* Barre d'outils nuages */
+.nuages-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.nuages-count {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.btn-nouveau-nuage {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: var(--ink);
+  border: none;
+  color: var(--paper);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-nouveau-nuage:hover { background: var(--accent); }
+.btn-nouveau-nuage:disabled { opacity: 0.4; cursor: not-allowed; background: var(--ink); }
+
+/* Grille nuages */
+.nuages-grille {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+/* Carte nuage */
+.nuage-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  padding: 20px;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  position: relative;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.nuage-card:hover {
+  border-color: var(--ink);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+.nuage-card.etat-valide { border-left: 3px solid var(--green); }
+.nuage-card.etat-valide_combo { border-left: 3px solid #b8860b; }
+.nuage-card.etat-en_cours { border-left: 3px solid var(--accent); }
+.nuage-card.etat-nouveau { border-left: 3px solid var(--border); }
+
+.nuage-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.nuage-etat-badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border: 1px solid;
+  flex-shrink: 0;
+}
+.badge-nouveau { color: var(--muted); border-color: var(--border); }
+.badge-en_cours { color: var(--accent); border-color: rgba(184,54,21,0.3); }
+.badge-valide { color: var(--green); border-color: rgba(45,92,62,0.3); }
+.badge-valide_combo { color: #b8860b; border-color: rgba(184,134,11,0.3); }
+
+.nuage-card-apercu {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--muted);
+  line-height: 1.6;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+.nuage-card-apercu.has-image {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.nuage-card-thumb {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+}
+.nuage-card-delete {
+  position: absolute;
+  top: 8px; right: 8px;
+  opacity: 0;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 4px;
+  transition: opacity 0.15s, color 0.15s;
+}
+.nuage-card:hover .nuage-card-delete { opacity: 1; }
+.nuage-card-delete:hover { color: var(--accent); }
+
+/* Carte vide — nouveau nuage */
+.nuage-card-empty {
+  background: transparent;
+  border: 1px dashed var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--muted);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  min-height: 140px;
+  transition: border-color 0.2s, color 0.2s;
+}
+.nuage-card-empty:hover { border-color: var(--ink); color: var(--ink); }
+
+/* ══════════════════════════════════
+   MODAL NUAGE
+══════════════════════════════════ */
+
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(15,14,11,0.7);
+  z-index: 200;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s;
+}
+.modal-overlay.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.modal-nuage {
+  background: var(--paper);
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  grid-template-rows: auto 1fr;
+  overflow: hidden;
+  transform: translateY(20px);
+  transition: transform 0.25s;
+}
+.modal-overlay.open .modal-nuage { transform: translateY(0); }
+
+/* Header modal */
+.modal-header {
+  grid-column: 1 / -1;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 20px 32px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.modal-header-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.modal-header-etat {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border: 1px solid;
+  margin-left: 8px;
+}
+.modal-close {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  color: rgba(247,244,239,0.4);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: color 0.15s;
+}
+.modal-close:hover { color: var(--paper); }
+
+/* Colonne gauche — dialogue */
+.modal-dialogue-col {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border);
+  min-height: 0;
+  height: calc(100vh - 56px - 52px);
+}
+
+/* Sélecteur de mode */
+.mode-switcher {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  background: var(--paper2);
+}
+.mode-btn {
+  flex: 1;
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+  position: relative;
+  bottom: -1px;
+}
+.mode-btn:hover { color: var(--ink); }
+.mode-btn.active { color: var(--ink); border-bottom-color: var(--accent); }
+.mode-btn.locked { opacity: 0.35; cursor: not-allowed; }
+
+/* Fil de dialogue */
+.dialogue-fil {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.dialogue-vide {
+  margin: auto;
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 300;
+  font-style: italic;
+  line-height: 1.8;
+}
+
+.message {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 92%;
+}
+.message.user { align-self: flex-end; align-items: flex-end; }
+.message.assistant { align-self: flex-start; }
+
+.message-role {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.message-bubble {
+  padding: 14px 18px;
+  font-size: 15px;
+  font-weight: 300;
+  line-height: 1.75;
+  white-space: pre-wrap;
+}
+.message.user .message-bubble {
+  background: var(--ink);
+  color: var(--paper);
+}
+.message.assistant .message-bubble {
+  background: var(--white);
+  border: 1px solid var(--border);
+}
+
+/* Zone de saisie */
+.saisie-zone {
+  border-top: 1px solid var(--border);
+  padding: 16px 20px;
+  background: var(--white);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.saisie-textarea {
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--paper);
+  border: 1px solid var(--border);
+  color: var(--ink);
+  font-family: 'Crimson Pro', serif;
+  font-size: 15px;
+  line-height: 1.65;
+  resize: none;
+  outline: none;
+  transition: border-color 0.2s;
+  min-height: 80px;
+  max-height: 160px;
+}
+.saisie-textarea:focus { border-color: var(--ink); }
+.saisie-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.btn-envoyer {
+  padding: 9px 20px;
+  background: var(--ink);
+  border: none;
+  color: var(--paper);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-envoyer:hover { background: var(--accent); }
+.btn-envoyer:disabled { opacity: 0.4; cursor: not-allowed; background: var(--ink); }
+
+.saisie-hint {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  margin-left: auto;
+}
+
+/* Colonne droite — contexte */
+.modal-contexte-col {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  height: calc(100vh - 56px - 52px);
+}
+
+.contexte-section {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+}
+.contexte-section:last-child { border-bottom: none; }
+.contexte-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 12px;
+  display: block;
+}
+
+/* Image permanente */
+.image-permanente {
+  width: 100%;
+  aspect-ratio: 4/3;
+  object-fit: cover;
+  display: block;
+  border: 1px solid var(--border);
+  margin-bottom: 10px;
+}
+.legende-texte {
+  font-size: 13px;
+  font-weight: 300;
+  font-style: italic;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* Contenu texte nuage */
+.contenu-nuage-display {
+  font-size: 14px;
+  font-weight: 300;
+  line-height: 1.7;
+  color: var(--ink);
+  background: var(--paper2);
+  padding: 14px;
+  white-space: pre-wrap;
+}
+
+/* Upload image */
+.upload-zone {
+  border: 1px dashed var(--border);
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+.upload-zone:hover { border-color: var(--ink); background: var(--paper2); }
+.upload-zone input { display: none; }
+.upload-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+/* Synthèse */
+.synthese-zone {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.synthese-textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border);
+  background: var(--white);
+  font-family: 'Crimson Pro', serif;
+  font-size: 14px;
+  line-height: 1.65;
+  resize: vertical;
+  outline: none;
+  min-height: 100px;
+  color: var(--ink);
+  transition: border-color 0.2s;
+}
+.synthese-textarea:focus { border-color: var(--ink); }
+.synthese-actions { display: flex; gap: 8px; }
+
+.btn-generer-synthese {
+  flex: 1;
+  padding: 9px 12px;
+  background: var(--paper3);
+  border: 1px solid var(--border);
+  color: var(--ink);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-generer-synthese:hover { background: var(--paper2); }
+.btn-generer-synthese:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-valider-nuage {
+  flex: 1;
+  padding: 9px 12px;
+  background: var(--green);
+  border: 1px solid var(--green);
+  color: var(--paper);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-valider-nuage:hover { background: #1e3d29; }
+.btn-valider-nuage:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.nuage-valide-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: rgba(45,92,62,0.08);
+  border: 1px solid rgba(45,92,62,0.2);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--green);
+}
+
+/* Dépôt initial */
+.depot-zone {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.depot-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.depot-desc {
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--muted);
+  line-height: 1.7;
+}
+.depot-textarea {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid var(--border);
+  background: var(--white);
+  font-family: 'Crimson Pro', serif;
+  font-size: 15px;
+  line-height: 1.7;
+  resize: vertical;
+  outline: none;
+  min-height: 120px;
+  color: var(--ink);
+  transition: border-color 0.2s;
+}
+.depot-textarea:focus { border-color: var(--ink); }
+
+.depot-ou {
+  text-align: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.depot-ou::before, .depot-ou::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.depot-upload {
+  border: 1px dashed var(--border);
+  padding: 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.depot-upload:hover { border-color: var(--ink); background: var(--paper2); }
+.depot-upload input { display: none; }
+.depot-upload-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  cursor: pointer;
+}
+.depot-upload-preview {
+  width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  display: none;
+  border: 1px solid var(--border);
+}
+.depot-legende {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  background: var(--white);
+  font-family: 'Crimson Pro', serif;
+  font-size: 14px;
+  color: var(--ink);
+  outline: none;
+  display: none;
+}
+.depot-legende:focus { border-color: var(--ink); }
+
+.btn-deposer {
+  width: 100%;
+  padding: 13px;
+  background: var(--ink);
+  border: none;
+  color: var(--paper);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-deposer:hover { background: var(--accent); }
+.btn-deposer:disabled { opacity: 0.4; cursor: not-allowed; background: var(--ink); }
+
+/* ══════════════════════════════════
+   TAB COMBINAISONS (placeholder)
+══════════════════════════════════ */
+#tab-combos {
+  padding: 40px;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+}
+.tab-placeholder {
+  text-align: center;
+  color: var(--muted);
+}
+.tab-placeholder-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--ink);
+}
+.tab-placeholder-desc {
+  font-size: 14px;
+  font-weight: 300;
+  line-height: 1.8;
+  max-width: 400px;
+}
+
+/* ══════════════════════════════════
+   TAB TEASER (placeholder)
+══════════════════════════════════ */
+#tab-teaser {
+  padding: 40px;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+}
+
+/* ── LOADING SPINNER ── */
+.spinner {
+  display: inline-block;
+  width: 14px; height: 14px;
+  border: 2px solid rgba(247,244,239,0.2);
+  border-top-color: var(--paper);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+.spinner.dark {
+  border-color: rgba(15,14,11,0.15);
+  border-top-color: var(--ink);
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  bottom: 28px; left: 50%;
+  transform: translateX(-50%) translateY(12px);
+  background: var(--ink);
+  color: var(--paper);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  padding: 10px 22px;
+  z-index: 999;
+  opacity: 0;
+  transition: opacity 0.25s, transform 0.25s;
+  pointer-events: none;
+}
+.toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.error { background: var(--accent); }
+
+/* ── ERREUR ── */
+.error-banner {
+  background: rgba(184,54,21,0.08);
+  border: 1px solid rgba(184,54,21,0.25);
+  padding: 10px 16px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.06em;
+  margin: 12px 0;
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="app-header">
+  <a class="header-brand" href="index.html">Serendeep</a>
+  <span class="header-sep">·</span>
+  <span class="header-projet" id="header-projet">—</span>
+  <span class="header-format" id="header-format"></span>
+  <div class="header-right">
+    <span class="header-phase">Phase 1 — Saturation</span>
+  </div>
+</header>
+
+<!-- TABS -->
+<nav class="tabs-bar">
+  <button class="tab-btn active" data-tab="nuages">Nuages</button>
+  <button class="tab-btn locked" data-tab="combos" id="tab-btn-combos">Combinaisons</button>
+  <button class="tab-btn locked" data-tab="teaser" id="tab-btn-teaser">Teaser</button>
+</nav>
+
+<!-- TAB NUAGES -->
+<div class="tab-content active" id="tab-nuages">
+  <div class="nuages-toolbar">
+    <span class="nuages-count" id="nuages-count">0 / 20 nuages</span>
+    <button class="btn-nouveau-nuage" id="btn-nouveau-nuage">
+      + Nouveau nuage
+    </button>
+  </div>
+  <div class="nuages-grille" id="nuages-grille">
+    <!-- cartes générées dynamiquement -->
+  </div>
+</div>
+
+<!-- TAB COMBINAISONS -->
+<div class="tab-content" id="tab-combos">
+  <div class="tab-placeholder">
+    <div class="tab-placeholder-title">Combinaisons</div>
+    <p class="tab-placeholder-desc">Disponible après avoir validé au moins 2 nuages.</p>
+  </div>
+</div>
+
+<!-- TAB TEASER -->
+<div class="tab-content" id="tab-teaser">
+  <div class="tab-placeholder">
+    <div class="tab-placeholder-title">Teaser</div>
+    <p class="tab-placeholder-desc">Disponible après avoir sauvegardé une combinaison.</p>
+  </div>
+</div>
+
+<!-- MODAL NUAGE -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal-nuage" id="modal-nuage">
+
+    <div class="modal-header" id="modal-header">
+      <span class="modal-header-label">Nuage</span>
+      <span class="modal-header-etat badge-nouveau" id="modal-etat-badge">Nouveau</span>
+      <button class="modal-close" id="modal-close">✕</button>
+    </div>
+
+    <!-- COL GAUCHE : dépôt initial puis dialogue -->
+    <div class="modal-dialogue-col" id="modal-dialogue-col">
+
+      <!-- DÉPÔT INITIAL (visible avant le premier dépôt) -->
+      <div class="depot-zone" id="depot-zone">
+        <div>
+          <div class="depot-title">Déposer un nuage</div>
+          <p class="depot-desc">Texte, image, ou les deux. Ce qui est là, brut, pas encore narratif.</p>
+        </div>
+
+        <textarea
+          class="depot-textarea"
+          id="depot-texte"
+          placeholder="Une image mentale, une atmosphère, un fragment…"
+          rows="5"
+        ></textarea>
+
+        <div class="depot-ou">ou</div>
+
+        <label class="depot-upload" id="depot-upload-label">
+          <input type="file" id="depot-image-input" accept="image/jpeg,image/png,image/webp">
+          <img class="depot-upload-preview" id="depot-upload-preview" alt="">
+          <span class="depot-upload-label" id="depot-upload-txt">Déposer une image (JPG, PNG, WebP)</span>
+        </label>
+
+        <input
+          type="text"
+          class="depot-legende"
+          id="depot-legende"
+          placeholder="Légende — ce que cette image représente pour vous…"
+        >
+
+        <button class="btn-deposer" id="btn-deposer" disabled>
+          Déposer ce nuage →
+        </button>
+      </div>
+
+      <!-- DIALOGUE (visible après dépôt) -->
+      <div style="display:none; flex-direction:column; flex:1; min-height:0;" id="dialogue-zone">
+        <div class="mode-switcher">
+          <button class="mode-btn active" data-mode="developper" id="mode-developper">Développer</button>
+          <button class="mode-btn locked" data-mode="approfondir" id="mode-approfondir">Approfondir</button>
+        </div>
+        <div class="dialogue-fil" id="dialogue-fil">
+          <div class="dialogue-vide" id="dialogue-vide">
+            Choisissez un mode et entrez dans le dialogue.
+          </div>
+        </div>
+        <div class="saisie-zone">
+          <textarea
+            class="saisie-textarea"
+            id="saisie-textarea"
+            placeholder="Votre message…"
+            rows="3"
+          ></textarea>
+          <div class="saisie-actions">
+            <button class="btn-envoyer" id="btn-envoyer">Envoyer</button>
+            <span class="saisie-hint" id="saisie-hint-mode">Mode : Développer</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- COL DROITE : contexte permanent -->
+    <div class="modal-contexte-col" id="modal-contexte-col">
+
+      <!-- Image permanente (si présente) -->
+      <div class="contexte-section" id="section-image-permanente" style="display:none;">
+        <span class="contexte-label">Référence visuelle</span>
+        <img class="image-permanente" id="image-permanente-img" src="" alt="">
+        <div class="legende-texte" id="image-permanente-legende"></div>
+      </div>
+
+      <!-- Contenu texte (si présent) -->
+      <div class="contexte-section" id="section-contenu-texte" style="display:none;">
+        <span class="contexte-label">Matériau</span>
+        <div class="contenu-nuage-display" id="contenu-nuage-display"></div>
+      </div>
+
+      <!-- Upload image additionnel (si pas encore d'image) -->
+      <div class="contexte-section" id="section-upload-image">
+        <span class="contexte-label">Ajouter une image</span>
+        <label class="upload-zone">
+          <input type="file" id="upload-image-additionnel" accept="image/jpeg,image/png,image/webp">
+          <span class="upload-label">Cliquer pour choisir une image</span>
+        </label>
+      </div>
+
+      <!-- Synthèse -->
+      <div class="contexte-section" id="section-synthese">
+        <span class="contexte-label">Synthèse</span>
+        <div class="synthese-zone">
+          <textarea
+            class="synthese-textarea"
+            id="synthese-textarea"
+            placeholder="Synthèse du nuage — ce qui en émerge, les tensions identifiées…"
+          ></textarea>
+          <div class="synthese-actions" id="synthese-actions">
+            <button class="btn-generer-synthese" id="btn-generer-synthese">
+              Générer
+            </button>
+            <button class="btn-valider-nuage" id="btn-valider-nuage">
+              Valider ✓
+            </button>
+          </div>
+          <div class="nuage-valide-badge" id="nuage-valide-badge" style="display:none;">
+            ✓ Nuage validé
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ══════════════════════════════════════════
+     SCRIPTS INLINE
+══════════════════════════════════════════ -->
+<script>
+'use strict';
+
+// ─── COMPAT data.js inliné ───
+// (même contenu que data.js du socle)
+window.SD = window.SD || {};
+
+// ── STORAGE KEYS ──
+const STORAGE_KEYS = {
+  PROJETS_INDEX: 'serendeep_projets_index',
+  PROJET_PREFIX: 'serendeep_projet_',
+  PROJET_ACTIF: 'serendeep_projet_actif',
+  API_KEY: 'serendeep_api_key',
+};
+
+function generateId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+function nowISO() { return new Date().toISOString(); }
+function deepClone(obj) { return JSON.parse(JSON.stringify(obj)); }
+
+function getApiKey() { return localStorage.getItem(STORAGE_KEYS.API_KEY) || ''; }
+function getProjetActifId() { return localStorage.getItem(STORAGE_KEYS.PROJET_ACTIF); }
+function setProjetActif(id) { localStorage.setItem(STORAGE_KEYS.PROJET_ACTIF, id); }
+
+function getProjet(id) {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.PROJET_PREFIX + id);
+    return raw ? JSON.parse(raw) : null;
+  } catch(e) { return null; }
+}
+function saveProjet(projet) {
+  try {
+    projet.updated_at = nowISO();
+    localStorage.setItem(STORAGE_KEYS.PROJET_PREFIX + projet.id, JSON.stringify(projet));
+    return true;
+  } catch(e) { return false; }
+}
+
+// ── NUAGES ──
+function createNuage(projet, options = {}) {
+  if (projet.phase1.nuages.length >= 20) return null;
+  const nuage = {
+    id: generateId(),
+    etat: 'nouveau',
+    contenu: options.contenu || '',
+    image_b64: options.image_b64 || null,
+    image_type: options.image_type || null,
+    legende: options.legende || '',
+    synthese: '',
+    synthese_validee: false,
+    dialogue: [],
+    mode_dialogue: 'developper',
+    created_at: nowISO(),
+    updated_at: nowISO(),
+  };
+  projet.phase1.nuages.push(nuage);
+  saveProjet(projet);
+  return nuage;
+}
+
+function updateNuage(projet, nuageId, updates) {
+  const idx = projet.phase1.nuages.findIndex(n => n.id === nuageId);
+  if (idx === -1) return null;
+  Object.assign(projet.phase1.nuages[idx], updates);
+  projet.phase1.nuages[idx].updated_at = nowISO();
+  saveProjet(projet);
+  return projet.phase1.nuages[idx];
+}
+
+function addMessage(projet, nuageId, role, content) {
+  const idx = projet.phase1.nuages.findIndex(n => n.id === nuageId);
+  if (idx === -1) return;
+  projet.phase1.nuages[idx].dialogue.push({ role, content, ts: nowISO() });
+  if (projet.phase1.nuages[idx].etat === 'nouveau') {
+    projet.phase1.nuages[idx].etat = 'en_cours';
+  }
+  projet.phase1.nuages[idx].updated_at = nowISO();
+  saveProjet(projet);
+}
+
+function deleteNuage(projet, nuageId) {
+  const combosActifs = (projet.phase1.combos || []).filter(c => c.saved);
+  const protege = combosActifs.some(c => c.nuage_ids.includes(nuageId));
+  if (protege) return false;
+  projet.phase1.nuages = projet.phase1.nuages.filter(n => n.id !== nuageId);
+  saveProjet(projet);
+  return true;
+}
+
+function validerNuage(projet, nuageId, synthese) {
+  return updateNuage(projet, nuageId, {
+    synthese,
+    synthese_validee: true,
+    etat: 'valide',
+  });
+}
+
+function getNuagesValides(projet) {
+  return projet.phase1.nuages.filter(n => n.synthese_validee);
+}
+</script>
+
+<script>
+'use strict';
+// ─── API callClaude ───
+const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages';
+const MODEL = 'claude-opus-4-5';
+
+async function callClaude(messages, systemPrompt, options = {}) {
+  const apiKey = getApiKey();
+  if (!apiKey) throw new Error('Clé API manquante');
+
+  const { max_tokens = 1500, onStream = null } = options;
+
+  const payload = {
+    model: MODEL,
+    max_tokens,
+    messages,
+  };
+  if (systemPrompt) payload.system = systemPrompt;
+
+  if (onStream) {
+    payload.stream = true;
+    const resp = await fetch(ANTHROPIC_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-calls': 'true',
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.error?.message || `HTTP ${resp.status}`);
+    }
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let full = '';
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value, { stream: true });
+      for (const line of chunk.split('\n')) {
+        if (!line.startsWith('data: ')) continue;
+        const data = line.slice(6).trim();
+        if (data === '[DONE]') continue;
+        try {
+          const parsed = JSON.parse(data);
+          if (parsed.type === 'content_block_delta' && parsed.delta?.text) {
+            full += parsed.delta.text;
+            onStream(parsed.delta.text, full);
+          }
+        } catch(_) {}
+      }
+    }
+    return full;
+  }
+
+  const resp = await fetch(ANTHROPIC_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-calls': 'true',
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err.error?.message || `HTTP ${resp.status}`);
+  }
+  const data = await resp.json();
+  return (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+}
+
+// ─── SYSTEM PROMPT PHASE 1 ───
+function buildSystemPrompt(projet) {
+  return `Tu es Serendeep, un outil de développement narratif pour l'audiovisuel créé par Looker Films.
+Projet : ${projet.nom} / Format : ${projet.format} / Tonalité : ${projet.tonalite}
+Tu travailles avec un auteur en Phase 1 — Saturation et Émergence.
+Ton rôle est d'ouvrir, pas d'orienter. Tu ne proposes pas de direction narrative sans que l'auteur en ait fait la demande.
+Tu ne complètes pas, tu n'achèves pas, tu n'assembles pas à la place de l'auteur.
+Réponds en français.`;
+}
+
+// ─── CONSTRUCTION DES MESSAGES API ───
+function buildMessages(nuage, modeActuel, messageUtilisateur) {
+  const messages = [];
+
+  // Reconstruire l'historique
+  for (const msg of nuage.dialogue) {
+    if (msg.role === 'user') {
+      messages.push({ role: 'user', content: msg.content });
+    } else {
+      messages.push({ role: 'assistant', content: msg.content });
+    }
+  }
+
+  // Construire le message utilisateur courant
+  const isFirstMessage = nuage.dialogue.length === 0;
+  let content;
+
+  if (nuage.image_b64 && isFirstMessage) {
+    // Premier message avec image
+    const contentArray = [
+      {
+        type: 'image',
+        source: { type: 'base64', media_type: nuage.image_type, data: nuage.image_b64 },
+      },
+    ];
+
+    let textePart = '';
+    if (nuage.legende) textePart += `Légende de l'auteur : ${nuage.legende}\n\n`;
+    if (nuage.contenu) textePart += `Texte : ${nuage.contenu}\n\n`;
+
+    if (modeActuel === 'developper') {
+      textePart += `Mode : Développer
+Lis cette image comme un curateur ou historien de l'art.
+Identifie ce qu'elle convoque — régime de représentation, atmosphère, tensions formelles, références artistiques possibles (cinéma, photographie, peinture, littérature).
+${nuage.legende ? "Note la tension entre ce que l'image dit et ce que la légende déclare — cet écart est souvent le matériau le plus riche." : ""}
+Ne conclus pas. Ne propose pas de direction narrative. Pose une ou deux questions ouvertes depuis ta lecture.`;
+    } else {
+      textePart += `Mode : Approfondir
+Mets en tension ce que l'image révèle formellement avec ce qui a émergé dans notre dialogue.
+Cherche la friction entre la forme et le contenu narratif qui commence à apparaître.
+Commence à construire du sens narratif depuis cette friction — sans l'imposer.
+Identifie des orientations possibles, des tensions dramatiques potentielles. Reste au conditionnel.`;
+    }
+
+    contentArray.push({ type: 'text', text: textePart });
+    content = contentArray;
+  } else if (nuage.image_b64 && !isFirstMessage) {
+    // Messages suivants avec image — réinjecter l'image dans le contexte
+    const contentArray = [
+      {
+        type: 'image',
+        source: { type: 'base64', media_type: nuage.image_type, data: nuage.image_b64 },
+      },
+      { type: 'text', text: messageUtilisateur }
+    ];
+    content = contentArray;
+  } else {
+    // Texte seul — premier message
+    if (isFirstMessage) {
+      let textePart = '';
+      if (nuage.contenu) textePart += `Matériau : ${nuage.contenu}\n\n`;
+      if (modeActuel === 'developper') {
+        textePart += `Mode : Développer
+Ouvre le champ des possibles. Interroge ce matériau sans le réduire.
+Ne conclus pas. Ne propose pas de direction narrative. Pose une ou deux questions ouvertes.`;
+      } else {
+        textePart += `Mode : Approfondir
+Détecte les patterns d'émergence narrative dans ce qui a été dit.
+Identifie des tensions dramatiques potentielles. Reste au conditionnel.`;
+      }
+      content = textePart;
+    } else {
+      content = messageUtilisateur;
+    }
+  }
+
+  messages.push({ role: 'user', content });
+  return messages;
+}
+</script>
+
+<script>
+'use strict';
+// ──────────────────────────────────────────────
+// ÉTAT DE L'APPLICATION
+// ──────────────────────────────────────────────
+
+let projet = null;
+let nuageActif = null; // id du nuage ouvert dans le modal
+let imageDepot = null; // { b64, type } pour le dépôt
+let envoi_en_cours = false;
+
+// ──────────────────────────────────────────────
+// INIT
+// ──────────────────────────────────────────────
+
+document.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const projetId = params.get('projet') || localStorage.getItem(STORAGE_KEYS.PROJET_ACTIF);
+
+  if (!projetId) {
+    window.location.href = 'index.html';
+    return;
+  }
+
+  projet = getProjet(projetId);
+  if (!projet) {
+    window.location.href = 'index.html';
+    return;
+  }
+
+  localStorage.setItem(STORAGE_KEYS.PROJET_ACTIF, projetId);
+
+  // Header
+  document.getElementById('header-projet').textContent = projet.nom;
+  document.getElementById('header-format').textContent = `${projet.format} · ${projet.tonalite}`;
+
+  // Initialiser les structures manquantes
+  if (!projet.phase1) projet.phase1 = { nuages: [], combos: [], teaser: null, intention: '' };
+  if (!projet.phase1.nuages) projet.phase1.nuages = [];
+  if (!projet.phase1.combos) projet.phase1.combos = [];
+
+  renderGrille();
+  updateTabsState();
+  bindUI();
+});
+
+// ──────────────────────────────────────────────
+// TABS
+// ──────────────────────────────────────────────
+
+function bindUI() {
+  // Tabs
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (btn.classList.contains('locked')) return;
+      switchTab(btn.dataset.tab);
+    });
+  });
+
+  // Bouton nouveau nuage
+  document.getElementById('btn-nouveau-nuage').addEventListener('click', ouvrirNouveauNuage);
+
+  // Modal close
+  document.getElementById('modal-close').addEventListener('click', fermerModal);
+  document.getElementById('modal-overlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('modal-overlay')) fermerModal();
+  });
+
+  // Dépôt
+  document.getElementById('depot-image-input').addEventListener('change', onDepotImageChange);
+  document.getElementById('depot-texte').addEventListener('input', updateBtnDeposer);
+  document.getElementById('btn-deposer').addEventListener('click', deposerNuage);
+
+  // Mode switcher
+  document.getElementById('mode-developper').addEventListener('click', () => switchMode('developper'));
+  document.getElementById('mode-approfondir').addEventListener('click', () => switchMode('approfondir'));
+
+  // Envoyer
+  document.getElementById('btn-envoyer').addEventListener('click', envoyerMessage);
+  document.getElementById('saisie-textarea').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      envoyerMessage();
+    }
+  });
+
+  // Upload image additionnel
+  document.getElementById('upload-image-additionnel').addEventListener('change', onUploadImageAdditionnel);
+
+  // Synthèse
+  document.getElementById('btn-generer-synthese').addEventListener('click', genererSynthese);
+  document.getElementById('btn-valider-nuage').addEventListener('click', validerNuageActif);
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.querySelector(`.tab-btn[data-tab="${tab}"]`).classList.add('active');
+  document.getElementById(`tab-${tab}`).classList.add('active');
+}
+
+function updateTabsState() {
+  const valides = getNuagesValides(projet);
+  const combosActifs = (projet.phase1.combos || []).filter(c => c.saved);
+
+  const btnCombos = document.getElementById('tab-btn-combos');
+  const btnTeaser = document.getElementById('tab-btn-teaser');
+
+  if (valides.length >= 2) {
+    btnCombos.classList.remove('locked');
+  } else {
+    btnCombos.classList.add('locked');
+  }
+
+  if (combosActifs.length >= 1) {
+    btnTeaser.classList.remove('locked');
+  } else {
+    btnTeaser.classList.add('locked');
+  }
+}
+
+// ──────────────────────────────────────────────
+// GRILLE NUAGES
+// ──────────────────────────────────────────────
+
+function renderGrille() {
+  const grille = document.getElementById('nuages-grille');
+  const nuages = projet.phase1.nuages;
+
+  document.getElementById('nuages-count').textContent = `${nuages.length} / 20 nuages`;
+
+  const btnNouveau = document.getElementById('btn-nouveau-nuage');
+  btnNouveau.disabled = nuages.length >= 20;
+
+  if (nuages.length === 0) {
+    grille.innerHTML = `
+      <div class="nuage-card-empty" id="carte-vide-new">
+        <span>+ Premier nuage</span>
+      </div>
+    `;
+    document.getElementById('carte-vide-new').addEventListener('click', ouvrirNouveauNuage);
+    return;
+  }
+
+  grille.innerHTML = nuages.map(n => {
+    const badgeClass = `badge-${n.etat}`;
+    const etats = { nouveau: 'Nouveau', en_cours: 'En cours', valide: 'Validé', valide_combo: 'Validé · Combo' };
+    const etatLabel = etats[n.etat] || n.etat;
+
+    let apercu = '';
+    if (n.image_b64) {
+      apercu = `<div class="nuage-card-apercu has-image">
+        <img class="nuage-card-thumb" src="data:${n.image_type};base64,${n.image_b64}" alt="">
+        <span>${escHtml(n.legende || n.contenu || 'Image')}</span>
+      </div>`;
+    } else {
+      apercu = `<div class="nuage-card-apercu">${escHtml(n.contenu || '—')}</div>`;
+    }
+
+    return `
+      <div class="nuage-card etat-${n.etat}" data-id="${n.id}">
+        <div class="nuage-card-header">
+          <span class="nuage-etat-badge ${badgeClass}">${etatLabel}</span>
+        </div>
+        ${apercu}
+        <button class="nuage-card-delete" data-id="${n.id}" title="Supprimer">✕</button>
+      </div>
+    `;
+  }).join('');
+
+  // Bind clicks
+  grille.querySelectorAll('.nuage-card').forEach(card => {
+    card.addEventListener('click', e => {
+      if (e.target.classList.contains('nuage-card-delete')) return;
+      ouvrirNuage(card.dataset.id);
+    });
+  });
+
+  grille.querySelectorAll('.nuage-card-delete').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const id = btn.dataset.id;
+      const ok = deleteNuage(projet, id);
+      if (!ok) {
+        showToast('Ce nuage est protégé — il appartient à un combo sauvegardé', true);
+        return;
+      }
+      if (nuageActif === id) fermerModal();
+      renderGrille();
+      updateTabsState();
+      showToast('Nuage supprimé');
+    });
+  });
+}
+
+// ──────────────────────────────────────────────
+// MODAL — NOUVEAU NUAGE
+// ──────────────────────────────────────────────
+
+function ouvrirNouveauNuage() {
+  if (projet.phase1.nuages.length >= 20) return;
+  nuageActif = null;
+  imageDepot = null;
+  resetDepotZone();
+  afficherDepotZone();
+  ouvrirModal();
+}
+
+function resetDepotZone() {
+  document.getElementById('depot-texte').value = '';
+  document.getElementById('depot-legende').value = '';
+  document.getElementById('depot-legende').style.display = 'none';
+  document.getElementById('depot-upload-preview').style.display = 'none';
+  document.getElementById('depot-upload-txt').style.display = '';
+  document.getElementById('depot-image-input').value = '';
+  document.getElementById('btn-deposer').disabled = true;
+}
+
+function afficherDepotZone() {
+  document.getElementById('depot-zone').style.display = 'flex';
+  document.getElementById('dialogue-zone').style.display = 'none';
+  majModalHeader(null);
+}
+
+function afficherDialogueZone() {
+  document.getElementById('depot-zone').style.display = 'none';
+  document.getElementById('dialogue-zone').style.display = 'flex';
+}
+
+// ──────────────────────────────────────────────
+// MODAL — NUAGE EXISTANT
+// ──────────────────────────────────────────────
+
+function ouvrirNuage(id) {
+  const nuage = projet.phase1.nuages.find(n => n.id === id);
+  if (!nuage) return;
+  nuageActif = id;
+
+  // Afficher la zone dialogue
+  afficherDialogueZone();
+  majModalHeader(nuage);
+  majColContexte(nuage);
+  majModeSwitcher(nuage);
+  renderDialogue(nuage);
+  ouvrirModal();
+}
+
+function majModalHeader(nuage) {
+  const badge = document.getElementById('modal-etat-badge');
+  if (!nuage) {
+    badge.textContent = 'Nouveau';
+    badge.className = 'modal-header-etat badge-nouveau';
+    return;
+  }
+  const etats = { nouveau: 'Nouveau', en_cours: 'En cours', valide: 'Validé', valide_combo: 'Validé · Combo' };
+  const classes = { nouveau: 'badge-nouveau', en_cours: 'badge-en_cours', valide: 'badge-valide', valide_combo: 'badge-valide_combo' };
+  badge.textContent = etats[nuage.etat] || nuage.etat;
+  badge.className = `modal-header-etat ${classes[nuage.etat] || 'badge-nouveau'}`;
+}
+
+function majColContexte(nuage) {
+  // Image permanente
+  const secImg = document.getElementById('section-image-permanente');
+  const secUpload = document.getElementById('section-upload-image');
+
+  if (nuage.image_b64) {
+    secImg.style.display = 'block';
+    document.getElementById('image-permanente-img').src = `data:${nuage.image_type};base64,${nuage.image_b64}`;
+    document.getElementById('image-permanente-legende').textContent = nuage.legende || '';
+    secUpload.style.display = 'none';
+  } else {
+    secImg.style.display = 'none';
+    secUpload.style.display = 'block';
+  }
+
+  // Contenu texte
+  const secTexte = document.getElementById('section-contenu-texte');
+  if (nuage.contenu) {
+    secTexte.style.display = 'block';
+    document.getElementById('contenu-nuage-display').textContent = nuage.contenu;
+  } else {
+    secTexte.style.display = 'none';
+  }
+
+  // Synthèse
+  document.getElementById('synthese-textarea').value = nuage.synthese || '';
+
+  if (nuage.synthese_validee) {
+    document.getElementById('synthese-actions').style.display = 'none';
+    document.getElementById('nuage-valide-badge').style.display = 'flex';
+    document.getElementById('synthese-textarea').readOnly = true;
+  } else {
+    document.getElementById('synthese-actions').style.display = 'flex';
+    document.getElementById('nuage-valide-badge').style.display = 'none';
+    document.getElementById('synthese-textarea').readOnly = false;
+  }
+}
+
+function majModeSwitcher(nuage) {
+  const modeActuel = nuage.mode_dialogue || 'developper';
+  const hasDialogue = nuage.dialogue.length > 0;
+
+  const btnDev = document.getElementById('mode-developper');
+  const btnApp = document.getElementById('mode-approfondir');
+
+  btnDev.classList.remove('active', 'locked');
+  btnApp.classList.remove('active', 'locked');
+
+  if (modeActuel === 'developper') {
+    btnDev.classList.add('active');
+  } else {
+    btnApp.classList.add('active');
+  }
+
+  // Approfondir disponible seulement après un premier échange
+  if (!hasDialogue) {
+    btnApp.classList.add('locked');
+  }
+
+  document.getElementById('saisie-hint-mode').textContent =
+    `Mode : ${modeActuel === 'developper' ? 'Développer' : 'Approfondir'}`;
+}
+
+function renderDialogue(nuage) {
+  const fil = document.getElementById('dialogue-fil');
+  const vide = document.getElementById('dialogue-vide');
+
+  if (nuage.dialogue.length === 0) {
+    fil.innerHTML = '';
+    fil.appendChild(vide);
+    vide.style.display = 'block';
+    return;
+  }
+
+  vide.style.display = 'none';
+  fil.innerHTML = nuage.dialogue.map(msg => {
+    const role = msg.role === 'user' ? 'user' : 'assistant';
+    const label = role === 'user' ? 'Vous' : 'Serendeep';
+    // Gérer le content qui peut être string ou array
+    let texte = '';
+    if (typeof msg.content === 'string') {
+      texte = msg.content;
+    } else if (Array.isArray(msg.content)) {
+      texte = msg.content.filter(b => b.type === 'text').map(b => b.text).join('');
+    }
+    return `
+      <div class="message ${role}">
+        <span class="message-role">${label}</span>
+        <div class="message-bubble">${escHtml(texte)}</div>
+      </div>
+    `;
+  }).join('');
+
+  // Scroll bas
+  fil.scrollTop = fil.scrollHeight;
+}
+
+// ──────────────────────────────────────────────
+// MODAL OPEN/CLOSE
+// ──────────────────────────────────────────────
+
+function ouvrirModal() {
+  const overlay = document.getElementById('modal-overlay');
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => {
+    const saisie = document.getElementById('saisie-textarea');
+    if (saisie && document.getElementById('dialogue-zone').style.display !== 'none') {
+      saisie.focus();
+    }
+  }, 300);
+}
+
+function fermerModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+  nuageActif = null;
+  imageDepot = null;
+}
+
+// ──────────────────────────────────────────────
+// DÉPÔT NUAGE
+// ──────────────────────────────────────────────
+
+function onDepotImageChange(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const dataUrl = ev.target.result;
+    const b64 = dataUrl.split(',')[1];
+    const type = file.type;
+    imageDepot = { b64, type };
+
+    document.getElementById('depot-upload-preview').src = dataUrl;
+    document.getElementById('depot-upload-preview').style.display = 'block';
+    document.getElementById('depot-upload-txt').style.display = 'none';
+    document.getElementById('depot-legende').style.display = 'block';
+    updateBtnDeposer();
+  };
+  reader.readAsDataURL(file);
+}
+
+function updateBtnDeposer() {
+  const texte = document.getElementById('depot-texte').value.trim();
+  const hasImage = !!imageDepot;
+  document.getElementById('btn-deposer').disabled = !texte && !hasImage;
+}
+
+function deposerNuage() {
+  const texte = document.getElementById('depot-texte').value.trim();
+  const legende = document.getElementById('depot-legende').value.trim();
+
+  const nuage = createNuage(projet, {
+    contenu: texte,
+    image_b64: imageDepot?.b64 || null,
+    image_type: imageDepot?.type || null,
+    legende,
+  });
+
+  if (!nuage) {
+    showToast('Maximum 20 nuages atteint', true);
+    return;
+  }
+
+  nuageActif = nuage.id;
+  imageDepot = null;
+
+  // Passer en zone dialogue
+  afficherDialogueZone();
+  majModalHeader(nuage);
+  majColContexte(nuage);
+  majModeSwitcher(nuage);
+  renderDialogue(nuage);
+  renderGrille();
+  updateTabsState();
+  showToast('Nuage déposé');
+}
+
+// ──────────────────────────────────────────────
+// UPLOAD IMAGE ADDITIONNEL
+// ──────────────────────────────────────────────
+
+function onUploadImageAdditionnel(e) {
+  const file = e.target.files[0];
+  if (!file || !nuageActif) return;
+
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const b64 = ev.target.result.split(',')[1];
+    const type = file.type;
+    updateNuage(projet, nuageActif, { image_b64: b64, image_type: type });
+    const nuage = projet.phase1.nuages.find(n => n.id === nuageActif);
+    majColContexte(nuage);
+    renderGrille();
+    showToast('Image ajoutée');
+  };
+  reader.readAsDataURL(file);
+}
+
+// ──────────────────────────────────────────────
+// MODE SWITCHER
+// ──────────────────────────────────────────────
+
+function switchMode(mode) {
+  if (!nuageActif) return;
+  const nuage = projet.phase1.nuages.find(n => n.id === nuageActif);
+  if (!nuage) return;
+  if (mode === 'approfondir' && nuage.dialogue.length === 0) return;
+
+  updateNuage(projet, nuageActif, { mode_dialogue: mode });
+  nuage.mode_dialogue = mode;
+  majModeSwitcher(nuage);
+}
+
+// ──────────────────────────────────────────────
+// ENVOI MESSAGE
+// ──────────────────────────────────────────────
+
+async function envoyerMessage() {
+  if (envoi_en_cours || !nuageActif) return;
+
+  const saisie = document.getElementById('saisie-textarea');
+  const texteUser = saisie.value.trim();
+  const nuage = projet.phase1.nuages.find(n => n.id === nuageActif);
+  if (!nuage) return;
+
+  const isFirst = nuage.dialogue.length === 0;
+
+  // Premier message : pas besoin de texte si image présente
+  if (!isFirst && !texteUser) return;
+
+  envoi_en_cours = true;
+  saisie.value = '';
+  saisie.disabled = true;
+  document.getElementById('btn-envoyer').disabled = true;
+
+  // Ajouter le message utilisateur à l'historique (si texte)
+  const modeActuel = nuage.mode_dialogue || 'developper';
+
+  if (texteUser) {
+    addMessage(projet, nuageActif, 'user', texteUser);
+  } else if (isFirst) {
+    // Premier message auto : décrire le contexte
+    const autoMsg = nuage.image_b64
+      ? (nuage.legende ? `[Image déposée avec légende : "${nuage.legende}"]` : '[Image déposée]')
+      : `[Matériau : ${nuage.contenu}]`;
+    addMessage(projet, nuageActif, 'user', autoMsg);
+  }
+
+  // Recharger le nuage depuis le projet (après addMessage qui a sauvé)
+  const nuageFrais = projet.phase1.nuages.find(n => n.id === nuageActif);
+  renderDialogue(nuageFrais);
+
+  // Préparer le message d'attente
+  const fil = document.getElementById('dialogue-fil');
+  const waitEl = document.createElement('div');
+  waitEl.className = 'message assistant';
+  waitEl.innerHTML = `
+    <span class="message-role">Serendeep</span>
+    <div class="message-bubble" id="streaming-bubble"><span class="spinner dark"></span></div>
+  `;
+  fil.appendChild(waitEl);
+  fil.scrollTop = fil.scrollHeight;
+
+  try {
+    const systemPrompt = buildSystemPrompt(projet);
+    const messages = buildMessages(nuageFrais, modeActuel, texteUser);
+
+    let responseText = '';
+    const bubble = document.getElementById('streaming-bubble');
+
+    await callClaude(messages, systemPrompt, {
+      max_tokens: 1200,
+      onStream: (delta, full) => {
+        responseText = full;
+        if (bubble) bubble.textContent = full;
+        fil.scrollTop = fil.scrollHeight;
+      },
+    });
+
+    // Sauvegarder la réponse
+    addMessage(projet, nuageActif, 'assistant', responseText);
+
+    // Mettre à jour l'état
+    const nuageMaj = projet.phase1.nuages.find(n => n.id === nuageActif);
+    majModeSwitcher(nuageMaj);
+    majModalHeader(nuageMaj);
+    renderGrille();
+    updateTabsState();
+
+    // Re-render propre
+    waitEl.remove();
+    renderDialogue(projet.phase1.nuages.find(n => n.id === nuageActif));
+
+  } catch (err) {
+    waitEl.remove();
+    const errEl = document.createElement('div');
+    errEl.className = 'error-banner';
+    errEl.textContent = `Erreur : ${err.message}`;
+    fil.appendChild(errEl);
+    fil.scrollTop = fil.scrollHeight;
+    showToast(err.message, true);
+  } finally {
+    envoi_en_cours = false;
+    saisie.disabled = false;
+    document.getElementById('btn-envoyer').disabled = false;
+    saisie.focus();
+  }
+}
+
+// ──────────────────────────────────────────────
+// SYNTHÈSE
+// ──────────────────────────────────────────────
+
+async function genererSynthese() {
+  if (!nuageActif) return;
+  const nuage = projet.phase1.nuages.find(n => n.id === nuageActif);
+  if (!nuage || nuage.dialogue.length === 0) {
+    showToast('Menez d\'abord un dialogue avant de générer une synthèse', true);
+    return;
+  }
+
+  const btn = document.getElementById('btn-generer-synthese');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner dark"></span>Génération…';
+
+  const systemPrompt = buildSystemPrompt(projet);
+  const histoText = nuage.dialogue
+    .map(m => {
+      const content = typeof m.content === 'string' ? m.content :
+        (Array.isArray(m.content) ? m.content.filter(b => b.type === 'text').map(b => b.text).join('') : '');
+      return `${m.role === 'user' ? 'Auteur' : 'Serendeep'}: ${content}`;
+    })
+    .join('\n\n');
+
+  const prompt = `Sur la base de ce dialogue autour d'un nuage narratif, produis une synthèse concise (5 à 8 lignes maximum) qui capture :
+- Les tensions ou images les plus fertiles qui ont émergé
+- Ce qui reste ouvert, non résolu, potentiellement narratif
+- Le registre, l'atmosphère, la tonalité de ce matériau
+
+Ne propose pas de direction. Ne structure pas. Reste dans le registre de l'émergence.
+
+Dialogue :
+${histoText}`;
+
+  try {
+    const result = await callClaude(
+      [{ role: 'user', content: prompt }],
+      systemPrompt,
+      { max_tokens: 400 }
+    );
+    document.getElementById('synthese-textarea').value = result;
+  } catch(err) {
+    showToast(err.message, true);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Générer';
+  }
+}
+
+function validerNuageActif() {
+  if (!nuageActif) return;
+  const synthese = document.getElementById('synthese-textarea').value.trim();
+  if (!synthese) {
+    showToast('La synthèse ne peut pas être vide', true);
+    return;
+  }
+
+  validerNuage(projet, nuageActif, synthese);
+
+  const nuage = projet.phase1.nuages.find(n => n.id === nuageActif);
+  majModalHeader(nuage);
+  majColContexte(nuage);
+  renderGrille();
+  updateTabsState();
+  showToast('Nuage validé ✓');
+}
+
+// ──────────────────────────────────────────────
+// UTILS
+// ──────────────────────────────────────────────
+
+function showToast(msg, isError = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isError ? ' error' : '');
+  requestAnimationFrame(() => t.classList.add('visible'));
+  setTimeout(() => t.classList.remove('visible'), 3200);
+}
+
+function escHtml(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+</script>
+
+</body>
+</html>
